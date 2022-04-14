@@ -1,19 +1,25 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Nav></Nav>
+    <ScrollToTopButton> </ScrollToTopButton>
+    <div class="mt-5 pt-4">
+      <keep-alive>
+        <router-view />
+      </keep-alive>
+    </div>
   </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
 
+<script>
+import Nav from "./components/Nav/Nav.vue";
+import ScrollToTopButton from "./components/ScrollToTop/ScrollTopButton.vue";
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  components: { Nav, ScrollToTopButton },
+  data() {
+    return {};
+  },
+};
 </script>
 
 <style>
@@ -22,7 +28,12 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  background-color: #2c3e50;
+  color: white;
+  height: 100%;
+}
+
+.selector-for-some-widget {
+  box-sizing: content-box;
 }
 </style>
