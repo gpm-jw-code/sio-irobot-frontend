@@ -8,12 +8,20 @@ const routes = [
   {
     path: '/',
     name: '看板模式',
-    component: Dashboard
+    component: Dashboard,
+    showInSideBar:true
   },
   {
     path: '/trend-charts',
     name: '趨勢圖',
-    component: TrendCharts
+    component: TrendCharts,
+    showInSideBar:true
+  },
+  {
+    path: '/trend-charts/:eqid/:field', 
+    name: '趨勢圖',
+    component: TrendCharts,
+    showInSideBar:false
   }
 ]
 

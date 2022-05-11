@@ -1,11 +1,9 @@
 <template>
   <div id="app">
     <Nav></Nav>
-    <ScrollToTopButton> </ScrollToTopButton>
-    <div class="mt-5 pt-4">
-      <keep-alive>
-        <router-view />
-      </keep-alive>
+    <ScrollToTopButton></ScrollToTopButton>
+    <div class="mt-5">
+      <router-view />
     </div>
   </div>
 </template>

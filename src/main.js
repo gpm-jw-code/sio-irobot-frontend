@@ -10,6 +10,8 @@ import configs from './config'
 import VueDummy from "vue-dummy"
 import VueApexCharts from 'vue-apexcharts'
 
+
+
 Vue.use(VueApexCharts)
 Vue.use(VueDummy)
 Vue.use(BootstrapVue)
