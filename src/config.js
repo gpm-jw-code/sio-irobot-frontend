@@ -1,6 +1,6 @@
 var _navStyle = "info"
 var configs = {
-    navTitle: "ENV-MONITOR",
+    navTitle: "SIO-IROBOT",
     get navStyle() {
         var navStyle = localStorage.getItem('style')
         if (navStyle == null) {
