@@ -1,6 +1,5 @@
 <template>
   <div class="trend-charts">
-    <h1>趨勢圖</h1>
     {{$route.params.eqid}} - {{$route.params.field}}
     <b-row>
       <b-col lg="9">
@@ -42,12 +41,18 @@
       </b-col>
     </b-row>
 
-    <b-sidebar id="filter-sidebar" right backdrop></b-sidebar>
+    <b-sidebar id="filter-sidebar" right backdrop>
+      <filter-vue></filter-vue>
+    </b-sidebar>
   </div>
 </template>
 
 <script>
+import filterVue from '../components/Trend/filter.vue';
 export default {
+  components: {
+    filterVue,
+  },
   data() {
     return {
       parameters: {

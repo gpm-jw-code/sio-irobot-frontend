@@ -23,7 +23,13 @@
             <div class="mt-5">
               <b-button block variant="danger" @click="LoginOutHandle">登出</b-button>
             </div>
-            <b-avatar slot="reference" id="logined-avastar" button variant="primary"></b-avatar>
+            <b-avatar
+              slot="reference"
+              id="logined-avastar"
+              button
+              variant="primary"
+              :text="userInfo.userName[0]"
+            ></b-avatar>
           </el-popover>
         </div>
       </b-navbar-nav>

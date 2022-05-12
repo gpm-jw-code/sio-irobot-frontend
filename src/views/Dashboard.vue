@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <div class="text-left pt-3 pb-2" @click="CloseFootPanel">
+    <div v-if="false" class="text-left pt-3 pb-2" @click="CloseFootPanel">
       <b-button @click="GenFakeData">更新一次</b-button>
       <b-button @click="Test">測試</b-button>
     </div>
@@ -10,6 +10,7 @@
       @on-cell-click="onCellClick"
       :max-height="ViewPortHeight"
       :fixed-header="true"
+      :sort-options="{enabled:false}"
     >
       <template slot="table-row" slot-scope="props">
         <div
@@ -138,9 +139,12 @@ export default {
     },
     onCellClick(params) {
       console.log(params);
+      if (params.column.field == 'eqid')
+        return;
       if (this.selectedKey != "")
         this.StatusMap[this.selectedKey][0] = this.selectStyle.unselected;
       this.selectedCell.column = params.column;
+
       this.selectedCell.eqid = this.RobotDatas[params.rowIndex].eqid;
       this.selectedKey = this.selectedCell.eqid + this.selectedCell.column.field;
       this.StatusMap[this.selectedKey][0] = this.selectStyle.selected;
@@ -257,7 +261,7 @@ export default {
 }
 
 .foot-panel {
-  background-color: gray;
+  background-color: rgb(255, 255, 255);
   position: fixed;
   width: 100%;
   bottom: 0;

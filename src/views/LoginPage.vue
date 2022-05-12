@@ -17,7 +17,8 @@
           type="password"
         ></b-form-input>
         <b-form-checkbox></b-form-checkbox>
-        <b-button class="mt-3" block squared @click="LoginHandle">登入</b-button>
+        <b-button class="mt-3" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
+        <b-button class block squared @click="LoginHandle(true)">取消</b-button>
       </b-form>
     </div>
   </div>
@@ -43,8 +44,12 @@ export default {
 
   },
   methods: {
-    async LoginHandle() {
+    async LoginHandle(cancel = false) {
       // await Login(this.form);
+      if (cancel) {
+        this.$router.push({ name: this.$route.params.from });
+        return;
+      }
       var userInfo = {
         login: true,
         level: 2,
