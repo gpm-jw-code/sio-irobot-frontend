@@ -20,12 +20,11 @@ Vue.use(VueApexCharts)
 Vue.use(VueDummy)
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
-
+    
 Vue.config.productionTip = false
 Vue.prototype.$configs = configs;
 Vue.prototype.$axios = axios;
 Vue.prototype.$userInfo = userInfo
-
 
 new Vue({
     router,

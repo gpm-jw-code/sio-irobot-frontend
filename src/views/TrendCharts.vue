@@ -40,7 +40,15 @@
         <b-button squared id="query-button" variant="primary">查詢</b-button>
       </b-col>
     </b-row>
-
+    <el-divider></el-divider>
+    <!--圖表區-->
+    <div>
+      <b-row cols-lg="2">
+        <b-col class="mb-1 text-center" v-for="i in [0,1,2,3,4,5]" :key="i" lg>
+          <sio-chart-vue></sio-chart-vue>
+        </b-col>
+      </b-row>
+    </div>
     <b-sidebar id="filter-sidebar" right backdrop>
       <filter-vue></filter-vue>
     </b-sidebar>
@@ -49,9 +57,10 @@
 
 <script>
 import filterVue from '../components/Trend/filter.vue';
+import SioChartVue from '../components/Chart/SioChart.vue';
 export default {
   components: {
-    filterVue,
+    filterVue, SioChartVue
   },
   data() {
     return {
@@ -83,8 +92,15 @@ export default {
 <style>
 .trend-charts {
   padding: 10px;
+  background-color: white;
+  color: rgb(36, 36, 36);
 }
+
 #query-button {
-  width: 100px;
+  width: 120px;
+}
+.chart-container {
+  background-color: red;
+  margin: auto 0;
 }
 </style>
