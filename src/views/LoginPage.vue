@@ -1,0 +1,98 @@
+<template>
+  <div class="loginPage">
+    <div class="login-form pt-3">
+      <h1 class="mb-3 pb-3">LOGIN</h1>
+      <b-form>
+        <b-form-input
+          v-model="form.userName"
+          class="text-center"
+          debounce="100"
+          placeholder="USER NAME"
+          aria-required
+        ></b-form-input>
+        <b-form-input
+          v-model="form.password"
+          class="text-center"
+          placeholder="PASSWORD"
+          type="password"
+        ></b-form-input>
+        <b-form-checkbox></b-form-checkbox>
+        <b-button class="mt-3" block squared @click="LoginHandle">登入</b-button>
+      </b-form>
+    </div>
+  </div>
+</template>
+
+<script>
+// import { Login } from '../web-api/backend'
+export default {
+  //import引入的组件需要注入到对象中才能使用
+  components: {},
+  data() {
+    //这里存放数据
+    return {
+      form: {
+        userName: '',
+        password: ''
+      }
+
+    };
+  },
+  computed: {},
+  watch: {
+
+  },
+  methods: {
+    async LoginHandle() {
+      // await Login(this.form);
+      var userInfo = {
+        login: true,
+        level: 2,
+        userName: this.form.userName
+      }
+      var success = true;
+      if (success) {
+        this.$userInfo.login = true;
+        this.$userInfo.level = 2;
+        this.$userInfo.userName = this.form.userName;
+        this.$router.push({ name: this.$route.params.from, params: userInfo });
+      }
+
+    }
+
+  },
+  created() {
+  },
+  mounted() {
+  },
+  beforeCreate() { }, //生命周期 - 创建之前
+  beforeMount() { }, //生命周期 - 挂载之前
+  beforeUpdate() { }, //生命周期 - 更新之前
+  updated() { }, //生命周期 - 更新之后
+  beforeDestroy() { }, //生命周期 - 销毁之前
+  destroyed() { }, //生命周期 - 销毁完成
+  activated() { }, //如果页面有keep-alive缓存功能，这个函数会触发
+}
+</script>
+<style>
+.loginPage {
+  top: 0;
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgb(199, 199, 199);
+  z-index: 21312321321;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+.login-form {
+  position: relative;
+  top: 230px;
+  background-color: rgb(255, 255, 255);
+  color: black;
+  opacity: 0.6;
+  width: 400px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+</style>

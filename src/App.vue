@@ -3,7 +3,9 @@
     <Nav></Nav>
     <ScrollToTopButton></ScrollToTopButton>
     <div class="mt-5">
-      <router-view />
+      <keep-alive>
+        <router-view />
+      </keep-alive>
     </div>
   </div>
 </template>

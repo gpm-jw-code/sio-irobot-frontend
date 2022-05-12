@@ -15,8 +15,17 @@
           </b-row>
         </div>
       </b-sidebar>
+      <b-navbar-nav class="text-right">{{userInfo.userName}}</b-navbar-nav>
       <b-navbar-nav class="ml-auto">
-        <b-avatar button @click="UserAvatarClickHandle" variant="light"></b-avatar>
+        <b-avatar v-if="!userInfo.login" button @click="UserAvatarClickHandle" variant="light"></b-avatar>
+        <div v-else>
+          <el-popover placement="top-start" :title="userInfo.userName" width="200" trigger="hover">
+            <div class="mt-5">
+              <b-button block variant="danger" @click="LoginOutHandle">登出</b-button>
+            </div>
+            <b-avatar slot="reference" id="logined-avastar" button variant="primary"></b-avatar>
+          </el-popover>
+        </div>
       </b-navbar-nav>
     </b-navbar>
   </div>
@@ -27,7 +36,12 @@ export default {
   data() {
     return {
       nav_style: "dark",
-      sibarItems: []
+      sibarItems: [],
+      userInfo: {
+        userName: 'visitor',
+        level: 0
+      }
+
     };
   },
   methods: {
@@ -45,7 +59,47 @@ export default {
 
     },
     UserAvatarClickHandle() {
-      alert('login form');
+      // alert('login form');
+      this.$router.push(`/login/${this.$route.name}`);
+    },
+    async LoginOutHandle() {
+
+      var isOk = await this.ShowLogoutConfirmMsgBox();
+      if (!isOk) return;
+      this.$userInfo.logout();
+      this.$bvToast.toast("Logout", {
+        title: '登出',
+        variant: "info",
+        autoHideDelay: 3000,
+        appendToast: false
+      })
+    },
+    async ShowLogoutConfirmMsgBox() {
+      return await this.$bvModal.msgBoxConfirm('確定要登出?', {
+        title: 'Please Confirm',
+        // size: 'sm',
+        // buttonSize: 'sm',
+        okVariant: 'primary',
+        okTitle: 'YES',
+        cancelTitle: 'NO',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+        .then(value => {
+          return value;
+        })
+        .catch(() => {
+          // An error occurred
+        })
+    },
+    ShowLoginTaost() {
+      this.$bvToast.toast("", {
+        title: "USER LOGIN",
+        variant: "info",
+        autoHideDelay: 3000,
+        appendToast: false
+      })
     }
   },
   mounted() {
@@ -55,7 +109,18 @@ export default {
       this.nav_style = window.scrollY != 0 ? "light" : "dark";
     });
   },
-
+  watch: {
+    $userInfo: {
+      handler: function (userInfo) {
+        this.userInfo = userInfo;
+        if (this.userInfo.login) {
+          this.ShowLoginTaost();
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  }
 };
 </script>
 

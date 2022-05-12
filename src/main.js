@@ -9,17 +9,23 @@ import './registerServiceWorker'
 import configs from './config'
 import VueDummy from "vue-dummy"
 import VueApexCharts from 'vue-apexcharts'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import axios from 'axios'
+import {userInfo} from './state'
 
-
-
+Vue.component('apexchart', VueApexCharts)
+Vue.use(ElementUI);
 Vue.use(VueApexCharts)
 Vue.use(VueDummy)
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
+
 Vue.config.productionTip = false
 Vue.prototype.$configs = configs;
+Vue.prototype.$axios = axios;
+Vue.prototype.$userInfo = userInfo
 
-Vue.component('apexchart', VueApexCharts)
 
 new Vue({
     router,
