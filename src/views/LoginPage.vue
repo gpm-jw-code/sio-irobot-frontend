@@ -1,27 +1,29 @@
 <template>
-  <div class="loginPage">
-    <div class="login-form pt-3">
-      <h1 class="mb-3 pb-3">LOGIN</h1>
-      <b-form>
-        <b-form-input
-          v-model="form.userName"
-          class="text-center"
-          debounce="100"
-          placeholder="USER NAME"
-          aria-required
-        ></b-form-input>
-        <b-form-input
-          v-model="form.password"
-          class="text-center"
-          placeholder="PASSWORD"
-          type="password"
-        ></b-form-input>
-        <b-form-checkbox></b-form-checkbox>
-        <b-button class="mt-3" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
-        <b-button class block squared @click="LoginHandle(true)">取消</b-button>
-      </b-form>
+  <transition name="el-fade-in-linear">
+    <div class="loginPage">
+      <div class="login-form pt-3">
+        <h1 class="mb-3 pb-3">LOGIN</h1>
+        <b-form>
+          <b-form-input
+            v-model="form.userName"
+            class="text-center"
+            debounce="100"
+            placeholder="USER NAME"
+            aria-required
+          ></b-form-input>
+          <b-form-input
+            v-model="form.password"
+            class="text-center"
+            placeholder="PASSWORD"
+            type="password"
+          ></b-form-input>
+          <b-form-checkbox></b-form-checkbox>
+          <b-button class="mt-3" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
+          <b-button class block squared @click="LoginHandle(true)">取消</b-button>
+        </b-form>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>

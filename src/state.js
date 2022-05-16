@@ -9,4 +9,9 @@ var userInfo={
     }
 }
 
-export {userInfo}
+/**儲存 */
+var dataInfo={
+    eqidls:['1','2']
+}
+
+export {userInfo,dataInfo}

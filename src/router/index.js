@@ -16,13 +16,7 @@ const routes = [
     path: '/trend-charts',
     name: '趨勢圖',
     component: TrendCharts,
-    showInSideBar:true
-  },
-  {
-    path: '/trend-charts/:eqid/:field', 
-    name: '趨勢圖',
-    component: TrendCharts,
-    showInSideBar:false
+    showInSideBar:true,
   },
   {
     path: '/login/:from', 

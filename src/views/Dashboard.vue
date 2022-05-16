@@ -22,20 +22,19 @@
       </template>
     </vue-good-table>
 
-    <div class="my-modal" @click="CloseFootPanel">123</div>
     <transition name="el-zoom-in-bottom">
       <div v-show="showFootPanel" class="foot-panel">
         <b-row>
           <b-col sm="4" class="text-left pl-2">
             <b-button-group>
-              <b-button variant="primary">{{selectedCell.eqid}}</b-button>
-              <b-button variant="light">{{selectedCell.column.label}}</b-button>
+              <b-button variant="dark" pill>{{selectedCell.eqid}}</b-button>
+              <b-button variant="light" pill>{{selectedCell.column.label}}</b-button>
             </b-button-group>
           </b-col>
           <b-col sm="4">
             <b-button
-              squared
               variant="light"
+              block
               :disabled="(!Resetable||userInfo.level==0)"
               @click="ResetAlarmHandle"
             >
@@ -58,7 +57,6 @@
 import 'vue-good-table/dist/vue-good-table.css'
 import { VueGoodTable } from 'vue-good-table';
 import { ResetAlarm } from '../web-api/backend'
-
 export default {
   data() {
     return {
@@ -84,7 +82,8 @@ export default {
       StatusMap: {},
       statusStyle: {
         normal: {
-          backgroundColor: 'rgb(71, 124, 71)',
+          // backgroundColor: 'rgb(71, 124, 71)',
+          backgroundColor: 'rgb(71, 124, 91)',
           color: 'rgb(71, 124, 71)'
         },
         out_of_spec: {
@@ -113,7 +112,7 @@ export default {
   methods: {
     GenFakeData() {
       this.RobotDatas = [];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 10; i++) {
         var rnd = Math.random();
         this.RobotDatas.push({
           eqid: 'Robot-' + i,
@@ -135,10 +134,10 @@ export default {
     onRowDoubleClick() {
       var eqid = this.selectedCell.eqid;
       var field = this.selectedCell.column.field;
-      this.$router.push(`/trend-charts/${eqid}/${field}`);
+      this.$router.push({ path: '/trend-charts', query: { eqid: eqid, field: field, realtime: true } });
     },
     onCellClick(params) {
-      console.log(params);
+      // console.log(params);
       if (params.column.field == 'eqid')
         return;
       if (this.selectedKey != "")
@@ -179,7 +178,7 @@ export default {
     },
     async ShowConfirmMsgBox() {
       return await this.$bvModal.msgBoxConfirm(`確定要清除 ${this.selectedCell.eqid}-${this.selectedCell.column.label} 異常?`, {
-        title: 'Please Confirm',
+        title: '異常清除',
         // size: 'sm',
         // buttonSize: 'sm',
         okVariant: 'primary',
@@ -229,7 +228,7 @@ export default {
         this.CloseFootPanel();
       }
     })
-
+    this.$dataInfo.eqidls.push('214');
     setInterval(() => {
       for (let index = 0; index < 10; index++) {
         this.RobotDatas[index].vac_upper_arm = Math.random().toFixed(3);
@@ -261,12 +260,12 @@ export default {
 }
 
 .foot-panel {
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(52, 58, 64);
   position: fixed;
   width: 100%;
   bottom: 0;
   height: 40px;
-  border: 1px solid black;
+  border: 1px solid rgb(52, 58, 64);
   /* border-top-left-radius: 10px; */
 }
 

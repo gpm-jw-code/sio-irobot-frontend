@@ -15,7 +15,9 @@
           </b-row>
         </div>
       </b-sidebar>
-      <b-navbar-nav class="text-right">{{userInfo.userName}}</b-navbar-nav>
+      <b-navbar-nav class="text-right">
+        <b-button :variant="nav_style">{{userInfo.userName}}</b-button>
+      </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-avatar v-if="!userInfo.login" button @click="UserAvatarClickHandle" variant="light"></b-avatar>
         <div v-else>
@@ -51,10 +53,7 @@ export default {
     };
   },
   methods: {
-    SetStyle(style) {
-      this.nav_style = style;
-      this.$configs.navStyle = style;
-    },
+
     CreateSideBar() {
       console.log(this.$router.options.routes.length);
       for (let index = 0; index < this.$router.options.routes.length; index++) {
@@ -110,7 +109,7 @@ export default {
   },
   mounted() {
     this.CreateSideBar();
-    this.nav_style = this.$configs.navStyle;
+    //this.nav_style = this.$configs.navStyle;
     window.addEventListener("scroll", () => {
       this.nav_style = window.scrollY != 0 ? "light" : "dark";
     });

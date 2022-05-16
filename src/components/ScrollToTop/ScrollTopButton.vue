@@ -1,7 +1,13 @@
 <template>
   <div v-if="show" class="scroll-to-top">
     <div class="h2 mb-0">
-      <b-icon id="scroll-top-btn" class="rounded-circle" icon="chevron-up" variant="dark" @click="ScrollToTop"></b-icon>
+      <b-icon
+        id="scroll-top-btn"
+        class="rounded-circle"
+        icon="chevron-up"
+        variant="dark"
+        @click="ScrollToTop"
+      ></b-icon>
     </div>
   </div>
 </template>
@@ -34,12 +40,13 @@ export default {
   position: fixed;
   bottom: 20px;
   right: 20px;
+  z-index: 12312312;
 }
 
 #scroll-top-btn {
   cursor: pointer;
   padding: 5px;
-  background-color: rgb(110, 110, 110);
+  background-color: rgb(255, 255, 255);
 }
 
 #scroll-top-btn:hover {
