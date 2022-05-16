@@ -1,6 +1,35 @@
 <template >
   <div class="sio-chart ml-1">
-    {{eqid}}-{{field}}
+    <b-row no-gutters>
+      <b-col cols="10 pl-5">{{eqid}}-{{field}}</b-col>
+      <b-col cols="1">
+        <b-button
+          v-b-tooltip.hover
+          title="OOC閥值(點擊設定)"
+          block
+          squared
+          variant="primary"
+          size="sm"
+          @click="ChangeOOC"
+        >{{oocThresHold}}</b-button>
+      </b-col>
+      <b-col cols="1">
+        <b-button
+          v-b-tooltip.hover
+          title="OOS閥值(點擊設定)"
+          block
+          squared
+          variant="danger"
+          size="sm"
+          @click="ChangeOOS"
+        >{{oosThresHold}}</b-button>
+      </b-col>
+    </b-row>
+    <b-modal v-model="ooSettingModalShow" @ok="SettingThres" title="Threshold Value">
+      {{settingWhatText}} 閥值設定
+      <el-input-number step="0.01" v-model="thresHoldValSetting"></el-input-number>
+      {{oocThresHold}} / {{oosThresHold}}
+    </b-modal>
     <reactive-chart :height="250" :chartData="chartDataSet"></reactive-chart>
     <!-- <button id="oos" class="oo-button">oos</button>
     <button id="ooc" class="oo-button">ooc</button>-->
@@ -8,6 +37,7 @@
 </template>
 <script>
 import ReactiveChart from '../Chart/ReaactiveChart.vue'
+import { ThresHoldSetting } from '../../web-api/backend'
 export default {
   components: { ReactiveChart },
   props: {
@@ -24,6 +54,9 @@ export default {
   },
   data() {
     return {
+      ooSettingModalShow: false,
+      settingWhatText: "OOS",
+      thresHoldValSetting: 0,
       chartDataSet: {
         labels: ["1", "2", "3", "4", "5", "6",],
         datasets: [
@@ -35,8 +68,8 @@ export default {
           },
           {
             label: "OOS",
-            borderColor: "#6262f9",
-            backgroundColor: "#6262f9",
+            borderColor: "blue",
+            backgroundColor: "blue",
             data: [3, 3, 3, 3, 3, 3],
             borderWidth: 1
           },
@@ -73,6 +106,27 @@ export default {
         }
         document.documentElement.style.setProperty('--oos-vale', (val) + "px");
       }, immediate: true
+    }
+  },
+  methods: {
+    ChangeOOS() {
+      this.ooSettingModalShow = true;
+      this.settingWhatText = "OOS";
+      this.thresHoldValSetting = this.oosThresHold;
+    },
+    ChangeOOC() {
+      this.ooSettingModalShow = true;
+      this.settingWhatText = "OOC";
+      this.thresHoldValSetting = this.oocThresHold;
+    },
+    SettingThres() {
+      if (this.settingWhatText == "OOS") {
+        //TODO Call api
+        ThresHoldSetting.SetOOS(`${this.eqid}${this.field}`, this.thresHoldValSetting);
+      } else {
+        //TODO Call api
+        ThresHoldSetting.SetOOC(`${this.eqid}${this.field}`, this.thresHoldValSetting);
+      }
     }
   }
 

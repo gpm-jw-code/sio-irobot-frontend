@@ -22,6 +22,7 @@
         <b-avatar v-if="!userInfo.login" button @click="UserAvatarClickHandle" variant="light"></b-avatar>
         <div v-else>
           <el-popover placement="top-start" :title="userInfo.userName" width="200" trigger="hover">
+            <div>LEVEL : {{userInfo.level}}</div>
             <div class="mt-5">
               <b-button block variant="danger" @click="LoginOutHandle">登出</b-button>
             </div>
