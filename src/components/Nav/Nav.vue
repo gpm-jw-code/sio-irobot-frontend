@@ -19,7 +19,14 @@
         <b-button :variant="nav_style">{{userInfo.userName}}</b-button>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
-        <b-avatar v-if="!userInfo.login" button @click="UserAvatarClickHandle" variant="light"></b-avatar>
+        <b-avatar
+          v-if="!userInfo.login"
+          button
+          @click="UserAvatarClickHandle"
+          variant="light"
+          v-b-tooltip.hover
+          title="點擊登入"
+        ></b-avatar>
         <div v-else>
           <el-popover placement="top-start" :title="userInfo.userName" width="200" trigger="hover">
             <div>LEVEL : {{userInfo.level}}</div>

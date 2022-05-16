@@ -27,9 +27,9 @@
         >
           <b-form-checkbox
             v-for="sensorType in sensorTypes"
-            :key="sensorType"
-            :value="sensorType"
-          >{{sensorType}}</b-form-checkbox>
+            :key="sensorType.field"
+            :value="sensorType.field"
+          >{{sensorType.label}}</b-form-checkbox>
         </b-form-checkbox-group>
       </b-dropdown-form>
     </b-dropdown>
@@ -61,8 +61,6 @@ export default {
   data() {
     return {
       formStyle: {},
-      eqList: ["Robot1", "Robot2", "Robot3", "Robot4", "Robot5"],
-      sensorTypes: ["VAC", "溫度", "電流", "振動"],
       statusList: ["OOC", "OOS"],
       selectedRobots: [],
       selectedSensorTypes: [],
@@ -102,6 +100,9 @@ export default {
     },
     eqidls: {
       get() { return this.$dataInfo.eqidls; }
+    },
+    sensorTypes() {
+      return this.$dataInfo.fields;
     }
   }
 }

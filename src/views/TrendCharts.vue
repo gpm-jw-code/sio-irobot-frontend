@@ -1,50 +1,60 @@
 <template>
   <transition name="el-fade-in-linear">
     <div class="trend-charts">
-      {{$route.params.eqid}} - {{$route.params.field}}
-      <b-row>
+      <!-- {{$route.params.eqid}} - {{$route.params.field}} -->
+      <b-row class="mt-2">
         <b-col lg="9">
-          <b-row>
-            <b-col lg="6" class="stard-time-regin mb-3 text-left">
-              START
-              <b-row>
+          <b-row no-gutters>
+            <b-col md="4" class="stard-time-regin mb-3 text-left">
+              <b>START</b>
+              <b-row no-gutters>
                 <b-col lg="6">
-                  <b-form-datepicker id="start-datepicker" v-model="condition.QuStart" class="mb-2"></b-form-datepicker>
+                  <b-input v-model="condition.QuStart" size="sm" class="mb-2" type="date"></b-input>
+                  <!-- <b-form-datepicker id="start-datepicker" v-model="condition.QuStart" class="mb-2"></b-form-datepicker> -->
                 </b-col>
                 <b-col lg="6">
-                  <b-form-timepicker v-model="condition.QuStart_Time" locale="en"></b-form-timepicker>
+                  <b-input v-model="condition.QuStart_Time" size="sm" locale="en" type="time"></b-input>
+                  <!-- <b-form-timepicker v-model="condition.QuStart_Time" locale="en"></b-form-timepicker> -->
                 </b-col>
               </b-row>
             </b-col>
-            <b-col lg="6" class="end-time-regin mb-3 text-left">
-              END
-              <b-row>
-                <b-col lg="6">
-                  <b-form-datepicker id="end-datepicker" v-model="condition.QuEnd" class="mb-2"></b-form-datepicker>
+            <b-col md="6" class="end-time-regin mb-3 text-left">
+              <b>END</b>
+              <b-row no-gutters>
+                <b-col lg="4">
+                  <b-input v-model="condition.QuEnd" size="sm" class="mb-2" type="date"></b-input>
+                  <!-- <b-form-datepicker id="end-datepicker" v-model="condition.QuEnd" class="mb-2"></b-form-datepicker> -->
                 </b-col>
-                <b-col lg="6">
-                  <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker>
+                <b-col lg="4">
+                  <b-input v-model="condition.QuEnd_Time" size="sm" locale="en" type="time"></b-input>
+                  <!-- <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker> -->
                 </b-col>
               </b-row>
             </b-col>
           </b-row>
         </b-col>
         <b-col lg="3" class="text-right pr-4">
-          <b-icon-filter scale="3" v-b-toggle.filter-sidebar></b-icon-filter>
+          <b-icon-filter
+            scale="2"
+            v-b-toggle.filter-sidebar
+            variant="info"
+            v-b-tooltip.hover
+            title="過濾器"
+          ></b-icon-filter>
         </b-col>
       </b-row>
 
       <b-row no-gutters>
         <b-col lg="2">
-          <b-input placeholder="關鍵字查詢"></b-input>
+          <b-input size="sm" placeholder="關鍵字查詢"></b-input>
         </b-col>
         <b-col cols="3" class="text-left">
-          <b-button squared id="query-button" variant="primary">查詢</b-button>
+          <b-button squared id="query-button" size="sm" variant="primary">查詢</b-button>
         </b-col>
       </b-row>
       <el-divider></el-divider>
       <!--圖表區-->
-      <div>
+      <div id="charts-container">
         <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
           <b-button squared class="ml-1">{{eqid}}</b-button>
           <b-row cols-lg="2">
@@ -84,8 +94,8 @@ export default {
       },
       condition: {
         IP: null,
-        QuStart: null,
-        QuEnd: null,
+        QuStart: "2022-03-03",
+        QuEnd: "2022-03-04",
         QuStart_Time: "00:00:00",
         QuEnd_Time: "00:00:00",
       },
@@ -151,8 +161,6 @@ export default {
 #query-button {
   width: 120px;
 }
-.chart-container {
-  background-color: red;
-  margin: auto 0;
+#charts-container {
 }
 </style>

@@ -14,6 +14,8 @@
     >
       <template slot="table-row" slot-scope="props">
         <div
+          v-b-tooltip.hover
+          title
           @dblclick="onRowDoubleClick"
           :key="renderKey"
           class="inner-val"
@@ -110,25 +112,23 @@ export default {
     VueGoodTable,
   },
   methods: {
-    GenFakeData() {
+    GenRobotDatas() {
       this.RobotDatas = [];
-      for (var i = 0; i < 10; i++) {
-        var rnd = Math.random();
-        this.RobotDatas.push({
-          eqid: 'Robot-' + i,
-          vac_upper_arm: rnd * 1.2,
-          vac_lower_arm: rnd * 0.23,
-          x_axis_torge: rnd,
-          x_axis_motor_temp: 1 + rnd
-        });
-      }
+      this.$dataInfo.eqidls.forEach(eqid => {
+        var dataMap = {};
+        dataMap['eqid'] = eqid;
+        this.$dataInfo.fields.forEach(field => {
+          var rnd = Math.random();
+          dataMap[field.field] = rnd;
+        })
+        this.RobotDatas.push(dataMap);
+      })
     },
     GenStatusMap() {
       this.RobotDatas.forEach(rb => {
-        this.StatusMap[rb.eqid + "vac_upper_arm"] = [this.selectStyle.unselected, this.statusStyle.out_of_control];
-        this.StatusMap[rb.eqid + "vac_lower_arm"] = [this.selectStyle.unselected, this.statusStyle.normal];
-        this.StatusMap[rb.eqid + "x_axis_torge"] = [this.selectStyle.unselected, this.statusStyle.out_of_spec];
-        this.StatusMap[rb.eqid + "x_axis_motor_temp"] = [this.selectStyle.unselected, this.statusStyle.normal];
+        this.$dataInfo.fields.forEach(field => {
+          this.StatusMap[rb.eqid + field.field] = [this.selectStyle.unselected, this.statusStyle.normal];
+        })
       })
     },
     onRowDoubleClick() {
@@ -203,24 +203,16 @@ export default {
   },
   mounted() {
     //TODO GET columns from backend
+
     this.columns = [{
       label: 'EQ ID',
       field: 'eqid',
-    }, {
-      label: '上手臂VAC',
-      field: 'vac_upper_arm',
-    }, {
-      label: '下手臂VAC',
-      field: 'vac_lower_arm',
-    }, {
-      label: 'X軸扭力',
-      field: 'x_axis_torge',
-    }, {
-      label: 'X軸馬達溫度',
-      field: 'x_axis_motor_temp',
-    }];
+    }]
+    this.$dataInfo.fields.forEach(element => {
+      this.columns.push(element);
+    });
 
-    this.GenFakeData();
+    this.GenRobotDatas();
     this.GenStatusMap();
 
     window.addEventListener('keydown', (e) => {
@@ -228,16 +220,14 @@ export default {
         this.CloseFootPanel();
       }
     })
-    this.$dataInfo.eqidls.push('214');
+    //模擬
     setInterval(() => {
-      for (let index = 0; index < 10; index++) {
-        this.RobotDatas[index].vac_upper_arm = Math.random().toFixed(3);
-        this.RobotDatas[index].vac_lower_arm = Math.random().toFixed(3);
-        this.RobotDatas[index].x_axis_motor_temp = Math.random().toFixed(3);
-        this.RobotDatas[index].x_axis_torge = Math.random().toFixed(3);
-        // this.StatusMap[`${this.RobotDatas[index].eqid}vac_upper_arm`][1] = this.statusStyle.normal;
-        // this.StatusMap[`${this.RobotDatas[index].eqid}x_axis_torge`][1] = this.statusStyle.out_of_control;
-      }
+      this.RobotDatas.forEach(d => {
+        d.vac_upper_arm = Math.random().toFixed(3);
+        d.vac_lower_arm = Math.random().toFixed(3);
+        d.x_axis_motor_temp = Math.random().toFixed(3);
+        d.x_axis_torge = Math.random().toFixed(3);
+      })
     }, 1000);
   },
   watch: {

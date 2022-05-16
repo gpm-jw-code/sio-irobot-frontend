@@ -26,7 +26,7 @@ Vue.prototype.$configs = configs;
 Vue.prototype.$axios = axios;
 Vue.prototype.$userInfo = userInfo
 Vue.prototype.$dataInfo = dataInfo
-
+console.log(dataInfo);
 
 new Vue({
     router,

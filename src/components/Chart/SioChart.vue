@@ -25,10 +25,15 @@
         >{{oosThresHold}}</b-button>
       </b-col>
     </b-row>
-    <b-modal v-model="ooSettingModalShow" @ok="SettingThres" title="Threshold Value">
-      {{settingWhatText}} 閥值設定
-      <el-input-number step="0.01" v-model="thresHoldValSetting"></el-input-number>
-      {{oocThresHold}} / {{oosThresHold}}
+    <b-modal
+      size="sm"
+      v-model="ooSettingModalShow"
+      @ok="SettingThres"
+      title="Threshold Value"
+      cancel-title="取消"
+    >
+      {{settingWhatText}} 閥值設定 :
+      <el-input-number step="0.01" size="small" v-model="thresHoldValSetting"></el-input-number>
     </b-modal>
     <reactive-chart :height="250" :chartData="chartDataSet"></reactive-chart>
     <!-- <button id="oos" class="oo-button">oos</button>
@@ -62,8 +67,8 @@ export default {
         datasets: [
           {
             label: this.field,
-            borderColor: "rgba(215, 22, 192, 1)",
-            backgroundColor: "rgba(215, 22, 192, 1)",
+            borderColor: "black",
+            backgroundColor: "black",
             data: [1, 39,],
           },
           {
@@ -141,7 +146,10 @@ export default {
   width: 100%;
   height: 300px;
   border: 1px solid rgb(126, 126, 126);
-  /* border-radius: 5px; */
+  /* border-radius: 15px; */
+  border-end-start-radius: 6px;
+  border-end-end-radius: 6px;
+  border-top-right-radius: 6px;
   padding: 10px;
 }
 .rchart {

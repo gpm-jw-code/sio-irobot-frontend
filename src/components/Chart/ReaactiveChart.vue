@@ -133,7 +133,7 @@ export default {
 
 <style>
 .line-chart-container {
-  border: 1px solid rgb(51, 51, 51);
-  border-radius: 3px;
+  /* border: 1px solid rgb(160, 160, 160); */
+  border-radius: 0px;
 }
 </style>>
