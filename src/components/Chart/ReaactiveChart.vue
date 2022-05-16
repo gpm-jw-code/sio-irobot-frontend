@@ -124,7 +124,7 @@ export default {
             radius: 0,
           },
         },
-        animation: "",
+        animation: false,
       },
     };
   },
