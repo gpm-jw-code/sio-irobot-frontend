@@ -104,6 +104,12 @@ export default {
     sensorTypes() {
       return this.$dataInfo.fields;
     }
+  },
+  mounted() {
+    console.log('filter mounted');
+  },
+  destroyed() {
+    console.log('filter destoryed');
   }
 }
 </script>

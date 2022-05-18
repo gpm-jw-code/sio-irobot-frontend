@@ -91,13 +91,16 @@ export default {
   z-index: 21312321321;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-image: url("../assets/login_bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .login-form {
   position: relative;
   top: 230px;
   background-color: rgb(255, 255, 255);
   color: black;
-  opacity: 0.6;
+  opacity: 0.8;
   width: 400px;
   margin: 0 auto;
   border-radius: 8px;

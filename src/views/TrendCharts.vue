@@ -59,7 +59,13 @@
           <b-button squared class="ml-1">{{eqid}}</b-button>
           <b-row cols-lg="2">
             <b-col v-for="field in filter.typeLs" :key="field" class="mb-1 text-center" lg>
-              <sio-chart-vue :eqid="eqid" :field="field" :oocThresHold="122" :oosThresHold="30"></sio-chart-vue>
+              <sio-chart-vue
+                :id="`scv-${eqid}${field}`"
+                :eqid="eqid"
+                :field="field"
+                :oocThresHold="OOCThresHoldValue(eqid,field)"
+                :oosThresHold="OOSThresHoldValue(eqid,field)"
+              ></sio-chart-vue>
             </b-col>
           </b-row>
           <el-divider></el-divider>
@@ -85,6 +91,7 @@ export default {
   },
   data() {
     return {
+      realtime_ws: undefined,
       parameters: {
         eqid: 0,
         column: {
@@ -108,7 +115,7 @@ export default {
         robotLs: [],
         typeLs: [],
         statusLs: []
-      }
+      },
     }
   },
   mounted() {
@@ -117,6 +124,7 @@ export default {
   },
   beforeDestroy() {
     console.log('beforeDestroy');
+    this.realtime_ws.close();
   },
 
   methods: {
@@ -135,6 +143,24 @@ export default {
       this.filter.robotLs = list;
     }, TypeLsOnchange(list) {
       this.filter.typeLs = list;
+    },
+    GetOOS(eqid, field) {
+      console.log(eqid, field);
+      return 1;
+    },
+    GetOOC(eqid, field) {
+      console.log(eqid, field);
+      return 2;
+    },
+    OOCThresHoldValue(eqid, field) {
+      if (!field || !field)
+        return 999;
+      return this.$caches.thresholdsDataCaches[`${eqid}${field}`][`${field}_OOC`];
+    },
+    OOSThresHoldValue(eqid, field) {
+      if (!field || !field)
+        return 999;
+      return this.$caches.thresholdsDataCaches[`${eqid}${field}`][`${field}_OOS`];
     }
   },
   watch: {
@@ -147,6 +173,13 @@ export default {
         }
       }
     }
+  },
+  computed: {
+    realTimeDataCaches(redkey) {
+      console.log(this.$caches.realTimeDataCaches);
+      console.log(redkey);
+      return this.$caches.realTimeDataCaches[redkey];
+    },
   }
 }
 </script>

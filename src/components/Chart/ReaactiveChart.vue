@@ -1,12 +1,13 @@
 <template >
-  <div class="line-chart-container">
+  <div class="line-chart-container" :id="chartId">
+    <b-button @click="test">test</b-button>
     <LineChartGenerator
-      ref="line-chart"
+      :id="`line-${chartId}`"
+      :ref="`line-${chartId}`"
       :chart-options="chartOptions"
       :chart-data="chartData"
       :chart-id="chartId"
       :dataset-id-key="datasetIdKey"
-      :plugins="plugins"
       :css-classes="cssClasses"
       :styles="styles"
       :width="width"
@@ -39,7 +40,6 @@ ChartJS.register(
 );
 
 export default {
-  name: "LineChart",
   components: {
     LineChartGenerator,
   },
@@ -68,50 +68,34 @@ export default {
       type: Object,
       default: () => { },
     },
-    plugins: {
-      type: Array,
-      default: () => [],
-    },
     chartData: {
       type: Object,
       default() {
         return {
-          labels: [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-          ],
-          datasets: [
-            {
-              label: "Data One",
-              borderColor: "rgba(215, 22, 192, 1)",
-              backgroundColor: "rgba(215, 22, 192, 1)",
-              data: [40, 39, 10, 40, 39, 80, 40],
-            },
-            {
-              label: "Data 2",
-              backgroundColor: "rgba(25, 92, 192, 1)",
-              borderColor: "rgba(25, 92, 192, 1)",
-              data: [30, 2, 10, 40, 39, 80, 40],
-              fill: true,
-              borderWidth: 1,
-            },
-          ],
         };
       },
     },
+    ThresHoldLines: {
+      type: Array,
+      default() {
+        return [{ name: "oos", value: 2.3, color: "red", type: 'line' },
+        { name: "ooc", value: 0.1, color: "blue", type: 'line' }]
+      }
+    }
   },
   watch: {
-    datasetIdKey: {
-      handler: function (newkey) {
-        console.info(newkey);
-        this.$refs["line-chart"].renderChart(this.chartData, this.chartOptions);
-      },
-    },
+    // datasetIdKey: {
+    //   handler: function (newkey) {
+    //     console.log(newkey);
+    //     this.$refs["line-chart"].renderChart(this.chartData, this.chartOptions);
+    //   },
+    // }
+  },
+  methods: {
+    test() {
+      console.log(`line-${this.chartId}`);
+      this.$refs[`line-${this.chartId}`].renderChart(this.chartData, this.chartOptions);
+    }
   },
   data() {
     return {
@@ -125,6 +109,20 @@ export default {
           },
         },
         animation: false,
+        plugins: {
+          autocolors: false,
+          annotation: {
+            annotations: {
+              // line1: {
+              //   type: 'line',
+              //   yMin: 1,
+              //   yMax: 1,
+              //   borderColor: 'rgb(255, 99, 132)',
+              //   borderWidth: 2,
+              // }
+            }
+          }
+        }
       },
     };
   },

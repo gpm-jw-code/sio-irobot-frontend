@@ -2,7 +2,6 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './registerServiceWorker'
@@ -11,8 +10,13 @@ import VueDummy from "vue-dummy"
 import VueApexCharts from 'vue-apexcharts'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import axios from 'axios'
-import {userInfo,dataInfo} from './state'
+import {userInfo,dataInfo,caches} from './state'
+import { Chart } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
+import VueObserveVisibility from 'vue-observe-visibility';
+
+Chart.register(annotationPlugin);
+Vue.use(VueObserveVisibility);
 
 Vue.component('apexchart', VueApexCharts)
 Vue.use(ElementUI);
@@ -23,9 +27,9 @@ Vue.use(IconsPlugin)
     
 Vue.config.productionTip = false
 Vue.prototype.$configs = configs;
-Vue.prototype.$axios = axios;
 Vue.prototype.$userInfo = userInfo
 Vue.prototype.$dataInfo = dataInfo
+Vue.prototype.$caches = caches
 console.log(dataInfo);
 
 new Vue({

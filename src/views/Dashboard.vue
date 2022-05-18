@@ -1,8 +1,9 @@
 <template>
   <div class="dashboard">
-    <div v-if="false" class="text-left pt-3 pb-2" @click="CloseFootPanel">
-      <b-button @click="GenFakeData">更新一次</b-button>
-      <b-button @click="Test">測試</b-button>
+    <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
+      <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
+      <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
+      <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
     </div>
     <vue-good-table
       :columns="columns"
@@ -24,16 +25,43 @@
       </template>
     </vue-good-table>
 
+    <!-- <transition name="el-fade-in-linear">
+      <div v-show="showFootPanel" class="threshold-info-panel">fff</div>
+    </transition>-->
     <transition name="el-zoom-in-bottom">
       <div v-show="showFootPanel" class="foot-panel">
         <b-row>
-          <b-col sm="4" class="text-left pl-2">
+          <b-col cols="2" class="text-left pl-2">
             <b-button-group>
               <b-button variant="dark" pill>{{selectedCell.eqid}}</b-button>
               <b-button variant="light" pill>{{selectedCell.column.label}}</b-button>
             </b-button-group>
           </b-col>
-          <b-col sm="4">
+          <b-col cols="3" class="text-left threshold-region-foot">
+            <b-row cols="2" no-gutters>
+              <b-col class="text-right pr-4">OOC閥值</b-col>
+              <b-col class="ooc-style">
+                <span
+                  class="threval"
+                  @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
+                  v-b-tooltip.hover
+                  title="點一下進行設定"
+                >{{selectOOCThresval}}</span>
+              </b-col>
+            </b-row>
+            <b-row cols="2" no-gutters>
+              <b-col class="text-right pr-4">OOS閥值</b-col>
+              <b-col class="oos-style">
+                <span
+                  class="threval"
+                  @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
+                  v-b-tooltip.hover
+                  title="點一下進行設定"
+                >{{selectOOSThresval}}</span>
+              </b-col>
+            </b-row>
+          </b-col>
+          <b-col>
             <b-button
               variant="light"
               block
@@ -44,30 +72,46 @@
               <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
             </b-button>
           </b-col>
-          <b-col class="text-right" sm="4">
-            (ESC)
-            <b-button variant="danger" @click="CloseFootPanel">X</b-button>
+          <b-col class="text-right">
+            <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
           </b-col>
         </b-row>
       </div>
     </transition>
+
+    <threshold-setting-dialog-vue
+      :show="thresSettingDialogShow"
+      :options="thresHoldSettingOptions"
+      @onSuccess="ThresHoldSetSuccessHandle"
+      @hide="thresSettingDialogShow=false"
+    ></threshold-setting-dialog-vue>
   </div>
 </template>
 
 <script>
 // import the styles
 import 'vue-good-table/dist/vue-good-table.css'
+import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue';
 import { VueGoodTable } from 'vue-good-table';
-import { ResetAlarm } from '../web-api/backend'
+import { ResetAlarm, GetEQIDList, GetFieldList, SensorRawDataWsConnect } from '../web-api/backend'
+
 export default {
+  components: {
+    VueGoodTable, ThresholdSettingDialogVue
+  },
   data() {
     return {
+
+      websocket_sensorData: WebSocket,
+      newestRawDataObject: {},
+      RawDataStorage: {},
       userInfo: {
         userName: 'visitor',
         level: 0
       },
       Resetable: false,
       showFootPanel: false,
+      thresSettingDialogShow: false,
       renderKey: 0,
       selectedKey: "",
       selectedCell: {
@@ -77,6 +121,8 @@ export default {
           label: ""
         }
       },
+      selectOOCThresval: -1,
+      selectOOSThresval: -1,
       columns: [
 
       ],
@@ -85,35 +131,55 @@ export default {
       statusStyle: {
         normal: {
           // backgroundColor: 'rgb(71, 124, 71)',
-          backgroundColor: 'rgb(71, 124, 91)',
-          color: 'rgb(71, 124, 71)'
+          backgroundColor: 'white',
+          color: 'black'
         },
         out_of_spec: {
-          backgroundColor: '#6262f9',
+          backgroundColor: '#d51919', //藍色
           color: 'white'
         },
         out_of_control: {
-          backgroundColor: '#d51919',
+          backgroundColor: '#6262f9', //紅色
           color: 'white'
         }
       },
       selectStyle: {
         selected: {
-          border: "2px solid gold",
-          padding: "8px"
+          border: "4px solid black",
+          padding: "6px"
         },
         unselected: {
           border: ""
         }
+      },
+      thresHoldSettingOptions: {
+        settingFor: {
+          thresType: "OOS",
+          originVal: -1
+        },
+        sensor: {
+          eqid: "",
+          field: ""
+        },
+
       }
     }
   },
-  components: {
-    VueGoodTable,
-  },
   methods: {
-    GenRobotDatas() {
+    CreateColumns() {
+      this.columns = [{
+        label: 'EQ ID',
+        field: 'eqid',
+      }];
+      this.$dataInfo.fields.forEach(element => {
+        element.label = element.label == null ? element.field + "" : element.label;
+        this.columns.push(element);
+      });
+    },
+    async GenRobotDatas() {
       this.RobotDatas = [];
+
+      console.log(this.$dataInfo.fields);
       this.$dataInfo.eqidls.forEach(eqid => {
         var dataMap = {};
         dataMap['eqid'] = eqid;
@@ -147,22 +213,35 @@ export default {
       this.selectedCell.eqid = this.RobotDatas[params.rowIndex].eqid;
       this.selectedKey = this.selectedCell.eqid + this.selectedCell.column.field;
       this.StatusMap[this.selectedKey][0] = this.selectStyle.selected;
+      this.UpdateSelectedThresDisplay();
       this.renderKey = Date.now();
       this.showFootPanel = true;
-
       this.Resetable = this.StatusMap[this.selectedKey][1].backgroundColor != this.statusStyle.normal.backgroundColor;
     },
-    CloseFootPanel() {
-      this.StatusMap[this.selectedKey][0] = this.selectStyle.unselected;
-      this.showFootPanel = false;
+    ShowTresSettingDialog(type, oriVal) {
+      this.thresHoldSettingOptions.settingFor.thresType = type;
+      this.thresHoldSettingOptions.settingFor.originVal = oriVal;
+      this.thresHoldSettingOptions.sensor = { eqid: this.selectedCell.eqid, field: this.selectedCell.column.field }
+      this.thresSettingDialogShow = true;
+
     },
-    Test() {
-      var obj = {
-        eqid: 'Robot-5',
-        field: 'vac_upper_arm'
-      }
-      this.StatusMap[`${obj.eqid}${obj.field}`][1] = this.statusStyle.out_of_spec;
-      this.renderKey = Date.now();
+    ThresHoldSetSuccessHandle(val) {
+      if (this.thresHoldSettingOptions.settingFor.thresType == "OOC")
+        this.selectOOCThresval = val;
+      else
+        this.selectOOSThresval = val;
+    },
+    UpdateSelectedThresDisplay() {
+      let thresMap = this.$caches.thresholdsDataCaches[this.selectedKey]
+      this.selectOOCThresval = thresMap[this.selectedCell.column.field + '_OOC'];
+      this.selectOOSThresval = thresMap[this.selectedCell.column.field + '_OOS'];
+    },
+    CloseFootPanel() {
+      var state = this.StatusMap[this.selectedKey];
+      if (!state)
+        return;
+      state[0] = this.selectStyle.unselected;
+      this.showFootPanel = false;
     },
     BGclick() {
       console.log("GBC");
@@ -195,40 +274,90 @@ export default {
           // An error occurred
         })
     },
+    StoreDataInQueue(key, data) {
+      var queueList = this.RawDataStorage[key];
+      if (!queueList) this.RawDataStorage[key] = [];
+      this.RawDataStorage[key].push(data);
+      if (this.RawDataStorage[key].length > 30) {
+        this.RawDataStorage[key].splice(0, 1);
+      }
+    },
+    StoreDataInCache(sensorkey, time, value) {
+      if (!this.$caches.realTimeDataCaches[sensorkey])
+        this.$caches.realTimeDataCaches[sensorkey] = { time: [], data: [] };
+
+      var obj = this.$caches.realTimeDataCaches[sensorkey];
+      if (obj.time.length > 0) {
+        var lastTime = obj.time[obj.time.length - 1];
+        if (time == lastTime)
+          return;
+      }
+      obj.time.push(time);
+      obj.data.push(value);
+
+      if (obj.time.length > 30) {
+        obj.time.splice(0, 1);
+        obj.data.splice(0, 1);
+      }
+
+    },
+    HandleWSdata(e) {
+      var data = JSON.parse(e.data);
+      this.newestRawDataObject = data;
+      var roboName = data.SensorName.split('_')[0];
+      var robot = this.RobotDatas.find(rd => rd.eqid == roboName);
+      if (robot) {
+        for (const [key, value] of Object.entries(data.Dict_RawData_WithState)) {
+          robot[key] = value.value.toFixed(3);
+          var keyOfSensorData = `${robot.eqid}${key}`
+          this.$caches.thresholdsDataCaches[keyOfSensorData] = data.Dict_DataThreshold;
+          this.StoreDataInCache(keyOfSensorData, data.TimeLog, value.value);
+          this.StatusMap[keyOfSensorData][1] = value.isOutofSpec ? this.statusStyle.out_of_spec : value.isOutofControl ? this.statusStyle.out_of_control : this.statusStyle.normal;
+        }
+      }
+    },
+    async ReconnecWeSocket() {
+      this.websocket_sensorData = await SensorRawDataWsConnect();
+      this.websocket_sensorData.onmessage = this.HandleWSdata;
+    }
   },
   computed: {
     ViewPortHeight() {
       return (window.innerHeight - 150) + "px";
     }
   },
-  mounted() {
+  async mounted() {
     //TODO GET columns from backend
 
-    this.columns = [{
-      label: 'EQ ID',
-      field: 'eqid',
-    }]
-    this.$dataInfo.fields.forEach(element => {
-      this.columns.push(element);
-    });
+    this.$dataInfo.eqidls = await GetEQIDList();
+    this.$dataInfo.fields = await GetFieldList();
 
+    console.log('datainfo-', this.$dataInfo);
+
+    this.CreateColumns();
     this.GenRobotDatas();
     this.GenStatusMap();
-
+    this.websocket_sensorData = await SensorRawDataWsConnect();
+    this.websocket_sensorData.onmessage = this.HandleWSdata;
+    this.websocket_sensorData.onclose = () => {
+      console.log('ws closed');
+      this.ReconnecWeSocket()
+    };
+    this.websocket_sensorData.onerror = (err) => console.log('wserr', err);
     window.addEventListener('keydown', (e) => {
       if (e.key == 'Escape') {
         this.CloseFootPanel();
       }
     })
-    //模擬
-    setInterval(() => {
-      this.RobotDatas.forEach(d => {
-        d.vac_upper_arm = Math.random().toFixed(3);
-        d.vac_lower_arm = Math.random().toFixed(3);
-        d.x_axis_motor_temp = Math.random().toFixed(3);
-        d.x_axis_torge = Math.random().toFixed(3);
-      })
-    }, 1000);
+    // //模擬
+    // setInterval(() => {
+    //   this.RobotDatas.forEach(d => {
+    //     d.vac_upper_arm = Math.random().toFixed(3);
+    //     d.vac_lower_arm = Math.random().toFixed(3);
+    //     d.x_axis_motor_temp = Math.random().toFixed(3);
+    //     d.x_axis_torge = Math.random().toFixed(3);
+    //   })
+    // }, 1000);
   },
   watch: {
     $userInfo: {
@@ -250,15 +379,25 @@ export default {
 }
 
 .foot-panel {
-  background-color: rgb(52, 58, 64);
-  position: fixed;
   width: 100%;
   bottom: 0;
-  height: 40px;
+  height: 50px;
   border: 1px solid rgb(52, 58, 64);
   /* border-top-left-radius: 10px; */
 }
-
+.threshold-info-panel,
+.foot-panel {
+  position: fixed;
+  background-color: rgb(52, 58, 64);
+}
+.threshold-info-panel {
+  right: 0;
+  top: 120px;
+  width: 300px;
+  z-index: 200000;
+  opacity: 0.8;
+  color: white;
+}
 .inner-val {
   padding: 10px;
   cursor: pointer;
@@ -276,5 +415,27 @@ table.vgt-table td {
 }
 .my-modal {
   height: max-content;
+}
+
+.legend-btn {
+  width: 60px;
+  border: 1px solid black;
+}
+
+.ooc-style {
+  color: rgb(0, 136, 248);
+}
+.oos-style {
+  color: red;
+}
+.threshold-region-foot {
+  color: white;
+}
+.threval {
+  cursor: pointer;
+}
+.threval:hover {
+  text-decoration: underline;
+  font-weight: bold;
 }
 </style>

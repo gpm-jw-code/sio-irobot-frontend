@@ -4,7 +4,7 @@
       <b-button class="mr-2" @click="syncToDarkTheme">Dark</b-button>
       <b-button class="mr-2" @click="syncToLightTheme">Light</b-button>
     </div>
-    <div class="chart" :id="id"></div>
+    <div class="tchart" :id="id"></div>
   </div>
 </template>
 
@@ -88,4 +88,7 @@ export default {
 </script>
 
 <style>
+.tchart {
+  height: 200px;
+}
 </style>
