@@ -1,7 +1,10 @@
 <template >
   <div class="sio-chart ml-1">
     <b-row no-gutters class="text-right">
-      <!-- <b-col cols="10 pl-5">{{eqid}}-{{field}}</b-col> -->
+      <!-- <b-col cols="10 pl-1" class="text-left">{{eqid}}-{{field}}</b-col> -->
+      <b-col cols="10" class="text-left">
+        <b-button squared variant="light">{{field}}</b-button>
+      </b-col>
       <b-col cols="1">
         <b-button
           v-b-tooltip.hover
@@ -32,18 +35,26 @@
       @hide="ooSettingModalShow=false"
     ></threshold-setting-dialog-vue>
     <apexchart
+      v-show="!isPauseRealTimeDataRender"
       ref="chart"
       :options="chartOptions"
       :series="series"
       v-observe-visibility="visibilityChanged"
     ></apexchart>
+    <!-- <TradingChartVue v-show="isPauseRealTimeDataRender" :id="queryChartId"></TradingChartVue> -->
+    <div class="query-chart" v-show="isPauseRealTimeDataRender">
+      <canvas :id="queryChartId"></canvas>
+    </div>
   </div>
 </template>
 <script>
 import ThresholdSettingDialogVue from '../ThresholdSettingDialog.vue';
+import { createChart } from "lightweight-charts";
+import TradingChartVue from './TradingChart.vue';
+import Chart from 'chart.js'
 import moment from 'moment';
 export default {
-  components: { ThresholdSettingDialogVue },
+  components: { ThresholdSettingDialogVue, TradingChartVue },
   props: {
     eqid: String,
     field: String,
@@ -63,7 +74,7 @@ export default {
           data: []
         }
       }
-    }
+    },
   },
   watch: {
     oocThresHold: {
@@ -86,6 +97,7 @@ export default {
       timer: undefined,
       ooSettingModalShow: false,
       isVisible: false,
+      isPauseRealTimeDataRender: false,
       thresHoldSettingOptions: {
         settingFor: {
           thresType: "OOS",
@@ -95,7 +107,6 @@ export default {
           eqid: "",
           field: ""
         },
-
       },
       thresHoldValSetting: 0,
       chartOptions: {
@@ -104,7 +115,7 @@ export default {
         },
         chart: {
           type: "line",
-          height: 250,
+          height: 320,
           animations: {
             enabled: false,
             animateGradually: {
@@ -119,16 +130,6 @@ export default {
           toolbar: {
             show: false,
           }
-        },
-        title: {
-          text: 'Apex Chart Demo',
-          align: 'left',
-          style: {
-            fontSize: '16px',
-            fontWeight: 'bold',
-            fontFamily: undefined,
-            color: '#fff'
-          },
         },
         xaxis: {
           categories: [],
@@ -212,12 +213,22 @@ export default {
       lastData: -1,
       lastDataTime: -1,
       renderKey: "",
+      querySeries: [],
+      QueryData: {
+        chart: null,
+      }
     }
   },
   computed: {
     id() {
       return `${this.eqid}${this.field}`
     },
+    queryChartId() {
+      return `query-chart-${this.id}`
+    },
+    apexChart() {
+      return this.$refs["chart"];
+    }
   },
 
   methods: {
@@ -247,32 +258,96 @@ export default {
     ChangeOOSData(val) {
       this.ThresHolds.OOS = val;
       this.chartOptions.annotations.yaxis[1].y = val;
-      this.$refs["chart"].updateOptions(this.chartOptions);
+      if (this.apexChart)
+        this.apexChart.updateOptions(this.chartOptions);
 
     },
     ChangeOOCData(val) {
       this.ThresHolds.OOC = val;
       this.chartOptions.annotations.yaxis[0].y = val;
-      this.$refs["chart"].updateOptions(this.chartOptions);
+      if (this.apexChart)
+        this.apexChart.updateOptions(this.chartOptions);
+
+    },
+    async RenderRealTimeData() {
+      if (this.isVisible && !this.isPauseRealTimeDataRender) {
+        await this.Sleep(1);
+        var obj = this.$caches.realTimeDataCaches[`${this.eqid}${this.field}`];
+        this.series[0].data = obj.data;
+        this.chartOptions.xaxis.categories = obj.time;
+        this.chartOptions.annotations.yaxis[2].y = obj.data.at(-1);
+        this.chartOptions.annotations.yaxis[2].label.text = obj.data.at(-1).toFixed(3);
+        this.$refs["chart"].updateOptions(this.chartOptions);
+        this.$refs["chart"].updateSeries(this.series);
+      }
+    },
+    ChangeToDisplayQueryDataMode() {
+      this.isPauseRealTimeDataRender = true;
+
+    },
+
+    async UpdateSeries(timeList, dataList) {
+      console.log(timeList.length);
+      var s = [];
+
+      this.QueryData.chart.data.labels = timeList;
+      this.QueryData.chart.data.datasets[0].label = timeList[0] + '-' + timeList[timeList.length - 1];
+      this.QueryData.chart.data.datasets[0].data = dataList; // Would update the first dataset's value of 'March' to be 50
+      this.QueryData.chart.update(); // Calling update now animates the position of March from 90 to 50.
+
+    },
+    CreateQueryChart() {
+      const ctx = document.getElementById(this.queryChartId);
+      this.QueryData.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ["水星", "金星", "地球", "火星", "木星", "土星", "天王星", "海王星"],
+          datasets: [
+            {
+              label: "行星卫星数量",
+              data: [0, 0, 1, 2, 79, 82, 27, 14],
+              backgroundColor: "",
+              borderColor: "#36495d",
+              borderWidth: 3,
+              fill: false,
+              pointStyle: 'none',
+              pointRadius: 0, lineTension: 0,
+
+            },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          lineTension: 0,
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                  padding: 25
+                }
+              }
+            ],
+            xAxes: [{
+              type: 'time',
+              time: {
+                unit: 'second'
+              }
+            }]
+          },
+        },
+      });
+      this.QueryData.chart.options.animation = false; // disables all animations
 
     }
   },
   mounted() {
-    this.chartOptions.title.text = `${this.eqid}-${this.field}`;
+    this.CreateQueryChart();
     this.thresHoldSettingOptions.sensor = { eqid: this.eqid, field: this.field }
     this.$refs["chart"].updateOptions(this.chartOptions);
-    var that = this;
     this.timer = setInterval(async () => {
-      if (this.isVisible) {
-        await that.Sleep(1);
-        var obj = that.$caches.realTimeDataCaches[`${that.eqid}${that.field}`];
-        that.series[0].data = obj.data;
-        that.chartOptions.xaxis.categories = obj.time;
-        that.chartOptions.annotations.yaxis[2].y = obj.data.at(-1);
-        that.chartOptions.annotations.yaxis[2].label.text = obj.data.at(-1).toFixed(3);
-        that.$refs["chart"].updateOptions(that.chartOptions);
-        that.$refs["chart"].updateSeries(that.series);
-      }
+      this.RenderRealTimeData();
     }, 1000);
   },
   destroyed() {
@@ -289,7 +364,7 @@ export default {
 }
 .sio-chart {
   width: 100%;
-  height: 300px;
+  height: 370px;
   border: 1px solid rgb(126, 126, 126);
   /* border-radius: 15px; */
   border-end-start-radius: 6px;
@@ -297,6 +372,14 @@ export default {
   border-top-right-radius: 6px;
   padding: 10px;
 }
+
+.query-chart {
+  /* background-color: red; */
+  height: 100%;
+  padding: 10px;
+  margin: 0 auto;
+}
+
 .rchart {
   background-color: rgb(179, 179, 179);
   color: white;

@@ -29,6 +29,9 @@
                   <b-input v-model="condition.QuEnd_Time" size="sm" locale="en" type="time"></b-input>
                   <!-- <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker> -->
                 </b-col>
+                <b-col lg="2" class="pl-2">
+                  <b-button variant="primary" size="sm" @click="QueryBtnClickHandle">查詢</b-button>
+                </b-col>
               </b-row>
             </b-col>
           </b-row>
@@ -46,10 +49,16 @@
 
       <b-row no-gutters>
         <b-col lg="2">
-          <b-input size="sm" placeholder="關鍵字查詢"></b-input>
+          <b-input size="sm" placeholder="關鍵字查詢" v-model="keywordsInput"></b-input>
         </b-col>
         <b-col cols="3" class="text-left">
-          <b-button squared id="query-button" size="sm" variant="primary">查詢</b-button>
+          <b-button
+            squared
+            id="query-button"
+            size="sm"
+            variant="primary"
+            @click="KeyWordQueryHandle"
+          >查詢</b-button>
         </b-col>
       </b-row>
       <el-divider></el-divider>
@@ -57,9 +66,10 @@
       <div id="charts-container">
         <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
           <b-button squared class="ml-1">{{eqid}}</b-button>
-          <b-row cols-lg="2">
+          <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
             <b-col v-for="field in filter.typeLs" :key="field" class="mb-1 text-center" lg>
               <sio-chart-vue
+                :ref="`sio-chart-${eqid}${field}`"
                 :id="`scv-${eqid}${field}`"
                 :eqid="eqid"
                 :field="field"
@@ -85,6 +95,7 @@
 <script>
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
+import { Query } from '../web-api/backend';
 export default {
   components: {
     filterVue, SioChartVue
@@ -116,11 +127,13 @@ export default {
         typeLs: [],
         statusLs: []
       },
+      keywordsInput: ""
     }
   },
   mounted() {
     console.log('mounted');
     this.DisplayModeHandle();
+    this.ReloadQueryParamFromLocalStorage();
   },
   beforeDestroy() {
     console.log('beforeDestroy');
@@ -161,6 +174,63 @@ export default {
       if (!field || !field)
         return 999;
       return this.$caches.thresholdsDataCaches[`${eqid}${field}`][`${field}_OOS`];
+    },
+    async QueryBtnClickHandle() {
+      this.SaveQueryParmToLocalStorage();
+      this.filter.robotLs.forEach(robotId => {
+        this.filter.typeLs.forEach(field => {
+          var startTime = this.quStartTime;
+          var endTime = this.quEndTime;
+          var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
+          setTimeout(() => {
+            new Promise(
+              function () {
+                Query.QuerySensorRawData(startTime, endTime, "SIOIROBOT", robotId, field).then(ret => {
+                  sioChart.ChangeToDisplayQueryDataMode();
+                  sioChart.UpdateSeries(ret.List_TimeLog, ret.Dict_DataList[field]);
+                });
+              }
+            )
+          }, 100);
+        });
+      })
+    },
+    SaveQueryParmToLocalStorage() {
+      localStorage.setItem('query-condition', JSON.stringify(this.condition));
+    },
+    ReloadQueryParamFromLocalStorage() {
+      var json = localStorage.getItem('query-condition');
+      if (json)
+        this.condition = JSON.parse(json);
+    },
+    KeyWordQueryHandle() {
+      var eqidShow = [];
+      var fieldShow = [];
+      for (let index = 0; index < this.keywordsInputSplit.length; index++) {
+        const keyword_UpperCase = this.keywordsInputSplit[index].toUpperCase().replaceAll(" ", "");
+        this.$dataInfo.eqidls.forEach(eqid => {
+          if (eqid.toUpperCase().includes(keyword_UpperCase)) {
+            eqidShow.push(eqid);
+          }
+        })
+
+        this.$dataInfo.fields.forEach(fields => {
+          if (fields.field.toUpperCase().includes(keyword_UpperCase)) {
+            fieldShow.push(fields.field);
+          }
+        })
+      }
+
+      if (eqidShow.length != 0 && fieldShow.length != 0)
+        this.filter.typeLs = fieldShow.concat();
+      else
+        this.filter.typeLs = this.AllFieldList;
+
+      if (fieldShow.length != 0 && eqidShow == 0) {
+        this.filter.typeLs = fieldShow.concat();
+        this.filter.robotLs = this.AllEqidList;
+      } else
+        this.filter.robotLs = eqidShow.concat();
     }
   },
   watch: {
@@ -180,7 +250,33 @@ export default {
       console.log(redkey);
       return this.$caches.realTimeDataCaches[redkey];
     },
-  }
+    quStartTime() {
+      return this.condition.QuStart + " " + this.condition.QuStart_Time;
+    },
+    quEndTime() {
+      return this.condition.QuEnd + " " + this.condition.QuEnd_Time;
+    },
+    IsOnlyOneChartDisplay() {
+      return this.filter.typeLs.length == 1;
+    },
+    keywordsInputSplit() {
+      return this.keywordsInput.split(',')
+    },
+    AllFieldList() {
+      var ls = [];
+      this.$dataInfo.fields.forEach(fi => {
+        ls.push(fi.field);
+      })
+      return ls;
+    },
+    AllEqidList() {
+      var ls = [];
+      this.$dataInfo.eqidls.forEach(eqid => {
+        ls.push(eqid);
+      })
+      return ls;
+    }
+  },
 }
 </script>
 

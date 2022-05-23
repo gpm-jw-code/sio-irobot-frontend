@@ -12,10 +12,8 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import {userInfo,dataInfo,caches} from './state'
 import { Chart } from 'chart.js';
-import annotationPlugin from 'chartjs-plugin-annotation';
 import VueObserveVisibility from 'vue-observe-visibility';
 
-Chart.register(annotationPlugin);
 Vue.use(VueObserveVisibility);
 
 Vue.component('apexchart', VueApexCharts)

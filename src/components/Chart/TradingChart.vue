@@ -14,6 +14,7 @@ export default {
   data() {
     return {
       chart: "",
+      lineSeries: null,
       themesData: {
         Dark: {
           height: 100,
@@ -71,17 +72,17 @@ export default {
   },
   mounted() {
     this.chart = createChart(this.id, { width: window.width, height: 400 });
-    const lineSeries = this.chart.addLineSeries({
+    this.lineSeries = this.chart.addLineSeries({
       topColor: "rgba(32, 226, 47, 0.56)",
       bottomColor: "rgba(32, 226, 47, 0.04)",
       lineColor: "rgba(32, 226, 47, 1)",
     });
 
     this.syncToDarkTheme();
-
+    console.log('trading chart mounted');
     setInterval(() => {
       var random = Math.random();
-      lineSeries.update({ time: Date.now(), value: random });
+      this.lineSeries.update({ time: Date.now(), value: random });
     }, 1000);
   },
 };

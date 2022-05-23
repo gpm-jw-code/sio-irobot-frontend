@@ -56,11 +56,25 @@ export async function GetFieldList(edgeName="SIOIROBOT"){
     })
 }
 
+/**for 分散式系統 */
 export async function SensorRawDataWsConnect(){
     return await new Promise(function(resolve,reject){
         var ws = new WebSocket("ws://localhost:8090/GPM/SensorRawData");
             ws.onopen=()=>{
                 console.log('SensorRawData ws connect');
+                resolve(ws);
+            }
+            ws.onerror =(err)=>reject(err);
+    })
+}
+
+
+/**for IDMS系統 */
+export async function IDMSSensorRawDataWsConnect(){
+    return await new Promise(function(resolve,reject){
+        var ws = new WebSocket("ws://192.168.0.100:44332/Raw/?distributed=true");
+            ws.onopen=()=>{
+                console.log('IDMS_SensorRawData ws connect');
                 resolve(ws);
             }
             ws.onerror =(err)=>reject(err);
@@ -91,4 +105,17 @@ export var ThresHoldSetting={
                 }
             )
         }
+}
+
+export var Query ={
+    QuerySensorRawData: async function(startTime=Date(),endTime=Date(),edgeName="SIOIROBOT",eqid="eqid", field="field"){
+        var sensorName = `${eqid}_${field}`
+        return await new Promise(function(resolve,reject){
+            var ws = new WebSocket(`ws://localhost:8090/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&edgeName=${edgeName}&sensorName=${sensorName}`);
+            ws.onmessage=(e)=>{
+                ws.close();
+                resolve( JSON.parse(e.data))
+            }
+        })
+    }
 }

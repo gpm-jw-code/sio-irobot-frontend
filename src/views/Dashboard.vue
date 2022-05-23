@@ -1,90 +1,108 @@
 <template>
   <div class="dashboard">
-    <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
-      <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
-      <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
-      <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
+    <div class="robot-idms-switch-container text-center pt-3 pl-1">
+      <b-button
+        pill
+        class="mr-2 type-switch-btn"
+        :variant="!idms_dt_show? 'primary':'secondary'"
+        @click="idms_dt_show=false"
+      >ROBOT數據</b-button>
+      <b-button
+        class="type-switch-btn"
+        pill
+        :variant="idms_dt_show? 'primary':'secondary'"
+        @click="idms_dt_show=true"
+      >振動訊號</b-button>
     </div>
-    <vue-good-table
-      :columns="columns"
-      :rows="RobotDatas"
-      @on-cell-click="onCellClick"
-      :max-height="ViewPortHeight"
-      :fixed-header="true"
-      :sort-options="{enabled:false}"
-    >
-      <template slot="table-row" slot-scope="props">
-        <div
-          v-b-tooltip.hover
-          title
-          @dblclick="onRowDoubleClick"
-          :key="renderKey"
-          class="inner-val"
-          v-bind:style="StatusMap[props.formattedRow['eqid']+props.column.field]"
-        >{{props.formattedRow[props.column.field]}}</div>
-      </template>
-    </vue-good-table>
-
-    <!-- <transition name="el-fade-in-linear">
-      <div v-show="showFootPanel" class="threshold-info-panel">fff</div>
-    </transition>-->
-    <transition name="el-zoom-in-bottom">
-      <div v-show="showFootPanel" class="foot-panel">
-        <b-row>
-          <b-col cols="2" class="text-left pl-2">
-            <b-button-group>
-              <b-button variant="dark" pill>{{selectedCell.eqid}}</b-button>
-              <b-button variant="light" pill>{{selectedCell.column.label}}</b-button>
-            </b-button-group>
-          </b-col>
-          <b-col cols="3" class="text-left threshold-region-foot">
-            <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4">OOC閥值</b-col>
-              <b-col class="ooc-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{selectOOCThresval}}</span>
-              </b-col>
-            </b-row>
-            <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4">OOS閥值</b-col>
-              <b-col class="oos-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{selectOOSThresval}}</span>
-              </b-col>
-            </b-row>
-          </b-col>
-          <b-col>
-            <b-button
-              variant="light"
-              block
-              :disabled="(!Resetable||userInfo.level==0)"
-              @click="ResetAlarmHandle"
-            >
-              <span v-if="userInfo.level!=0">RESET ALARM</span>
-              <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
-            </b-button>
-          </b-col>
-          <b-col class="text-right">
-            <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
-          </b-col>
-        </b-row>
+    <el-divider></el-divider>
+    <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
+    <div v-show="!idms_dt_show" id="robot-data-table">
+      <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
+        <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
+        <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
+        <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
       </div>
-    </transition>
+      <vue-good-table
+        :columns="columns"
+        :rows="RobotDatas"
+        @on-cell-click="onCellClick"
+        :max-height="ViewPortHeight"
+        :fixed-header="true"
+        :sort-options="{enabled:false}"
+      >
+        <template slot="table-row" slot-scope="props">
+          <div
+            v-b-tooltip.hover
+            title
+            @dblclick="onRowDoubleClick"
+            :key="renderKey"
+            class="inner-val"
+            v-bind:style="StatusMap[props.formattedRow['eqid']+props.column.field]"
+          >{{props.formattedRow[props.column.field]}}</div>
+        </template>
+      </vue-good-table>
 
-    <threshold-setting-dialog-vue
-      :show="thresSettingDialogShow"
-      :options="thresHoldSettingOptions"
-      @onSuccess="ThresHoldSetSuccessHandle"
-      @hide="thresSettingDialogShow=false"
-    ></threshold-setting-dialog-vue>
+      <!-- <transition name="el-fade-in-linear">
+      <div v-show="showFootPanel" class="threshold-info-panel">fff</div>
+      </transition>-->
+      <transition name="el-zoom-in-bottom">
+        <div v-show="showFootPanel" class="foot-panel">
+          <b-row>
+            <b-col cols="2" class="text-left pl-2">
+              <b-button-group>
+                <b-button variant="dark" pill>{{selectedCell.eqid}}</b-button>
+                <b-button variant="light" pill>{{selectedCell.column.label}}</b-button>
+              </b-button-group>
+            </b-col>
+            <b-col cols="3" class="text-left threshold-region-foot">
+              <b-row cols="2" no-gutters>
+                <b-col class="text-right pr-4">OOC閥值</b-col>
+                <b-col class="ooc-style">
+                  <span
+                    class="threval"
+                    @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
+                    v-b-tooltip.hover
+                    title="點一下進行設定"
+                  >{{selectOOCThresval}}</span>
+                </b-col>
+              </b-row>
+              <b-row cols="2" no-gutters>
+                <b-col class="text-right pr-4">OOS閥值</b-col>
+                <b-col class="oos-style">
+                  <span
+                    class="threval"
+                    @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
+                    v-b-tooltip.hover
+                    title="點一下進行設定"
+                  >{{selectOOSThresval}}</span>
+                </b-col>
+              </b-row>
+            </b-col>
+            <b-col>
+              <b-button
+                variant="light"
+                block
+                :disabled="(!Resetable||userInfo.level==0)"
+                @click="ResetAlarmHandle"
+              >
+                <span v-if="userInfo.level!=0">RESET ALARM</span>
+                <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
+              </b-button>
+            </b-col>
+            <b-col class="text-right">
+              <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
+            </b-col>
+          </b-row>
+        </div>
+      </transition>
+
+      <threshold-setting-dialog-vue
+        :show="thresSettingDialogShow"
+        :options="thresHoldSettingOptions"
+        @onSuccess="ThresHoldSetSuccessHandle"
+        @hide="thresSettingDialogShow=false"
+      ></threshold-setting-dialog-vue>
+    </div>
   </div>
 </template>
 
@@ -94,14 +112,14 @@ import 'vue-good-table/dist/vue-good-table.css'
 import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue';
 import { VueGoodTable } from 'vue-good-table';
 import { ResetAlarm, GetEQIDList, GetFieldList, SensorRawDataWsConnect } from '../web-api/backend'
-
+import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 export default {
   components: {
-    VueGoodTable, ThresholdSettingDialogVue
+    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable
   },
   data() {
     return {
-
+      idms_dt_show: false,
       websocket_sensorData: WebSocket,
       newestRawDataObject: {},
       RawDataStorage: {},
@@ -437,5 +455,9 @@ table.vgt-table td {
 .threval:hover {
   text-decoration: underline;
   font-weight: bold;
+}
+
+.type-switch-btn {
+  width: 150px;
 }
 </style>
