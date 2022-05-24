@@ -29,8 +29,21 @@
                   <b-input v-model="condition.QuEnd_Time" size="sm" locale="en" type="time"></b-input>
                   <!-- <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker> -->
                 </b-col>
-                <b-col lg="2" class="pl-2">
-                  <b-button variant="primary" size="sm" @click="QueryBtnClickHandle">查詢</b-button>
+                <b-col lg="4" class="pl-2">
+                  <b-button-group>
+                    <b-button
+                      class="query-button"
+                      variant="primary"
+                      size="sm"
+                      @click="QueryBtnClickHandle"
+                    >查詢</b-button>
+                    <b-button
+                      class="query-button"
+                      variant="info"
+                      size="sm"
+                      @click="ShowRealTimeHandle"
+                    >即時數據</b-button>
+                  </b-button-group>
                 </b-col>
               </b-row>
             </b-col>
@@ -54,7 +67,7 @@
         <b-col cols="3" class="text-left">
           <b-button
             squared
-            id="query-button"
+            class="query-button"
             size="sm"
             variant="primary"
             @click="KeyWordQueryHandle"
@@ -236,7 +249,6 @@ export default {
         this.filter.typeLs.forEach(field => {
           var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
           var isShowRealTimeData = this.isShowRealTimeData;
-
           setTimeout(() => {
             new Promise(
               function () {
@@ -252,6 +264,9 @@ export default {
       })
       if (!this.isShowRealTimeData)
         this.RenderQueryData();
+    },
+    ShowRealTimeHandle() {
+      this.isShowRealTimeData = true;
     },
     SaveQueryParmToLocalStorage() {
       localStorage.setItem('query-condition', JSON.stringify(this.condition));
@@ -345,8 +360,8 @@ export default {
   color: rgb(36, 36, 36);
 }
 
-#query-button {
-  width: 120px;
+.query-button {
+  width: 90px;
 }
 #charts-container {
 }

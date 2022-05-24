@@ -308,15 +308,14 @@ export default {
         this.apexChart.updateOptions(this.chartOptions);
       this.UpdateThresLine();
     },
-    async RenderRealTimeData() {
+    async RenderRealTimeData(data) {
       if (this.isVisible && !this.isPauseRealTimeDataRender) {
         await this.Sleep(1);
-        var obj = this.$caches.realTimeDataCaches[`${this.eqid}${this.field}`];
-        this.series[0].data = obj.data;
-        this.chartOptions.xaxis.categories = obj.time;
-        this.chartOptions.annotations.yaxis[2].y = obj.data.at(-1);
-        this.chartOptions.annotations.yaxis[2].label.text = obj.data.at(-1).toFixed(3);
-        this.$refs["chart"].updateOptions(this.chartOptions);
+        this.series[0].data = data.data;
+        this.chartOptions.xaxis.categories = data.time;
+        this.chartOptions.annotations.yaxis[2].y = data.data.at(-1);
+        this.chartOptions.annotations.yaxis[2].label.text = data.data.at(-1).toFixed(3);
+        // this.$refs["chart"].updateOptions(this.chartOptions);
         this.$refs["chart"].updateSeries(this.series);
       }
     },
@@ -335,7 +334,6 @@ export default {
       return new Promise(
         function (resolve) {
           setTimeout(() => {
-
             that.QueryData.lastTimeKey = key;
             that.QueryData.chart.data.labels = timeList;
             that.QueryData.chart.data.datasets[0].data = that.GenLine(timeList.length, that.ThresHolds.OOS);
@@ -442,12 +440,13 @@ export default {
     this.CreateQueryChart();
     this.thresHoldSettingOptions.sensor = { eqid: this.eqid, field: this.field }
     this.$refs["chart"].updateOptions(this.chartOptions);
-    this.timer = setInterval(async () => {
-      this.RenderRealTimeData();
-    }, 1000);
+    this.$bus.$on(this.id, (data) => this.RenderRealTimeData(data));
+    // this.timer = setInterval(async () => {
+    //   this.RenderRealTimeData();
+    // }, 1000);
   },
   destroyed() {
-    clearInterval(this.timer);
+    // clearInterval(this.timer);
   }
 
 }

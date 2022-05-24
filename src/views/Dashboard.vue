@@ -325,7 +325,7 @@ export default {
         obj.time.splice(0, 1);
         obj.data.splice(0, 1);
       }
-
+      this.$bus.$emit(sensorkey, obj);
     },
     HandleWSdata(e) {
       var data = JSON.parse(e.data);

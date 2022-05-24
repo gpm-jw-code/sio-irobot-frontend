@@ -13,6 +13,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import {userInfo,dataInfo,caches} from './state'
 import { Chart } from 'chart.js';
 import VueObserveVisibility from 'vue-observe-visibility';
+import Bus from './bus'
 
 Vue.use(VueObserveVisibility);
 
@@ -28,6 +29,7 @@ Vue.prototype.$configs = configs;
 Vue.prototype.$userInfo = userInfo
 Vue.prototype.$dataInfo = dataInfo
 Vue.prototype.$caches = caches
+Vue.prototype.$bus = Bus;
 console.log(dataInfo);
 
 new Vue({
