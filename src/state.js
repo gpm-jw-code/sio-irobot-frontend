@@ -18,8 +18,24 @@ var dataInfo={
 
 var caches={
     realTimeDataCaches:{},
-    thresholdsDataCaches:{}
+    thresholdsDataCaches:{},
+    queryResultCaches:{
+        lastTimeKey:'',
+        DataMap:{},
+        TryGetDataFromCache(startTime,endTime,eqid,field){
+            var sensorKey = eqid+"_"+field;
+            var timeKey = startTime+"-"+endTime;
+            return this.DataMap[timeKey][sensorKey];
+        },
+
+        TryGetLastQueryDataFromCache(eqid,field){
+            var sensorKey = eqid+"_"+field;
+            return this.DataMap[this.lastTimeKey][sensorKey];
+        }
+    }
 }
+
+
 
 console.log('state.js');
 

@@ -64,6 +64,35 @@
       <el-divider></el-divider>
       <!--圖表區-->
       <div id="charts-container">
+        <div
+          class="text-left"
+          v-for="eqid in AllEqidList"
+          :key="eqid"
+          v-show="filter.robotLs.includes(eqid)"
+        >
+          <b-button squared class="ml-1">{{eqid}}</b-button>
+          <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
+            <b-col
+              v-for="field in AllFieldList"
+              :key="field"
+              v-show="filter.typeLs.includes(field)"
+              class="mb-1 text-center"
+              lg
+            >
+              <sio-chart-vue
+                :ref="`sio-chart-${eqid}${field}`"
+                :id="`scv-${eqid}${field}`"
+                :eqid="eqid"
+                :field="field"
+                :oocThresHold="OOCThresHoldValue(eqid,field)"
+                :oosThresHold="OOSThresHoldValue(eqid,field)"
+                :showQueryData="!isShowRealTimeData"
+              ></sio-chart-vue>
+            </b-col>
+          </b-row>
+          <el-divider></el-divider>
+        </div>
+        <!-- 
         <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
           <b-button squared class="ml-1">{{eqid}}</b-button>
           <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
@@ -75,11 +104,12 @@
                 :field="field"
                 :oocThresHold="OOCThresHoldValue(eqid,field)"
                 :oosThresHold="OOSThresHoldValue(eqid,field)"
+                :showQueryData="!isShowRealTimeData"
               ></sio-chart-vue>
             </b-col>
           </b-row>
           <el-divider></el-divider>
-        </div>
+        </div>-->
       </div>
       <b-sidebar id="filter-sidebar" right backdrop>
         <filter-vue
@@ -96,6 +126,8 @@
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
 import { Query } from '../web-api/backend';
+import { QueryAll } from '../web-api/Query';
+import moment from 'moment';
 export default {
   components: {
     filterVue, SioChartVue
@@ -103,6 +135,7 @@ export default {
   data() {
     return {
       realtime_ws: undefined,
+      isShowRealTimeData: true,
       parameters: {
         eqid: 0,
         column: {
@@ -153,10 +186,29 @@ export default {
       }
     },
     RobotLsOnchange(list) {
+      list.sort();
       this.filter.robotLs = list;
-    }, TypeLsOnchange(list) {
-      this.filter.typeLs = list;
+      this.RenderQueryData();
     },
+    TypeLsOnchange(list) {
+      this.filter.typeLs = list;
+      this.RenderQueryData();
+    },
+
+    async RenderQueryData() {
+      for (let index = 0; index < this.filter.robotLs.length; index++) {
+        var eqid = this.filter.robotLs[index];
+        for (let index = 0; index < this.filter.typeLs.length; index++) {
+          var field = this.filter.typeLs[index];
+          var sioChart = this.$refs[`sio-chart-${eqid}${field}`][0];
+          var ret = this.$caches.queryResultCaches.TryGetLastQueryDataFromCache(eqid, field);
+          var timekey = this.$caches.queryResultCaches.lastTimeKey
+          sioChart.UpdateSeries(ret.List_TimeLog, ret.Dict_DataList[field], timekey);
+        }
+      }
+
+    },
+
     GetOOS(eqid, field) {
       console.log(eqid, field);
       return 1;
@@ -177,23 +229,29 @@ export default {
     },
     async QueryBtnClickHandle() {
       this.SaveQueryParmToLocalStorage();
+      this.isShowRealTimeData = new Date(Date.parse(this.quEndTime)) >= Date.now()
+      if (!this.isShowRealTimeData)
+        await QueryAll(this.quStartTime, this.quEndTime);
       this.filter.robotLs.forEach(robotId => {
         this.filter.typeLs.forEach(field => {
-          var startTime = this.quStartTime;
-          var endTime = this.quEndTime;
           var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
+          var isShowRealTimeData = this.isShowRealTimeData;
+
           setTimeout(() => {
             new Promise(
               function () {
-                Query.QuerySensorRawData(startTime, endTime, "SIOIROBOT", robotId, field).then(ret => {
+                if (isShowRealTimeData)
+                  sioChart.ChangeToDisplayRealTimeDataMode();
+                else {
                   sioChart.ChangeToDisplayQueryDataMode();
-                  sioChart.UpdateSeries(ret.List_TimeLog, ret.Dict_DataList[field]);
-                });
+                }
               }
             )
           }, 100);
         });
       })
+      if (!this.isShowRealTimeData)
+        this.RenderQueryData();
     },
     SaveQueryParmToLocalStorage() {
       localStorage.setItem('query-condition', JSON.stringify(this.condition));

@@ -75,6 +75,10 @@ export default {
         }
       }
     },
+    showQueryData: {
+      type: Boolean,
+      default: false
+    }
   },
   watch: {
     oocThresHold: {
@@ -90,6 +94,14 @@ export default {
         this.ChangeOOSData(val);
       }, immediate: true
     },
+    showQueryData: {
+      handler: function (bval) {
+        this.isPauseRealTimeDataRender = bval;
+
+      },
+      deep: true,
+      immediate: true
+    }
 
   },
   data() {
@@ -115,7 +127,7 @@ export default {
         },
         chart: {
           type: "line",
-          height: 320,
+          height: 270,
           animations: {
             enabled: false,
             animateGradually: {
@@ -125,8 +137,8 @@ export default {
               enabled: false,
             },
           },
-          background: 'rgb(51,51,51)',
-          foreColor: '#fff',
+          background: 'rgb(255,255,255)',
+          foreColor: 'black',
           toolbar: {
             show: false,
           }
@@ -141,17 +153,42 @@ export default {
           labels: {
             formatter: function (value) {
               return moment(value).format("HH:mm:ss");
-            }
-          }
+            },
+            rotate: 0,
+            rotateAlways: false,
+            hideOverlappingLabels: true,
+            showDuplicates: false,
+            trim: false,
+            minHeight: undefined,
+            maxHeight: 100,
+          },
+          axisBorder: {
+            show: true,
+            color: '#78909C',
+            height: '1',
+            width: '100%',
+            offsetX: 0,
+            offsetY: 0
+          },
+
         },
         yaxis: {
           labels: {
             formatter: (value) => {
               return value.toFixed(2);
             },
-          }, title: {
-            text: ""
-          }
+          },
+          title: {
+            text: "Unit"
+          },
+          axisBorder: {
+            show: true,
+            color: '#78909C',
+            height: '100%',
+            width: '1',
+            offsetX: 0,
+            offsetY: 0
+          },
         },
         stroke: {
           show: true,
@@ -200,11 +237,11 @@ export default {
               }
             }
           ]
-        }
+        },
       },
       series: [{
         name: "series",
-        data: [123, 12, 233]
+        data: []
       }],
       ThresHolds: {
         OOS: -1,
@@ -216,6 +253,7 @@ export default {
       querySeries: [],
       QueryData: {
         chart: null,
+        lastTimeKey: ''
       }
     }
   },
@@ -228,7 +266,8 @@ export default {
     },
     apexChart() {
       return this.$refs["chart"];
-    }
+    },
+
   },
 
   methods: {
@@ -260,14 +299,14 @@ export default {
       this.chartOptions.annotations.yaxis[1].y = val;
       if (this.apexChart)
         this.apexChart.updateOptions(this.chartOptions);
-
+      this.UpdateThresLine();
     },
     ChangeOOCData(val) {
       this.ThresHolds.OOC = val;
       this.chartOptions.annotations.yaxis[0].y = val;
       if (this.apexChart)
         this.apexChart.updateOptions(this.chartOptions);
-
+      this.UpdateThresLine();
     },
     async RenderRealTimeData() {
       if (this.isVisible && !this.isPauseRealTimeDataRender) {
@@ -283,18 +322,46 @@ export default {
     },
     ChangeToDisplayQueryDataMode() {
       this.isPauseRealTimeDataRender = true;
-
+    },
+    ChangeToDisplayRealTimeDataMode() {
+      this.isPauseRealTimeDataRender = false;
     },
 
-    async UpdateSeries(timeList, dataList) {
-      console.log(timeList.length);
-      var s = [];
+    async UpdateSeries(timeList, dataList, key = '123') {
 
-      this.QueryData.chart.data.labels = timeList;
-      this.QueryData.chart.data.datasets[0].label = timeList[0] + '-' + timeList[timeList.length - 1];
-      this.QueryData.chart.data.datasets[0].data = dataList; // Would update the first dataset's value of 'March' to be 50
-      this.QueryData.chart.update(); // Calling update now animates the position of March from 90 to 50.
+      if (key == this.QueryData.lastTimeKey)
+        return;
+      var that = this;
+      return new Promise(
+        function (resolve) {
+          setTimeout(() => {
 
+            that.QueryData.lastTimeKey = key;
+            that.QueryData.chart.data.labels = timeList;
+            that.QueryData.chart.data.datasets[0].data = that.GenLine(timeList.length, that.ThresHolds.OOS);
+            that.QueryData.chart.data.datasets[1].data = that.GenLine(timeList.length, that.ThresHolds.OOC);
+            that.QueryData.chart.data.datasets[2].data = dataList;
+            that.QueryData.chart.data.datasets[2].label = `${that.field}-(${timeList[0]}~${timeList[timeList.length - 1]})`;
+            that.QueryData.chart.update();
+            resolve(0);
+            console.log('UpdateSeries');
+          }, 1);
+        }
+      )
+    },
+    UpdateThresLine() {
+      if (!this.QueryData.chart) return;
+      var ptNum = this.QueryData.chart.data.datasets[2].data.length;
+      this.QueryData.chart.data.datasets[0].data = this.GenLine(ptNum, this.ThresHolds.OOS);
+      this.QueryData.chart.data.datasets[1].data = this.GenLine(ptNum, this.ThresHolds.OOC);
+      this.QueryData.chart.update();
+    },
+    GenLine(ptNum, value) {
+      var ls = [];
+      for (let index = 0; index < ptNum; index++) {
+        ls.push(value);
+      }
+      return ls;
     },
     CreateQueryChart() {
       const ctx = document.getElementById(this.queryChartId);
@@ -304,15 +371,33 @@ export default {
           labels: ["水星", "金星", "地球", "火星", "木星", "土星", "天王星", "海王星"],
           datasets: [
             {
+              label: "OOS",
+              data: [0, 0, 1, 2, 79, 82, 27, 14],
+              backgroundColor: "",
+              borderColor: "red",
+              borderWidth: 1,
+              fill: false,
+              pointStyle: 'none',
+              pointRadius: 0, lineTension: 0,
+            },
+            {
+              label: "OOC",
+              data: [0, 0, 1, 2, 79, 82, 27, 14],
+              backgroundColor: "",
+              borderColor: "blue",
+              borderWidth: 1,
+              fill: false,
+              pointStyle: 'none',
+              pointRadius: 0, lineTension: 0,
+            }, {
               label: "行星卫星数量",
               data: [0, 0, 1, 2, 79, 82, 27, 14],
               backgroundColor: "",
               borderColor: "#36495d",
-              borderWidth: 3,
+              borderWidth: 2,
               fill: false,
               pointStyle: 'none',
               pointRadius: 0, lineTension: 0,
-
             },
           ]
         },
@@ -320,6 +405,11 @@ export default {
           responsive: true,
           maintainAspectRatio: false,
           lineTension: 0,
+          layout: {
+            padding: {
+              bottom: 20
+            }
+          },
           scales: {
             yAxes: [
               {
@@ -333,7 +423,13 @@ export default {
               type: 'time',
               time: {
                 unit: 'second'
-              }
+              },
+              ticks: {
+                autoskip: true,
+                autoSkipPadding: 130,
+                maxRotation: 0,
+                minRotation: 0
+              },
             }]
           },
         },
@@ -352,7 +448,6 @@ export default {
   },
   destroyed() {
     clearInterval(this.timer);
-    console.log('sio-chart-destroyed', this.eqid);
   }
 
 }
@@ -364,7 +459,7 @@ export default {
 }
 .sio-chart {
   width: 100%;
-  height: 370px;
+  height: 320px;
   border: 1px solid rgb(126, 126, 126);
   /* border-radius: 15px; */
   border-end-start-radius: 6px;

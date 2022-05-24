@@ -18,11 +18,19 @@
     <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
     <div v-show="!idms_dt_show" id="robot-data-table">
       <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
-        <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
-        <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
-        <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
+        <b-row>
+          <b-col>
+            <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
+            <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
+            <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
+          </b-col>
+          <b-col class="text-right">
+            <b-button class="mr-2" variant="danger" size="sm" @click="ResetAllAlarmHandle">清除所有警報</b-button>
+          </b-col>
+        </b-row>
       </div>
       <vue-good-table
+        class="p-2"
         :columns="columns"
         :rows="RobotDatas"
         @on-cell-click="onCellClick"
@@ -313,7 +321,7 @@ export default {
       obj.time.push(time);
       obj.data.push(value);
 
-      if (obj.time.length > 30) {
+      if (obj.time.length > 50) {
         obj.time.splice(0, 1);
         obj.data.splice(0, 1);
       }
@@ -337,6 +345,27 @@ export default {
     async ReconnecWeSocket() {
       this.websocket_sensorData = await SensorRawDataWsConnect();
       this.websocket_sensorData.onmessage = this.HandleWSdata;
+    },
+    async ResetAllAlarmHandle() {
+      if (this.userInfo.level == 0) {
+        this.$bvModal.msgBoxOk("權限不足!\r\n若要進行此操作，請先進行登入。", {
+          title: "NO PERMISSION"
+        }).then(() => {
+        })
+        return;
+      }
+
+      var result = await this.$bvModal.msgBoxConfirm("確定要清除所有警報?", {
+        title: "CONFIRM"
+      }).then((val) => {
+        return val
+      })
+      console.log(result);
+
+      if (result) {
+        //TODO backend
+        await ResetAlarm({ eqid: 'all', field: 'all' });
+      }
     }
   },
   computed: {
