@@ -7,7 +7,6 @@
           <b-form-input
             v-model="form.userName"
             class="text-center"
-            debounce="100"
             placeholder="USER NAME"
             aria-required
           ></b-form-input>

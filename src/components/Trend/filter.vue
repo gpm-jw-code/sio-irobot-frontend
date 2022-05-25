@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{eqidls}}
     <b-dropdown text="設備" block variant="light">
       <b-dropdown-form form-class="dropdown-form">
         <b-form-checkbox-group
@@ -48,7 +47,7 @@
       </b-dropdown-form>
     </b-dropdown>
 
-    <b-form-tags add-button-text input-id="tags-basic" placeholder v-model="AllSelectedItem"></b-form-tags>
+    <!-- <b-form-tags add-button-text input-id="tags-basic" placeholder v-model="AllSelectedItem"></b-form-tags> -->
 
     <!-- 
     <div>{{selectedRobots}}</div>
@@ -58,6 +57,9 @@
 </template>
 <script>
 export default {
+  props: {
+
+  },
   data() {
     return {
       formStyle: {},
@@ -77,6 +79,10 @@ export default {
     },
     StatusChange() {
       this.$emit("statusSelectedOnchange", this.selectedStatusList);
+    },
+    SettingSelectedOption(eqid, field) {
+      this.selectedRobots = [eqid];
+      this.selectedSensorTypes = [field]
     }
   },
   computed: {

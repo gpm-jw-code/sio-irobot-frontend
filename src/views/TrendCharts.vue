@@ -126,6 +126,7 @@
       </div>
       <b-sidebar id="filter-sidebar" right backdrop>
         <filter-vue
+          ref="filter"
           @robotSelectedOnchange="RobotLsOnchange"
           @sensorTypeSelectedOnchange="TypeLsOnchange"
           @statusSelectedOnchange="RobotLsOnchange"
@@ -194,6 +195,7 @@ export default {
         console.log(this.currentQuery);
         this.filter.robotLs = [this.currentQuery.eqid];
         this.filter.typeLs = [this.currentQuery.field];
+        this.$refs.filter.SettingSelectedOption(this.currentQuery.eqid, this.currentQuery.field);
       } else {
         // this.$router.push({ path: this.$route.path, query: this.currentQuery });
       }
