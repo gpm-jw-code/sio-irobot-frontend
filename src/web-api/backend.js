@@ -72,7 +72,7 @@ export async function SensorRawDataWsConnect(){
 /**for IDMS系統 */
 export async function IDMSSensorRawDataWsConnect(){
     return await new Promise(function(resolve,reject){
-        var ws = new WebSocket("ws://192.168.0.100:44332/Raw/?distributed=true");
+        var ws = new WebSocket("ws://127.0.0.1:44332/Raw/?distributed=true");
             ws.onopen=()=>{
                 console.log('IDMS_SensorRawData ws connect');
                 resolve(ws);
