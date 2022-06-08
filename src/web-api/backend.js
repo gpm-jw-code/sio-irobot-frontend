@@ -59,7 +59,7 @@ export async function GetFieldList(edgeName="SIOIROBOT"){
 /**for 分散式系統 */
 export async function SensorRawDataWsConnect(){
     return await new Promise(function(resolve,reject){
-        var ws = new WebSocket("ws://localhost:8090/GPM/SensorRawData");
+        var ws = new WebSocket("ws://localhost:8090/GPM/SensorRawData/?EdgeName=SIOIROBOT");
             ws.onopen=()=>{
                 console.log('SensorRawData ws connect');
                 resolve(ws);

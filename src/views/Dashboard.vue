@@ -258,6 +258,7 @@ export default {
         this.selectOOSThresval = val;
     },
     UpdateSelectedThresDisplay() {
+      console.info(this.$caches.thresholdsDataCaches);
       let thresMap = this.$caches.thresholdsDataCaches[this.selectedKey]
       this.selectOOCThresval = thresMap[this.selectedCell.column.field + '_OOC'];
       this.selectOOSThresval = thresMap[this.selectedCell.column.field + '_OOS'];
@@ -308,25 +309,31 @@ export default {
         this.RawDataStorage[key].splice(0, 1);
       }
     },
-    StoreDataInCache(sensorkey, time, value) {
+    StoreDataInCache(sensorkey, timeList, valueList) {
+
       if (!this.$caches.realTimeDataCaches[sensorkey])
         this.$caches.realTimeDataCaches[sensorkey] = { time: [], data: [] };
 
       var obj = this.$caches.realTimeDataCaches[sensorkey];
+      var dataLen = valueList.length;
       if (obj.time.length > 0) {
-        var lastTime = obj.time[obj.time.length - 1];
-        if (time == lastTime)
+        var lastTime = obj.time[obj.time.length - dataLen];//0 1 2 3 , 0 1 2 3
+        if (timeList[0] == lastTime)
           return;
       }
-      obj.time.push(time);
-      obj.data.push(value);
+      for (let index = 0; index < valueList.length; index++) {
+        obj.time.push(timeList[index]);
+        obj.data.push(valueList[index]);
+      }
 
       if (obj.time.length > 50) {
-        obj.time.splice(0, 1);
-        obj.data.splice(0, 1);
+        obj.time.splice(0, dataLen);
+        obj.data.splice(0, dataLen);
       }
       this.$bus.$emit(sensorkey, obj);
     },
+
+
     HandleWSdata(e) {
       var data = JSON.parse(e.data);
       this.newestRawDataObject = data;
@@ -337,9 +344,16 @@ export default {
           robot[key] = value.value.toFixed(3);
           var keyOfSensorData = `${robot.eqid}${key}`
           this.$caches.thresholdsDataCaches[keyOfSensorData] = data.Dict_DataThreshold;
-          this.StoreDataInCache(keyOfSensorData, data.TimeLog, value.value);
           this.StatusMap[keyOfSensorData][1] = value.isOutofSpec ? this.statusStyle.out_of_spec : value.isOutofControl ? this.statusStyle.out_of_control : this.statusStyle.normal;
         }
+
+        for (const [key, value] of Object.entries(data.Dict_ListRawData)) {
+          robot[key] = value[value.length - 1].toFixed(3);
+          var keyOfSensorData2 = `${robot.eqid}${key}`
+          this.StoreDataInCache(keyOfSensorData2, data.List_TimeLog, value);
+        }
+
+
       }
     },
     async ReconnecWeSocket() {
