@@ -26,7 +26,7 @@
 <script>
 import 'vue-good-table/dist/vue-good-table.css'
 import { VueGoodTable } from 'vue-good-table'
-import { IDMSSensorRawDataWsConnect } from '../../web-api/backend'
+import { IDMSSensorRawDataWsConnect } from '../../web-api/Distribution_Host'
 export default {
   components: {
     VueGoodTable,

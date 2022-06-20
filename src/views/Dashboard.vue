@@ -119,7 +119,7 @@
 import 'vue-good-table/dist/vue-good-table.css'
 import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue';
 import { VueGoodTable } from 'vue-good-table';
-import { ResetAlarm, GetEQIDList, GetFieldList, SensorRawDataWsConnect } from '../web-api/backend'
+import { ResetAlarm, GetEQIDList, GetFieldList, SensorRawDataWsConnect } from '../web-api/Distribution_Host'
 import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 export default {
   components: {

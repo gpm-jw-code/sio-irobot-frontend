@@ -12,7 +12,7 @@
   </b-modal>
 </template>
 <script>
-import { ThresHoldSetting } from "../web-api/backend"
+import { ThresHoldSetting } from "../web-api/Distribution_Host"
 
 export default {
   props: {

@@ -139,7 +139,7 @@
 <script>
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
-import { Query } from '../web-api/backend';
+import { Query } from '../web-api/Distribution_Host';
 import { QueryAll } from '../web-api/Query';
 import moment from 'moment';
 export default {
