@@ -16,7 +16,12 @@
     </div>
     <el-divider></el-divider>
     <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
-    <div v-show="!idms_dt_show" id="robot-data-table">
+    <div
+      v-show="!idms_dt_show"
+      id="robot-data-table"
+      v-loading="controlCenterWSErr"
+      element-loading-text="網路異常"
+    >
       <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
         <b-row>
           <b-col>
@@ -127,6 +132,7 @@ export default {
   },
   data() {
     return {
+      controlCenterWSErr: true,
       idms_dt_show: false,
       websocket_sensorData: WebSocket,
       newestRawDataObject: {},
@@ -204,7 +210,6 @@ export default {
     },
     async GenRobotDatas() {
       this.RobotDatas = [];
-
       console.log(this.$dataInfo.fields);
       this.$dataInfo.eqidls.forEach(eqid => {
         var dataMap = {};
@@ -334,7 +339,8 @@ export default {
     },
 
 
-    HandleWSdata(e) {
+    async HandleWSdata(e) {
+
       var data = JSON.parse(e.data);
       this.newestRawDataObject = data;
       var roboName = data.SensorName.split('_')[0];
@@ -353,12 +359,31 @@ export default {
           this.StoreDataInCache(keyOfSensorData2, data.List_TimeLog, value);
         }
 
-
+      }
+      else {
+        this.$dataInfo.eqidls = await GetEQIDList();
+        this.$dataInfo.fields = await GetFieldList();
+        this.CreateColumns();
+        this.GenRobotDatas();
+        this.GenStatusMap();
       }
     },
     async ReconnecWeSocket() {
-      this.websocket_sensorData = await SensorRawDataWsConnect();
+      console.log('ws closed');
+      this.controlCenterWSErr = true;
+      this.websocket_sensorData = "network_error";
+      while (this.websocket_sensorData == 'network_error') {
+        this.websocket_sensorData = await SensorRawDataWsConnect();
+      }
+
+      this.controlCenterWSErr = false;
+      console.log("ws instance rebuild", this.websocket_sensorData);
       this.websocket_sensorData.onmessage = this.HandleWSdata;
+      this.websocket_sensorData.onclose = () => {
+        this.ReconnecWeSocket()
+      };
+
+
     },
     async ResetAllAlarmHandle() {
       if (this.userInfo.level == 0) {
@@ -389,19 +414,31 @@ export default {
   },
   async mounted() {
     //TODO GET columns from backend
+    var EQIDList = "network_error";
 
-    this.$dataInfo.eqidls = await GetEQIDList();
+    while (EQIDList == "network_error") {
+      this.controlCenterWSErr = true;
+      EQIDList = await GetEQIDList();
+    }
+
+    this.controlCenterWSErr = false;
+    if (EQIDList == 'network_error') {
+      console.log('network_error');
+      return;
+    }
+
+
+    this.$dataInfo.eqidls = EQIDList;
     this.$dataInfo.fields = await GetFieldList();
 
-    console.log('datainfo-', this.$dataInfo);
 
     this.CreateColumns();
     this.GenRobotDatas();
     this.GenStatusMap();
+
     this.websocket_sensorData = await SensorRawDataWsConnect();
     this.websocket_sensorData.onmessage = this.HandleWSdata;
     this.websocket_sensorData.onclose = () => {
-      console.log('ws closed');
       this.ReconnecWeSocket()
     };
     this.websocket_sensorData.onerror = (err) => console.log('wserr', err);

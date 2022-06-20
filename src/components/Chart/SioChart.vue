@@ -388,7 +388,7 @@ export default {
               pointStyle: 'none',
               pointRadius: 0, lineTension: 0,
             }, {
-              label: "行星卫星数量",
+              label: "Data",
               data: [0, 0, 1, 2, 79, 82, 27, 14],
               backgroundColor: "",
               borderColor: "#36495d",

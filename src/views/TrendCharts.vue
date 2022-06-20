@@ -1,111 +1,110 @@
 <template>
-  <transition name="el-fade-in-linear">
-    <div class="trend-charts">
-      <!-- {{$route.params.eqid}} - {{$route.params.field}} -->
-      <b-row class="mt-2">
-        <b-col lg="9">
-          <b-row no-gutters>
-            <b-col md="4" class="stard-time-regin mb-3 text-left">
-              <b>START</b>
-              <b-row no-gutters>
-                <b-col lg="6">
-                  <b-input v-model="condition.QuStart" size="sm" class="mb-2" type="date"></b-input>
-                  <!-- <b-form-datepicker id="start-datepicker" v-model="condition.QuStart" class="mb-2"></b-form-datepicker> -->
-                </b-col>
-                <b-col lg="6">
-                  <b-input v-model="condition.QuStart_Time" size="sm" locale="en" type="time"></b-input>
-                  <!-- <b-form-timepicker v-model="condition.QuStart_Time" locale="en"></b-form-timepicker> -->
-                </b-col>
-              </b-row>
-            </b-col>
-            <b-col md="6" class="end-time-regin mb-3 text-left">
-              <b>END</b>
-              <b-row no-gutters>
-                <b-col lg="4">
-                  <b-input v-model="condition.QuEnd" size="sm" class="mb-2" type="date"></b-input>
-                  <!-- <b-form-datepicker id="end-datepicker" v-model="condition.QuEnd" class="mb-2"></b-form-datepicker> -->
-                </b-col>
-                <b-col lg="4">
-                  <b-input v-model="condition.QuEnd_Time" size="sm" locale="en" type="time"></b-input>
-                  <!-- <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker> -->
-                </b-col>
-                <b-col lg="4" class="pl-2">
-                  <b-button-group>
-                    <b-button
-                      class="query-button"
-                      variant="primary"
-                      size="sm"
-                      @click="QueryBtnClickHandle"
-                    >查詢</b-button>
-                    <b-button
-                      class="query-button"
-                      variant="info"
-                      size="sm"
-                      @click="ShowRealTimeHandle"
-                    >即時數據</b-button>
-                  </b-button-group>
-                </b-col>
-              </b-row>
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col lg="3" class="text-right pr-4">
-          <b-icon-filter
-            scale="2"
-            v-b-toggle.filter-sidebar
-            variant="info"
-            v-b-tooltip.hover
-            title="過濾器"
-          ></b-icon-filter>
-        </b-col>
-      </b-row>
+  <div class="trend-charts">
+    <!-- {{$route.params.eqid}} - {{$route.params.field}} -->
+    <b-row class="mt-2">
+      <b-col lg="9">
+        <b-row no-gutters>
+          <b-col md="4" class="stard-time-regin mb-3 text-left">
+            <b>START</b>
+            <b-row no-gutters>
+              <b-col lg="6">
+                <b-input v-model="condition.QuStart" size="sm" class="mb-2" type="date"></b-input>
+                <!-- <b-form-datepicker id="start-datepicker" v-model="condition.QuStart" class="mb-2"></b-form-datepicker> -->
+              </b-col>
+              <b-col lg="6">
+                <b-input v-model="condition.QuStart_Time" size="sm" locale="en" type="time"></b-input>
+                <!-- <b-form-timepicker v-model="condition.QuStart_Time" locale="en"></b-form-timepicker> -->
+              </b-col>
+            </b-row>
+          </b-col>
+          <b-col md="6" class="end-time-regin mb-3 text-left">
+            <b>END</b>
+            <b-row no-gutters>
+              <b-col lg="4">
+                <b-input v-model="condition.QuEnd" size="sm" class="mb-2" type="date"></b-input>
+                <!-- <b-form-datepicker id="end-datepicker" v-model="condition.QuEnd" class="mb-2"></b-form-datepicker> -->
+              </b-col>
+              <b-col lg="4">
+                <b-input v-model="condition.QuEnd_Time" size="sm" locale="en" type="time"></b-input>
+                <!-- <b-form-timepicker v-model="condition.QuEnd_Time" locale="en"></b-form-timepicker> -->
+              </b-col>
+              <b-col lg="4" class="pl-2">
+                <b-button-group>
+                  <b-button
+                    class="query-button"
+                    variant="primary"
+                    size="sm"
+                    @click="QueryBtnClickHandle"
+                  >查詢</b-button>
+                  <b-button
+                    class="query-button"
+                    variant="info"
+                    size="sm"
+                    @click="ShowRealTimeHandle"
+                  >即時數據</b-button>
+                </b-button-group>
+              </b-col>
+            </b-row>
+          </b-col>
+        </b-row>
+      </b-col>
+      <b-col lg="3" class="text-right pr-4">
+        <b-icon-filter
+          scale="2"
+          v-b-toggle.filter-sidebar
+          variant="info"
+          v-b-tooltip.hover
+          title="過濾器"
+        ></b-icon-filter>
+      </b-col>
+    </b-row>
 
-      <b-row no-gutters>
-        <b-col lg="2">
-          <b-input size="sm" placeholder="關鍵字查詢" v-model="keywordsInput"></b-input>
-        </b-col>
-        <b-col cols="3" class="text-left">
-          <b-button
-            squared
-            class="query-button"
-            size="sm"
-            variant="primary"
-            @click="KeyWordQueryHandle"
-          >查詢</b-button>
-        </b-col>
-      </b-row>
-      <el-divider></el-divider>
-      <!--圖表區-->
-      <div id="charts-container">
-        <div
-          class="text-left"
-          v-for="eqid in AllEqidList"
-          :key="eqid"
-          v-show="filter.robotLs.includes(eqid)"
-        >
-          <b-button squared class="ml-1">{{eqid}}</b-button>
-          <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
-            <b-col
-              v-for="field in AllFieldList"
-              :key="field"
-              v-show="filter.typeLs.includes(field)"
-              class="mb-1 text-center"
-              lg
-            >
-              <sio-chart-vue
-                :ref="`sio-chart-${eqid}${field}`"
-                :id="`scv-${eqid}${field}`"
-                :eqid="eqid"
-                :field="field"
-                :oocThresHold="OOCThresHoldValue(eqid,field)"
-                :oosThresHold="OOSThresHoldValue(eqid,field)"
-                :showQueryData="!isShowRealTimeData"
-              ></sio-chart-vue>
-            </b-col>
-          </b-row>
-          <el-divider></el-divider>
-        </div>
-        <!-- 
+    <b-row no-gutters>
+      <b-col lg="2">
+        <b-input size="sm" placeholder="關鍵字查詢" v-model="keywordsInput"></b-input>
+      </b-col>
+      <b-col cols="3" class="text-left">
+        <b-button
+          squared
+          class="query-button"
+          size="sm"
+          variant="primary"
+          @click="KeyWordQueryHandle"
+        >查詢</b-button>
+      </b-col>
+    </b-row>
+    <el-divider></el-divider>
+    <!--圖表區-->
+    <div id="charts-container">
+      <div
+        class="text-left"
+        v-for="eqid in AllEqidList"
+        :key="eqid"
+        v-show="filter.robotLs.includes(eqid)"
+      >
+        <b-button squared class="ml-1">{{eqid}}</b-button>
+        <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
+          <b-col
+            v-for="field in AllFieldList"
+            :key="field"
+            v-show="filter.typeLs.includes(field)"
+            class="mb-1 text-center"
+            lg
+          >
+            <sio-chart-vue
+              :ref="`sio-chart-${eqid}${field}`"
+              :id="`scv-${eqid}${field}`"
+              :eqid="eqid"
+              :field="field"
+              :oocThresHold="OOCThresHoldValue(eqid,field)"
+              :oosThresHold="OOSThresHoldValue(eqid,field)"
+              :showQueryData="!isShowRealTimeData"
+            ></sio-chart-vue>
+          </b-col>
+        </b-row>
+        <el-divider></el-divider>
+      </div>
+      <!-- 
         <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
           <b-button squared class="ml-1">{{eqid}}</b-button>
           <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
@@ -122,18 +121,17 @@
             </b-col>
           </b-row>
           <el-divider></el-divider>
-        </div>-->
-      </div>
-      <b-sidebar id="filter-sidebar" right backdrop>
-        <filter-vue
-          ref="filter"
-          @robotSelectedOnchange="RobotLsOnchange"
-          @sensorTypeSelectedOnchange="TypeLsOnchange"
-          @statusSelectedOnchange="RobotLsOnchange"
-        ></filter-vue>
-      </b-sidebar>
+      </div>-->
     </div>
-  </transition>
+    <b-sidebar id="filter-sidebar" right backdrop>
+      <filter-vue
+        ref="filter"
+        @robotSelectedOnchange="RobotLsOnchange"
+        @sensorTypeSelectedOnchange="TypeLsOnchange"
+        @statusSelectedOnchange="RobotLsOnchange"
+      ></filter-vue>
+    </b-sidebar>
+  </div>
 </template>
 
 <script>

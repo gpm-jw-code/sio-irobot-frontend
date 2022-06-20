@@ -11,28 +11,33 @@ var routes = [
     path: '/',
     name: '看板模式',
     component: Dashboard,
-    showInSideBar:true
+    showInSideBar: true,
   },
   {
     path: '/trend-charts',
     name: '趨勢圖',
     component: TrendCharts,
-    showInSideBar:true,
+    showInSideBar: true,
   },
   {
-    path: '/login/:from', 
+    path: '/login/:from',
     name: 'Login',
     component: LoginPage,
-    showInSideBar:false
-  },{
-    path:'/admin',
+    showInSideBar: false,
+  },
+  {
+    path: '/admin',
     name: 'Admin',
-    component:AdminPage
-    }
+    component: AdminPage,
+  },
+  {
+    path: '*',
+    redirect: '/',
+  },
 ]
 
 const router = new VueRouter({
-  routes
+  routes,
 })
 
 export default router

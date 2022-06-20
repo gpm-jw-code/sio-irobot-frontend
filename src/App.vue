@@ -4,7 +4,11 @@
     <ScrollToTopButton></ScrollToTopButton>
     <div class="mt-5">
       <keep-alive>
-        <router-view />
+        <router-view v-slot="{Component}">
+          <transition name="fade">
+            <component :is="Component"></component>
+          </transition>
+        </router-view>
       </keep-alive>
     </div>
   </div>
@@ -14,6 +18,7 @@
 <script>
 import Nav from "./components/Nav/Nav.vue";
 import ScrollToTopButton from "./components/ScrollToTop/ScrollTopButton.vue";
+import { GetUIStartupConfig } from "./web-api/Backend/UIAPI.js";
 export default {
   components: { Nav, ScrollToTopButton },
   data() {
