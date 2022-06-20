@@ -29,7 +29,7 @@
         ></b-avatar>
         <div v-else>
           <el-popover placement="top-start" :title="userInfo.userName" width="200" trigger="hover">
-            <div>LEVEL : {{userInfo.level}}</div>
+            <div>LEVEL : {{userInfo.level + (userInfo.level==3? " (Admin)":"")}}</div>
             <div class="mt-5">
               <b-button block variant="danger" @click="LoginOutHandle">登出</b-button>
             </div>
@@ -56,17 +56,21 @@ export default {
       userInfo: {
         userName: 'visitor',
         level: 0
-      }
-
+      },
+      adminLogined: false,
     };
   },
   methods: {
 
     CreateSideBar() {
+      this.sibarItems = [];
       console.log(this.$router.options.routes.length);
       for (let index = 0; index < this.$router.options.routes.length; index++) {
         const route = this.$router.options.routes[index];
-        if (route.showInSideBar)
+
+        if (route.name == 'Admin' && this.adminLogined)
+          this.sibarItems.push(route);
+        else if (route.showInSideBar)
           this.sibarItems.push(route);
       }
 
@@ -76,7 +80,6 @@ export default {
       this.$router.push(`/login/${this.$route.name}`);
     },
     async LoginOutHandle() {
-
       var isOk = await this.ShowLogoutConfirmMsgBox();
       if (!isOk) return;
       this.$userInfo.logout();
@@ -85,7 +88,8 @@ export default {
         variant: "info",
         autoHideDelay: 3000,
         appendToast: false
-      })
+      }),
+        this.HideAdminItemOfSideBar(); //無論如何都隱藏Side bar 的 admin 項目
     },
     async ShowLogoutConfirmMsgBox() {
       return await this.$bvModal.msgBoxConfirm('確定要登出?', {
@@ -113,6 +117,14 @@ export default {
         autoHideDelay: 3000,
         appendToast: false
       })
+    },
+    ShowAdminItemOfSideBar() {
+      this.adminLogined = true;
+      this.CreateSideBar();
+    },
+    HideAdminItemOfSideBar() {
+      this.adminLogined = false;
+      this.CreateSideBar();
     }
   },
   mounted() {
@@ -121,12 +133,14 @@ export default {
     window.addEventListener("scroll", () => {
       this.nav_style = window.scrollY != 0 ? "light" : "dark";
     });
+    this.$bus.$on("admin-login", () => this.ShowAdminItemOfSideBar())
   },
   watch: {
     $userInfo: {
       handler: function (userInfo) {
         this.userInfo = userInfo;
         if (this.userInfo.login) {
+          console.log(this.$router);
           this.ShowLoginTaost();
         }
       },

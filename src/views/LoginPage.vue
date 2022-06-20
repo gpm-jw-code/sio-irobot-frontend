@@ -8,7 +8,7 @@
             v-model="form.userName"
             class="text-center"
             placeholder="USER NAME"
-            aria-required
+            title="?"
           ></b-form-input>
           <b-form-input
             v-model="form.password"
@@ -16,9 +16,17 @@
             placeholder="PASSWORD"
             type="password"
           ></b-form-input>
-          <b-form-checkbox></b-form-checkbox>
-          <b-button class="mt-3" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
+          <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
+          <b-button class="mt-1" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
           <b-button class block squared @click="LoginHandle(true)">取消</b-button>
+          <b-row>
+            <b-col>
+              <b-form-checkbox>儲存登入資訊</b-form-checkbox>
+            </b-col>
+            <b-col class="text-right mr-1">
+              <span class="regist" size="small">註冊</span>
+            </b-col>
+          </b-row>
         </b-form>
       </div>
     </div>
@@ -26,17 +34,16 @@
 </template>
 
 <script>
-// import { Login } from '../web-api/Distribution_Host'
+import { Login } from '../web-api/backend'
 export default {
-  //import引入的组件需要注入到对象中才能使用
   components: {},
   data() {
-    //这里存放数据
     return {
       form: {
         userName: '',
         password: ''
-      }
+      },
+      loginResult: {}
 
     };
   },
@@ -51,17 +58,21 @@ export default {
         this.$router.push({ name: this.$route.params.from });
         return;
       }
-      var userInfo = {
-        login: true,
-        level: 2,
-        userName: this.form.userName
-      }
-      var success = true;
-      if (success) {
+
+      this.loginResult = await Login(this.form.userName, this.form.password);
+      if (this.loginResult.success) {
+        var userInfo = {
+          login: true,
+          level: this.loginResult.level,
+          userName: this.form.userName
+        }
         this.$userInfo.login = true;
-        this.$userInfo.level = 2;
+        this.$userInfo.level = userInfo.level;
         this.$userInfo.userName = this.form.userName;
         this.$router.push({ name: this.$route.params.from, params: userInfo });
+
+        if (userInfo.level == 3) //Admin login
+          this.$bus.$emit("admin-login", "^_^");
       }
 
     }
@@ -80,7 +91,7 @@ export default {
   activated() { }, //如果页面有keep-alive缓存功能，这个函数会触发
 }
 </script>
-<style>
+<style >
 .loginPage {
   top: 0;
   position: absolute;
@@ -103,5 +114,14 @@ export default {
   width: 400px;
   margin: 0 auto;
   border-radius: 8px;
+}
+
+.login-fail {
+  color: red;
+}
+
+.regist {
+  cursor: pointer;
+  color: grey;
 }
 </style>

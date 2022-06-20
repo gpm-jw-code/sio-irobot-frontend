@@ -3,9 +3,10 @@ import VueRouter from 'vue-router'
 import Dashboard from '../views/Dashboard'
 import TrendCharts from '../views/TrendCharts'
 import LoginPage from '../views/LoginPage'
+import AdminPage from '../views/AdminPage.vue'
 Vue.use(VueRouter)
 
-const routes = [
+var routes = [
   {
     path: '/',
     name: '看板模式',
@@ -23,7 +24,11 @@ const routes = [
     name: 'Login',
     component: LoginPage,
     showInSideBar:false
-  }
+  },{
+    path:'/admin',
+    name: 'Admin',
+    component:AdminPage
+    }
 ]
 
 const router = new VueRouter({

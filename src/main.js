@@ -14,7 +14,6 @@ import {userInfo,dataInfo,caches} from './state'
 import { Chart } from 'chart.js';
 import VueObserveVisibility from 'vue-observe-visibility';
 import Bus from './bus'
-import './web-api/Backend'
 
 Vue.use(VueObserveVisibility);
 
