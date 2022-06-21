@@ -16,7 +16,7 @@ var routes = [
   },
   {
     path: '/trend-charts',
-    name: '趨勢圖',
+    name: '趨勢圖與查詢',
     component: TrendCharts,
     showInSideBar: true,
   },
@@ -35,6 +35,11 @@ var routes = [
         path: 'user',
         name: '用戶管理',
         component: () => import('../components/Admin/UserManager.vue'),
+      },
+      {
+        path: 'network',
+        name: '網路參數設定',
+        component: () => import('../components/Admin/NetworkConfigs.vue'),
       },
     ],
   },

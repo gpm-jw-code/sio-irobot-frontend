@@ -5,18 +5,21 @@
         <b-icon-menu-button></b-icon-menu-button>
         {{ $configs.navTitle }}
       </b-navbar-brand>
-      <b-sidebar id="sidebar" aria-labelledby="sidebar-title" no-header backdrop>
+      <b-sidebar id="sidebar" aria-labelledby="sidebar-title" no-header backdrop bg-variant="dark">
         <div id="sidebar-title">
           <h4>{{$configs.navTitle}}</h4>
         </div>
         <div id="sibar-container">
           <b-row v-for="route in sibarItems" :key="route.path">
-            <b-button variant="light" block :to="route.path">{{route.name}}</b-button>
+            <b-button class="p-4" variant="dark" block :to="route.path">{{route.name}}</b-button>
           </b-row>
         </div>
       </b-sidebar>
       <b-navbar-nav class="text-right">
-        <b-button :variant="nav_style">{{userInfo.userName}}</b-button>
+        <b-button :variant="nav_style" size="lg">{{$route.name}}</b-button>
+      </b-navbar-nav>
+      <b-navbar-nav class="text-right">
+        <b-button :variant="nav_style" size="sm">{{userInfo.userName}}</b-button>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-avatar
@@ -101,16 +104,15 @@ export default {
         appendToast: false
       });
 
+      console.info(this.$router);
       this.HideAdminItemOfSideBar(); //無論如何都隱藏Side bar 的 admin 項目
-      if (this.$router.history.current.path == "/admin") { //如果在Admin頁面則跳轉到主頁
+      if (this.$router.history.current.path.includes("/admin")) { //如果在Admin頁面則跳轉到主頁
         this.$router.push("/");
       }
     },
     async ShowLogoutConfirmMsgBox() {
       return await this.$bvModal.msgBoxConfirm('確定要登出?', {
         title: 'Please Confirm',
-        // size: 'sm',
-        // buttonSize: 'sm',
         okVariant: 'primary',
         okTitle: 'YES',
         cancelTitle: 'NO',
@@ -177,9 +179,9 @@ export default {
   width: 100%;
 }
 #sidebar-title {
-  background-color: black;
+  background-color: rgb(35, 37, 39);
   color: white;
-  padding: 5px;
+  padding: 15px;
 }
 #sibar-container {
   background-color: blue;

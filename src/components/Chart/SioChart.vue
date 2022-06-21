@@ -3,7 +3,7 @@
     <b-row no-gutters class="text-right">
       <!-- <b-col cols="10 pl-1" class="text-left">{{eqid}}-{{field}}</b-col> -->
       <b-col cols="10" class="text-left">
-        <b-button squared variant="light">{{field}}</b-button>
+        <b-button squared variant="dark">{{field}}</b-button>
       </b-col>
       <b-col cols="1">
         <b-button
@@ -137,8 +137,8 @@ export default {
               enabled: false,
             },
           },
-          background: 'rgb(255,255,255)',
-          foreColor: 'black',
+          background: 'rgb(31,31,31)',
+          foreColor: 'white',
           toolbar: {
             show: false,
           }

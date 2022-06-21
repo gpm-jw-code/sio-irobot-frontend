@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <div class="robot-idms-switch-container text-center pt-3 pl-1">
+    <div class="robot-idms-switch-container text-center pt-4 pl-1">
       <b-button
         pill
         class="mr-2 type-switch-btn"
@@ -22,7 +22,7 @@
       v-loading="controlCenterWSErr"
       element-loading-text="網路異常"
     >
-      <div v-if="true" class="text-left pt-3 pb-2" @click="CloseFootPanel">
+      <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
         <b-row>
           <b-col>
             <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
@@ -61,10 +61,10 @@
       <transition name="el-zoom-in-bottom">
         <div v-show="showFootPanel" class="foot-panel">
           <b-row>
-            <b-col cols="2" class="text-left pl-2">
+            <b-col cols="2" class="text-left pl-3">
               <b-button-group>
-                <b-button variant="dark" pill>{{selectedCell.eqid}}</b-button>
-                <b-button variant="light" pill>{{selectedCell.column.label}}</b-button>
+                <b-button variant="dark" squared>{{selectedCell.eqid}}</b-button>
+                <b-button variant="light" squared>{{selectedCell.column.label}}</b-button>
               </b-button-group>
             </b-col>
             <b-col cols="3" class="text-left threshold-region-foot">
@@ -163,8 +163,8 @@ export default {
       statusStyle: {
         normal: {
           // backgroundColor: 'rgb(71, 124, 71)',
-          backgroundColor: 'white',
-          color: 'black'
+          backgroundColor: 'black',
+          color: 'white'
         },
         out_of_spec: {
           backgroundColor: '#d51919', //藍色
@@ -177,7 +177,7 @@ export default {
       },
       selectStyle: {
         selected: {
-          border: "4px solid black",
+          border: "4px solid gold",
           padding: "6px"
         },
         unselected: {
@@ -390,6 +390,7 @@ export default {
         this.$bvModal.msgBoxOk("權限不足!\r\n若要進行此操作，請先進行登入。", {
           title: "NO PERMISSION"
         }).then(() => {
+          this.$router.push(`/login/${this.$route.name}`);
         })
         return;
       }
@@ -470,17 +471,17 @@ export default {
 }
 </script>
 
-<style>
+<style >
 .dashboard {
-  background-color: white;
-  color: black;
 }
 
 .foot-panel {
   width: 100%;
   bottom: 0;
-  height: 50px;
-  border: 1px solid rgb(52, 58, 64);
+  height: 58px;
+  border: 1px solid rgb(101, 102, 102);
+  padding-top: 8px;
+  box-shadow: 12px 12px 32px 12px black;
   /* border-top-left-radius: 10px; */
 }
 .threshold-info-panel,
@@ -505,11 +506,20 @@ export default {
   border: 2px solid rgb(17, 17, 17);
 }
 
+.vgt-table thead th {
+  color: white;
+  vertical-align: bottom;
+  border-bottom: 1px solid #004cff;
+  padding-right: 1.5em;
+  background: grey;
+}
+
 table.vgt-table td {
   padding: 0;
   vertical-align: top;
+  background-color: black;
   border-bottom: 1px solid #dcdfe6;
-  color: #606266;
+  color: #ffffff;
 }
 .my-modal {
   height: max-content;

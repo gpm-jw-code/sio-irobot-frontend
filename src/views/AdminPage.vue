@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-page">
+  <div class="admin-page pt-3">
     <h1>Admin Page</h1>
     <router-view></router-view>
   </div>

@@ -117,9 +117,10 @@ export default {
 
   }
 }
-</script>
-<style >
+</script >
+<style scoped>
 .display-item-selector {
-  background-color: rgb(209, 209, 209);
+  background-color: rgb(0, 0, 0);
+  margin: 0 1px;
 }
 </style>

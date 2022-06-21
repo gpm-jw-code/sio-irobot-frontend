@@ -82,8 +82,8 @@
         :key="eqid"
         v-show="filter.robotLs.includes(eqid)"
       >
-        <b-button squared class="ml-1">{{eqid}}</b-button>
-        <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
+        <b-button squared block class="ml-1" variant="light">{{eqid}}</b-button>
+        <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
           <b-col
             v-for="field in AllFieldList"
             :key="field"
@@ -304,6 +304,11 @@ export default {
         this.filter.robotLs = this.AllEqidList;
       } else
         this.filter.robotLs = eqidShow.concat();
+    },
+
+    EqBtnClick(eqid) {
+      var ele = this.$refs[eqid + "chart-row"][0];
+      ele.style.visibility = "hidden";
     }
   },
   watch: {
@@ -356,8 +361,9 @@ export default {
 <style>
 .trend-charts {
   padding: 10px;
-  background-color: white;
-  color: rgb(36, 36, 36);
+  height: 100%;
+  /* background-color: white;
+  color: rgb(36, 36, 36); */
 }
 
 .query-button {

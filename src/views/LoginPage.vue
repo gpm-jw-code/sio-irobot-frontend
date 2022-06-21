@@ -6,7 +6,7 @@
         <b-form>
           <b-form-input
             v-model="form.userName"
-            class="text-center"
+            class="text-center input-item"
             placeholder="USER NAME"
             title="?"
           ></b-form-input>
@@ -91,7 +91,7 @@ export default {
   activated() { }, //如果页面有keep-alive缓存功能，这个函数会触发
 }
 </script>
-<style >
+<style  scoped>
 .loginPage {
   top: 0;
   position: absolute;
@@ -108,7 +108,7 @@ export default {
 .login-form {
   position: relative;
   top: 230px;
-  background-color: rgb(255, 255, 255);
+  background-color: rgba(255, 255, 255, 0.2);
   color: black;
   opacity: 0.8;
   width: 400px;
@@ -122,6 +122,10 @@ export default {
 
 .regist {
   cursor: pointer;
-  color: grey;
+  color: rgb(2, 2, 2);
+}
+
+.input-item {
+  background-color: red;
 }
 </style>
