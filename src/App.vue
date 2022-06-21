@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <Nav></Nav>
     <ScrollToTopButton></ScrollToTopButton>
+
+    <Nav></Nav>
     <div class="mt-5">
       <keep-alive>
         <router-view v-slot="{Component}">
@@ -27,7 +28,7 @@ export default {
 };
 </script>
 
-<style>
+<style >
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -36,6 +37,15 @@ export default {
   background-color: #2c3e50;
   color: white;
   height: 100%;
+  width: 100%;
+  position: fixed;
+  overflow-y: scroll;
+  z-index: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
 .selector-for-some-widget {
