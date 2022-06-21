@@ -2,9 +2,8 @@
   <transition name="el-fade-in-linear">
     <div class="loginPage">
       <div class="login-form pt-3">
-        <h1 class="mb-3 pb-3">LOGIN</h1>
-        <b-form>
-          <b-form-input
+        <h1 class="mb-3 pb-3 text-white">LOGIN</h1>
+        <!-- <b-form-input
             v-model="form.userName"
             class="text-center input-item"
             placeholder="USER NAME"
@@ -15,19 +14,25 @@
             class="text-center"
             placeholder="PASSWORD"
             type="password"
-          ></b-form-input>
-          <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
-          <b-button class="mt-1" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
-          <b-button class block squared @click="LoginHandle(true)">取消</b-button>
-          <b-row>
-            <b-col>
-              <b-form-checkbox>儲存登入資訊</b-form-checkbox>
-            </b-col>
-            <b-col class="text-right mr-1">
-              <span class="regist" size="small">註冊</span>
-            </b-col>
-          </b-row>
-        </b-form>
+        ></b-form-input>-->
+        <div>
+          <input class="login-input" type="text" placeholder="User Name" v-model="form.userName" />
+        </div>
+        <div>
+          <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
+        </div>
+        <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
+        <b-button class="mt-1" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
+        <b-button class block squared @click="LoginHandle(true)">取消</b-button>
+
+        <b-row class="mt-4">
+          <b-col>
+            <b-form-checkbox>儲存登入資訊</b-form-checkbox>
+          </b-col>
+          <b-col class="text-right mr-1">
+            <span class="regist" size="small">註冊</span>
+          </b-col>
+        </b-row>
       </div>
     </div>
   </transition>
@@ -94,7 +99,7 @@ export default {
 <style  scoped>
 .loginPage {
   top: 0;
-  position: absolute;
+  position: fixed;
   height: 100vh;
   width: 100vw;
   background-color: rgb(199, 199, 199);
@@ -110,7 +115,6 @@ export default {
   top: 230px;
   background-color: rgba(255, 255, 255, 0.2);
   color: black;
-  opacity: 0.8;
   width: 400px;
   margin: 0 auto;
   border-radius: 8px;
@@ -127,5 +131,33 @@ export default {
 
 .input-item {
   background-color: red;
+}
+
+.login-input {
+  background-color: transparent;
+  width: 100%;
+  text-align: center;
+  color: white;
+  border: none;
+  margin-bottom: 10px;
+  height: 50px;
+}
+
+input[type="text"],
+textarea {
+  background-color: transparent;
+  color: white;
+}
+
+input[type="text"],
+input[type="password"],
+textarea:-webkit-autofill {
+  background-color: transparent !important;
+}
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: white;
+  opacity: 1; /* Firefox */
 }
 </style>
