@@ -7,7 +7,17 @@
       </b-navbar-brand>
       <b-sidebar id="sidebar" aria-labelledby="sidebar-title" no-header backdrop bg-variant="dark">
         <div id="sidebar-title">
-          <h4>{{$configs.navTitle}}</h4>
+          <b-row>
+            <b-col cols="1">
+              <button
+                v-b-toggle.sidebar
+                style="background-color:transparent;color:white;border:none;font-size:25px"
+              >X</button>
+            </b-col>
+            <b-col class="pt-1">
+              <h4>{{$configs.navTitle}}</h4>
+            </b-col>
+          </b-row>
         </div>
         <div id="sibar-container">
           <b-row v-for="route in sibarItems" :key="route.path">
