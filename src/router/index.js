@@ -4,6 +4,7 @@ import Dashboard from '../views/Dashboard'
 import TrendCharts from '../views/TrendCharts'
 import LoginPage from '../views/LoginPage'
 import AdminPage from '../views/AdminPage.vue'
+
 Vue.use(VueRouter)
 
 var routes = [
@@ -29,6 +30,13 @@ var routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminPage,
+    children: [
+      {
+        path: 'user',
+        name: '用戶管理',
+        component: () => import('../components/Admin/UserManager.vue'),
+      },
+    ],
   },
   {
     path: '*',

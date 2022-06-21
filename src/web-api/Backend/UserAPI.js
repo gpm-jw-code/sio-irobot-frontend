@@ -40,3 +40,46 @@ export async function Regist(accountName, userName, password) {
     AccountName: accountName,
   })
 }
+
+/**
+ * 取得用戶列表
+ * @returns
+ */
+export async function GetAllUserList() {
+  var ret = await apiAxios.get('api/User/').catch((e) => {
+    return {
+      data: 'error',
+    }
+  })
+  return ret.data
+}
+
+export async function UpdateUsersInfo(userList) {
+  var ret = await apiAxios
+    .post('api/User/UpdateUserList', userList)
+    .catch((e) => {
+      return {
+        data: {
+          success: false,
+          message: e.message,
+        },
+      }
+    })
+
+  return ret.data
+}
+
+export async function ChangePassword(changeInfo) {
+  var ret = await apiAxios
+    .post('api/User/ChangePassword', changeInfo)
+    .catch((e) => {
+      return {
+        data: {
+          success: false,
+          message: e.message,
+        },
+      }
+    })
+
+  return ret.data
+}

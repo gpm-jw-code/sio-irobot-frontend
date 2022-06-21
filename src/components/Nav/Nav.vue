@@ -31,6 +31,7 @@
           <el-popover placement="top-start" :title="userInfo.userName" width="200" trigger="hover">
             <div>LEVEL : {{userInfo.level + (userInfo.level==3? " (Admin)":"")}}</div>
             <div class="mt-5">
+              <b-button block variant="light" @click="ChangePasswordHandle">變更密碼</b-button>
               <b-button block variant="danger" @click="LoginOutHandle">登出</b-button>
             </div>
             <b-avatar
@@ -44,11 +45,20 @@
         </div>
       </b-navbar-nav>
     </b-navbar>
+    <ChangePasswordDialog
+      :show="showChangePasswordDialog"
+      :userName="userInfo.userName"
+      @hide="ChangePWDialogHideHandle"
+    ></ChangePasswordDialog>
   </div>
 </template>
 
 <script>
+import ChangePasswordDialog from '../User/ChangePasswordDialog.vue'
 export default {
+  components: {
+    ChangePasswordDialog,
+  },
   data() {
     return {
       nav_style: "dark",
@@ -58,6 +68,7 @@ export default {
         level: 0
       },
       adminLogined: false,
+      showChangePasswordDialog: false
     };
   },
   methods: {
@@ -88,8 +99,12 @@ export default {
         variant: "info",
         autoHideDelay: 3000,
         appendToast: false
-      }),
-        this.HideAdminItemOfSideBar(); //無論如何都隱藏Side bar 的 admin 項目
+      });
+
+      this.HideAdminItemOfSideBar(); //無論如何都隱藏Side bar 的 admin 項目
+      if (this.$router.history.current.path == "/admin") { //如果在Admin頁面則跳轉到主頁
+        this.$router.push("/");
+      }
     },
     async ShowLogoutConfirmMsgBox() {
       return await this.$bvModal.msgBoxConfirm('確定要登出?', {
@@ -125,6 +140,12 @@ export default {
     HideAdminItemOfSideBar() {
       this.adminLogined = false;
       this.CreateSideBar();
+    },
+    ChangePasswordHandle() {
+      this.showChangePasswordDialog = true;
+    },
+    ChangePWDialogHideHandle() {
+      this.showChangePasswordDialog = false;
     }
   },
   mounted() {
