@@ -14,7 +14,7 @@ export async function ResetAlarm(props = { eqid: 'string', field: 'string' }) {
       `ws://localhost:8090/GPM/AlarmReset/?edgeName=SIOIROBOT&eqid=${props.eqid}&field=${props.field}`,
     )
     ws.onopen = () => {
-      console.log('ws connected')
+      console.log('ws Alarm connected')
     }
     ws.onmessage = (ret) => {
       console.log(ret.data)
@@ -33,7 +33,7 @@ export async function GetEQIDList(edgeName = 'SIOIROBOT') {
     )
 
     ws.onopen = () => {
-      console.log('ws connected')
+      console.log('ws IDList connected')
     }
     ws.onmessage = (ret) => {
       ws.close()
@@ -52,7 +52,7 @@ export async function GetFieldList(edgeName = 'SIOIROBOT') {
       `ws://localhost:8090/GPM/Query/?Action=GetSensorTypeListOfEdge&EdgeName=${edgeName}`,
     )
     ws.onopen = () => {
-      console.log('ws connected')
+      console.log('ws FieldList connected')
     }
     ws.onmessage = (ret) => {
       ws.close()
@@ -74,6 +74,21 @@ export async function SensorRawDataWsConnect() {
     }
     ws.onerror = (err) => {
       resolve('network_error')
+    }
+  })
+}
+
+export async function GroupSettingWSConnect() {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(
+      'ws://localhost:8090/GPM/GroupSetting',
+    )
+    ws.onopen = () => {
+      console.log('GroupSetting ws connect')
+      resolve(ws)
+    }
+    ws.onerror = (err) => {
+      resolve('[GroupSetting] network_error')
     }
   })
 }

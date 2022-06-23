@@ -16,6 +16,7 @@
     </div>
     <el-divider></el-divider>
     <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
+    <DistributeTable></DistributeTable>
     <div
       v-show="!idms_dt_show"
       id="robot-data-table"
@@ -126,15 +127,17 @@ import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue'
 import { VueGoodTable } from 'vue-good-table';
 import { ResetAlarm, GetEQIDList, GetFieldList, SensorRawDataWsConnect } from '../web-api/Distribution_Host'
 import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
+import DistributeTable from '../components/Dashboard/DistributeDataTable.vue'
 export default {
   components: {
-    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable
+    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable,DistributeTable
   },
   data() {
     return {
       controlCenterWSErr: true,
       idms_dt_show: false,
       websocket_sensorData: WebSocket,
+      ws_GroupInfo: WebSocket,
       newestRawDataObject: {},
       RawDataStorage: {},
       userInfo: {
@@ -210,7 +213,7 @@ export default {
     },
     async GenRobotDatas() {
       this.RobotDatas = [];
-      console.log(this.$dataInfo.fields);
+      // console.log(this.$dataInfo.fields);
       this.$dataInfo.eqidls.forEach(eqid => {
         var dataMap = {};
         dataMap['eqid'] = eqid;
@@ -337,8 +340,9 @@ export default {
       }
       this.$bus.$emit(sensorkey, obj);
     },
-
-
+    async HandleGroupSettingWS(e){
+      //var GroupInfo = JSON.parse(e.data);
+    },
     async HandleWSdata(e) {
 
       var data = JSON.parse(e.data);
@@ -361,8 +365,8 @@ export default {
 
       }
       else {
-        this.$dataInfo.eqidls = await GetEQIDList();
-        this.$dataInfo.fields = await GetFieldList();
+         //this.$dataInfo.eqidls = await GetEQIDList();
+        // this.$dataInfo.fields = await GetFieldList();
         this.CreateColumns();
         this.GenRobotDatas();
         this.GenStatusMap();
@@ -378,7 +382,7 @@ export default {
 
       this.controlCenterWSErr = false;
       console.log("ws instance rebuild", this.websocket_sensorData);
-      this.websocket_sensorData.onmessage = this.HandleWSdata;
+     // this.websocket_sensorData.onmessage = this.HandleWSdata;
       this.websocket_sensorData.onclose = () => {
         this.ReconnecWeSocket()
       };
@@ -437,8 +441,11 @@ export default {
     this.GenRobotDatas();
     this.GenStatusMap();
 
+    //this.ws_GroupInfo = await GroupSettingWSConnect();
+    //this.ws_GroupInfo.onmessage = this.HandleGroupSettingWS;
+
     this.websocket_sensorData = await SensorRawDataWsConnect();
-    this.websocket_sensorData.onmessage = this.HandleWSdata;
+    //this.websocket_sensorData.onmessage = this.HandleWSdata;
     this.websocket_sensorData.onclose = () => {
       this.ReconnecWeSocket()
     };
