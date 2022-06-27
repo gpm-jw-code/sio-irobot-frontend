@@ -16,7 +16,7 @@
     </div>
     <el-divider></el-divider>
     <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
-    <DistributeTable></DistributeTable>
+    <DistributeTable v-show="!idms_dt_show"></DistributeTable>
     <div
       v-show="!idms_dt_show"
       id="robot-data-table"
