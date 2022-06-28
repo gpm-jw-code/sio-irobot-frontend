@@ -88,7 +88,7 @@ export async function GroupSettingWSConnect() {
       resolve(ws)
     }
     ws.onerror = (err) => {
-      resolve('[GroupSetting] network_error')
+      resolve('network_error')
     }
   })
 }
@@ -108,10 +108,10 @@ export async function IDMSSensorRawDataWsConnect() {
 /**閥值設定 */
 export var ThresHoldSetting = {
   /**設定OOC閥值 */
-  SetOOC: async function (eqid = '', field = '', threshold = 0) {
+  SetOOC: async function (groupName='',rowName = '', field = '', threshold = 0) {
     return await new Promise(function (resolve, reject) {
       var ws = new WebSocket(
-        `ws://localhost:8090/GPM/ThresholdSetting/?edgeName=SIOIROBOT&eqid=${eqid}&field=${field}&type=OOC&value=${threshold}`,
+        `ws://localhost:8090/GPM/ThresholdSetting/?groupName=${groupName}&rowName=${rowName}&field=${field}&type=OOC&value=${threshold}`,
       )
       ws.onmessage = (ret) => resolve(ret.data)
       ws.onerror = (err) => reject(err)
@@ -119,10 +119,10 @@ export var ThresHoldSetting = {
   },
   /**設定OOS閥值
    */
-  SetOOS: async function (eqid = '', field = '', threshold = 0) {
+  SetOOS: async function (groupName='',rowName = '', field = '', threshold = 0) {
     return await new Promise(function (resolve, reject) {
       var ws = new WebSocket(
-        `ws://localhost:8090/GPM/ThresholdSetting/?edgeName=SIOIROBOT&eqid=${eqid}&field=${field}&type=OOS&value=${threshold}`,
+        `ws://localhost:8090/GPM/ThresholdSetting/?groupName=${groupName}&rowName=${rowName}&field=${field}&type=OOS&value=${threshold}`,
       )
       ws.onmessage = (ret) => resolve(ret.data)
       ws.onerror = (err) => reject(err)

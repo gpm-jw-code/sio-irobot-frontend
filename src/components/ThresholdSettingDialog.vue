@@ -29,7 +29,8 @@ export default {
             originVal: -1
           },
           sensor: {
-            eqid: "",
+            groupName:"",
+            rowName: "",
             field: ""
           },
 
@@ -62,9 +63,9 @@ export default {
     async SettingThres() {
       var result;
       if (this.options.settingFor.thresType == "OOS") {
-        result = await ThresHoldSetting.SetOOS(this.options.sensor.eqid, this.options.sensor.field, this.thresHoldValSetting);
+        result = await ThresHoldSetting.SetOOS(this.options.sensor.groupName,this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
       } else {
-        result = await ThresHoldSetting.SetOOC(this.options.sensor.eqid, this.options.sensor.field, this.thresHoldValSetting);
+        result = await ThresHoldSetting.SetOOC(this.options.sensor.groupName,this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
       }
       console.log(result);
       if (result == 'ok')
