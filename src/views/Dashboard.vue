@@ -15,7 +15,7 @@
       >振動訊號</b-button>
     </div>
     <el-divider></el-divider>
-    <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
+    <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show" :userInfo="userInfo"></IDMSDataTable>
     <DistributeTable v-show="!idms_dt_show"></DistributeTable>
     <div
       v-show="!idms_dt_show"
@@ -196,7 +196,6 @@ export default {
           eqid: "",
           field: ""
         },
-
       }
     }
   },

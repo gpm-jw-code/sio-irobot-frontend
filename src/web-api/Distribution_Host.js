@@ -8,10 +8,10 @@ export async function Login(user = { userName: '', password: '' }) {
 }
 
 /**Reset Alarm  */
-export async function ResetAlarm(props = { eqid: 'string', field: 'string' }) {
+export async function ResetAlarm(GroupName, RowName,DataName ) {
   return await new Promise(function (resolve, reject) {
     var ws = new WebSocket(
-      `ws://localhost:8090/GPM/AlarmReset/?edgeName=SIOIROBOT&eqid=${props.eqid}&field=${props.field}`,
+      `ws://localhost:8090/GPM/AlarmReset/?GroupName=${GroupName}&RowName=${RowName}&DataName=${DataName}`,
     )
     ws.onopen = () => {
       console.log('ws Alarm connected')
@@ -105,6 +105,15 @@ export async function IDMSSensorRawDataWsConnect() {
   })
 }
 
+export async function getThresholdSetting(GroupName,RowName,ColumnName) {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(
+      `ws://localhost:8090/GPM/GetThreshold/?groupName=${GroupName}&rowName=${RowName}&Data=${ColumnName}`,
+    )
+    ws.onmessage = (ret) => resolve(ret.data)
+    ws.onerror = (err) => reject(err)
+  })
+}
 /**閥值設定 */
 export var ThresHoldSetting = {
   /**設定OOC閥值 */

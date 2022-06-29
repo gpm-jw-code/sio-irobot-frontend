@@ -21,83 +21,105 @@
       @on-cell-click="onCellClick"
     >
       <template slot="table-row" slot-scope="props">
-        <div v-b-tooltip.hover title class="inner-val">
-          {{ props.formattedRow[props.column.field] }}
+        <div
+          v-b-tooltip.hover
+          title
+          v-bind:style="StatusMap[nowGroupName+props.formattedRow['RowName'] + props.column.field]"
+          class="inner-val"
+        >{{ props.formattedRow[props.column.field] }}
         </div>
       </template>
     </vue-good-table>
 
     <div class="footer" v-if="showFootPanel">
       <div class="footer-content">
-          <b-row>
-            <b-col cols="2" class="text-left pl-3">
-              <b-button-group>
-                <b-button variant="dark" squared>{{selectedCell.eqid}}</b-button>
-                <b-button variant="light" squared>{{selectedCell.column.label}}</b-button>
-              </b-button-group>
-            </b-col>
-            <b-col cols="3" class="text-left threshold-region-foot">
-              <b-row cols="2" no-gutters>
-                <b-col class="text-right pr-4">OOC閥值</b-col>
-                <b-col class="ooc-style">
-                  <span
-                    class="threval"
-                    @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
-                    v-b-tooltip.hover
-                    title="點一下進行設定"
-                  >{{selectOOCThresval}}</span>
-                </b-col>
-              </b-row>
-              <b-row cols="2" no-gutters>
-                <b-col class="text-right pr-4">OOS閥值</b-col>
-                <b-col class="oos-style">
-                  <span
-                    class="threval"
-                    @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
-                    v-b-tooltip.hover
-                    title="點一下進行設定"
-                  >{{selectOOSThresval}}</span>
-                </b-col>
-              </b-row>
-            </b-col>
-            <b-col>
-              <b-button
-                variant="light"
-                block
-                :disabled="(!Resetable||userInfo.level==0)"
-                @click="ResetAlarmHandle"
-              >
-                <span v-if="userInfo.level!=0">RESET ALARM</span>
-                <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
-              </b-button>
-            </b-col>
-            <b-col class="text-right">
-              <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
-            </b-col>
-          </b-row>
-        </div>
+        <b-row>
+          <b-col cols="2" class="text-left pl-3">
+            <b-button-group>
+              <b-button variant="dark" squared>{{
+                selectedCell.column
+              }}</b-button>
+              <b-button variant="light" squared>{{
+                selectedCell.rowName
+              }}</b-button>
+            </b-button-group>
+          </b-col>
+          <b-col cols="1"></b-col>
+          <b-col cols="2" class="text-left threshold-region-foot">
+            <b-row cols="2" no-gutters>
+              <b-col class="text-right pr-4">OOC閥值</b-col>
+              <b-col class="ooc-style">
+                <span
+                  class="threval"
+                  @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
+                  v-b-tooltip.hover
+                  title="點一下進行設定"
+                  >{{ selectOOCThresval }}</span
+                >
+              </b-col>
+            </b-row>
+              </b-col>
+          <b-col cols="2" class="text-left threshold-region-foot">
+            <b-row cols="2" no-gutters>
+              <b-col class="text-right pr-4">OOS閥值</b-col>
+              <b-col class="oos-style">
+                <span
+                  class="threval"
+                  @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
+                  v-b-tooltip.hover
+                  title="點一下進行設定"
+                  >{{ selectOOSThresval }}</span
+                >
+              </b-col>
+            </b-row>
+          </b-col>
+          <b-col>
+            <b-button
+              variant="light"
+              block
+              :disabled="!Resetable || this.$userInfo.level == 0"
+              @click="ResetAlarmHandle"
+            >
+              <span v-if="this.$userInfo.level != 0">RESET ALARM</span>
+              <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
+            </b-button>
+          </b-col>
+          <b-col class="text-right">
+            <b-button
+              variant="danger"
+              v-b-tooltip.hover
+              title="關閉(ESC)"
+              @click="CloseFootPanel"
+              >X</b-button
+            >
+          </b-col>
+        </b-row>
+      </div>
     </div>
-      <threshold-setting-dialog-vue
-        :show="thresSettingDialogShow"
-        :options="thresHoldSettingOptions"
-        @onSuccess="ThresHoldSetSuccessHandle"
-        @hide="thresSettingDialogShow=false"
-      ></threshold-setting-dialog-vue>
+    <threshold-setting-dialog-vue
+      :show="thresSettingDialogShow"
+      :options="thresHoldSettingOptions"
+      @onSuccess="ThresHoldSetSuccessHandle"
+      @hide="thresSettingDialogShow = false"
+    ></threshold-setting-dialog-vue>
   </div>
 </template>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.18/vue.min.js"></script>
 <script>
 import "vue-good-table/dist/vue-good-table.css";
-import ThresholdSettingDialogVue from '../ThresholdSettingDialog.vue';
+import ThresholdSettingDialogVue from "../ThresholdSettingDialog.vue";
 import { VueGoodTable } from "vue-good-table";
 import {
   GroupSettingWSConnect,
   SensorRawDataWsConnect,
+  getThresholdSetting,
+  ResetAlarm,
 } from "../../web-api/Distribution_Host";
 
 export default {
   components: {
-    VueGoodTable,ThresholdSettingDialogVue
+    VueGoodTable,
+    ThresholdSettingDialogVue,
   },
   props: {
     groupInfo: Object,
@@ -105,15 +127,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    userInfo: {
-      type: Object,
-      default: () => {
-        return {
-          userName: 'visitor',
-          level: 0
-        }
-      }
-      },
   },
   data() {
     return {
@@ -126,17 +139,52 @@ export default {
       nowGroupName: "",
       groupInfoWS: WebSocket,
       rawDataWS: WebSocket,
+      StatusMap:{},
 
-      showFootPanel:false,
+      showFootPanel: false,
       selectedCell: {
         rowName: "",
         column: "",
       },
-      selectedKey:'',
-      thresSettingDialogShow:false,
+      selectedKey: "",
+      thresSettingDialogShow: false,
       selectOOCThresval: -1,
       selectOOSThresval: -1,
-      Resetable:false,
+      Resetable: true,
+      thresHoldSettingOptions: {
+        settingFor: {
+          thresType: "OOS",
+          originVal: -1,
+        },
+        sensor: {
+          eqid: "",
+          field: "",
+        },
+      },
+      statusStyle: {
+        normal: {
+          // backgroundColor: 'rgb(71, 124, 71)',
+          backgroundColor: 'black',
+          color: 'white'
+        },
+        out_of_spec: {
+          backgroundColor: '#d51919', //紅色
+          color: 'white'
+        },
+        out_of_control: {
+          backgroundColor: '#a5b600', //屎黃色
+          color: 'white'
+        }
+      },
+      selectStyle: {
+        selected: {
+          border: "4px solid gold",
+          padding: "6px"
+        },
+        unselected: {
+          border: ""
+        }
+      },
       thresHoldSettingOptions: {
         settingFor: {
           thresType: "OOS",
@@ -149,59 +197,75 @@ export default {
       }
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    onCellClick(params) {
-      // console.log(params);
-      console.log(params);
-      if (params.column.field == 'RowName')
-        return;
-      //if (this.selectedKey != "")
-        //this.StatusMap[this.selectedKey][0] = this.selectStyle.unselected;
+    async onCellClick(params) {
+      if (params.column.field == "RowName") return;
       this.selectedCell.column = params.column.field;
       this.selectedCell.rowName = params.row.RowName;
 
-      this.selectedKey = this.selectedCell.rowName + this.selectedCell.rowName;
-      //this.StatusMap[this.selectedKey][0] = this.selectStyle.selected;
-      this.UpdateSelectedThresDisplay();
-      //this.renderKey = Date.now();
+      this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
+      await this.UpdateSelectedThresDisplay();
       this.showFootPanel = true;
-     // this.Resetable = this.StatusMap[this.selectedKey][1].backgroundColor != this.statusStyle.normal.backgroundColor;
     },
     ShowTresSettingDialog(type, oriVal) {
-      //console.log()
       this.thresHoldSettingOptions.settingFor.thresType = type;
       this.thresHoldSettingOptions.settingFor.originVal = oriVal;
-      this.thresHoldSettingOptions.sensor = { groupName: this.nowGroupName,rowName: this.selectedCell.rowName, field: this.selectedCell.column }
+      this.thresHoldSettingOptions.sensor = {
+        groupName: this.nowGroupName,
+        rowName: this.selectedCell.rowName,
+        field: this.selectedCell.column,
+      };
       this.thresSettingDialogShow = true;
-
     },
-     UpdateSelectedThresDisplay() {
-      // this.selectOOCThresval = thresMap[this.selectedCell.column + '_OOC'];
-      // this.selectOOSThresval = thresMap[this.selectedCell.column + '_OOS'];
+    async UpdateSelectedThresDisplay() {
+      var returnData = await getThresholdSetting(this.nowGroupName,this.selectedCell.rowName,this.selectedCell.column)
+      var ThresholdSetting = JSON.parse(returnData);
+      if(ThresholdSetting==null)
+      {
+        return;
+      }
+      
+       this.selectOOCThresval = ThresholdSetting['OOC'];
+       this.selectOOSThresval =  ThresholdSetting['OOS'];
     },
-    CloseFootPanel(){
+    CloseFootPanel() {
       this.showFootPanel = false;
     },
     async ResetAlarmHandle() {
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
       //TODO backend reset alarm
-      await ResetAlarm({
-        eqid: this.selectedCell.eqid,
-        field: this.selectedCell.column.field
-      });
+      await ResetAlarm(this.nowGroupName,this.selectedCell.rowName,this.selectedCell.column);
+      this.showFootPanel = false;
+    },
+    async ShowConfirmMsgBox() {
+      return await this.$bvModal.msgBoxConfirm(`確定要清除 ${this.selectedCell.eqid}-${this.selectedCell.column.label} 異常?`, {
+        title: '異常清除',
+        // size: 'sm',
+        // buttonSize: 'sm',
+        okVariant: 'primary',
+        okTitle: 'YES',
+        cancelTitle: 'NO',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+        .then(value => {
+          return value;
+        })
+        .catch(() => {
+          // An error occurred
+        })
     },
     ThresHoldSetSuccessHandle(val) {
       if (this.thresHoldSettingOptions.settingFor.thresType == "OOC")
         this.selectOOCThresval = val;
-      else
-        this.selectOOSThresval = val;
+      else this.selectOOSThresval = val;
     },
     async WebSocketConnect() {
-      this.groupInfoWS = 'network_error';
-      while (this.groupInfoWS == 'network_error') {
+      this.groupInfoWS = "network_error";
+      while (this.groupInfoWS == "network_error") {
         this.groupInfoWS = await GroupSettingWSConnect();
       }
       this.groupInfoWS.onmessage = (e) => this.GroupWsDataHandle(e);
@@ -232,10 +296,10 @@ export default {
           this.Dict_GroupDataRows[eachGroupName].push(NewRowObject);
         });
       });
-      if(this.nowGroupName === "") {
-        if(this.List_GroupName.length !=0)
-        this.changeGroup(this.List_GroupName[0]);
-        }
+      if (this.nowGroupName === "") {
+        if (this.List_GroupName.length != 0)
+          this.changeGroup(this.List_GroupName[0]);
+      }
     },
     changeButtonColor(groupName) {
       if (this.nowGroupName === groupName) return "danger";
@@ -268,6 +332,7 @@ export default {
         }
       );
       this.dataRows = this.Dict_GroupDataRows[groupName];
+      this.showFootPanel = false;
     },
     async RawDataWSConnect() {
       this.rawDataWS = "network_error";
@@ -304,6 +369,11 @@ export default {
                   "_"
                 );
                 eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
+                this.StatusMap[EachGroupName+TargetRowName+NewDataName] = Dict_RawData[TargetDataName].isOutofControl?this.statusStyle.out_of_control:this.statusStyle.normal;
+                if(Dict_RawData[TargetDataName].isOutofSpec)
+                {
+                  this.StatusMap[EachGroupName+TargetRowName+NewDataName] = this.statusStyle.out_of_spec;
+                }
               });
             }
           });
@@ -346,7 +416,7 @@ export default {
 };
 </script>
 <style>
-:root{
+:root {
   --footer-height: 30px;
 }
 body {
@@ -372,7 +442,7 @@ body {
   bottom: 0;
   width: 100%;
   line-height: var(--footer-height);
-  background: #42b983;
+  background: #343a40;
   color: #fff;
 }
 </style>
