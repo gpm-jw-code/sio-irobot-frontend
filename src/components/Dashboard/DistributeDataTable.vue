@@ -2,8 +2,7 @@
   <div class="p-1">
     <b class="mr-3 ml-1">顯示項目</b>
     <b-form-checkbox-group :options="columnsOptions"></b-form-checkbox-group>
-
-    <b-button
+ <b-button
       size="lg"
       class="m-2"
       @click="changeGroup(item)"
@@ -11,6 +10,32 @@
       :key="item"
       >{{ item }}</b-button
     >
+    <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
+      <b-row>
+        <b-col>
+          <b-button class="legend-btn" squared size="sm" variant="light"
+            >正常</b-button
+          >
+          <b-button class="legend-btn" squared size="sm" variant="primary"
+            >OOC</b-button
+          >
+          <b-button class="legend-btn" squared size="sm" variant="danger"
+            >OOS</b-button
+          >
+        </b-col>
+        
+        <b-col class="text-right">
+          <b-button
+            class="mr-2"
+            variant="danger"
+            size="sm"
+            @click="ResetAllAlarmHandle"
+            >清除所有警報</b-button
+          >
+        </b-col>
+      </b-row>
+    </div>
+   
 
     <vue-good-table
       :key="-1"
@@ -24,9 +49,14 @@
         <div
           v-b-tooltip.hover
           title
-          v-bind:style="StatusMap[nowGroupName+props.formattedRow['RowName'] + props.column.field]"
+          v-bind:style="
+            StatusMap[
+              nowGroupName + props.formattedRow['RowName'] + props.column.field
+            ]
+          "
           class="inner-val"
-        >{{ props.formattedRow[props.column.field] }}
+        >
+          {{ props.formattedRow[props.column.field] }}
         </div>
       </template>
     </vue-good-table>
@@ -58,7 +88,7 @@
                 >
               </b-col>
             </b-row>
-              </b-col>
+          </b-col>
           <b-col cols="2" class="text-left threshold-region-foot">
             <b-row cols="2" no-gutters>
               <b-col class="text-right pr-4">OOS閥值</b-col>
@@ -139,7 +169,7 @@ export default {
       nowGroupName: "",
       groupInfoWS: WebSocket,
       rawDataWS: WebSocket,
-      StatusMap:{},
+      StatusMap: {},
 
       showFootPanel: false,
       selectedCell: {
@@ -164,37 +194,37 @@ export default {
       statusStyle: {
         normal: {
           // backgroundColor: 'rgb(71, 124, 71)',
-          backgroundColor: 'black',
-          color: 'white'
+          backgroundColor: "black",
+          color: "white",
         },
         out_of_spec: {
-          backgroundColor: '#d51919', //紅色
-          color: 'white'
+          backgroundColor: "#d51919", //紅色
+          color: "white",
         },
         out_of_control: {
-          backgroundColor: '#a5b600', //屎黃色
-          color: 'white'
-        }
+          backgroundColor: "#a5b600", //屎黃色
+          color: "white",
+        },
       },
       selectStyle: {
         selected: {
           border: "4px solid gold",
-          padding: "6px"
+          padding: "6px",
         },
         unselected: {
-          border: ""
-        }
+          border: "",
+        },
       },
       thresHoldSettingOptions: {
         settingFor: {
           thresType: "OOS",
-          originVal: -1
+          originVal: -1,
         },
         sensor: {
           eqid: "",
-          field: ""
+          field: "",
         },
-      }
+      },
     };
   },
   computed: {},
@@ -219,15 +249,18 @@ export default {
       this.thresSettingDialogShow = true;
     },
     async UpdateSelectedThresDisplay() {
-      var returnData = await getThresholdSetting(this.nowGroupName,this.selectedCell.rowName,this.selectedCell.column)
+      var returnData = await getThresholdSetting(
+        this.nowGroupName,
+        this.selectedCell.rowName,
+        this.selectedCell.column
+      );
       var ThresholdSetting = JSON.parse(returnData);
-      if(ThresholdSetting==null)
-      {
+      if (ThresholdSetting == null) {
         return;
       }
-      
-       this.selectOOCThresval = ThresholdSetting['OOC'];
-       this.selectOOSThresval =  ThresholdSetting['OOS'];
+
+      this.selectOOCThresval = ThresholdSetting["OOC"];
+      this.selectOOSThresval = ThresholdSetting["OOS"];
     },
     CloseFootPanel() {
       this.showFootPanel = false;
@@ -236,27 +269,57 @@ export default {
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
       //TODO backend reset alarm
-      await ResetAlarm(this.nowGroupName,this.selectedCell.rowName,this.selectedCell.column);
+      await ResetAlarm(
+        this.nowGroupName,
+        this.selectedCell.rowName,
+        this.selectedCell.column
+      );
       this.showFootPanel = false;
     },
-    async ShowConfirmMsgBox() {
-      return await this.$bvModal.msgBoxConfirm(`確定要清除 ${this.selectedCell.eqid}-${this.selectedCell.column.label} 異常?`, {
-        title: '異常清除',
-        // size: 'sm',
-        // buttonSize: 'sm',
-        okVariant: 'primary',
-        okTitle: 'YES',
-        cancelTitle: 'NO',
-        footerClass: 'p-2',
-        hideHeaderClose: false,
-        centered: true
+    async ResetAllAlarmHandle() {
+      if (this.$userInfo.level == 0) {
+        this.$bvModal.msgBoxOk("權限不足!\r\n若要進行此操作，請先進行登入。", {
+          title: "NO PERMISSION"
+        }).then(() => {
+          this.$router.push(`/login/${this.$route.name}`);
+        })
+        return;
+      }
+
+      var result = await this.$bvModal.msgBoxConfirm(`確定要清除${this.nowGroupName}所有警報?`, {
+        title: "CONFIRM"
+      }).then((val) => {
+        return val
       })
-        .then(value => {
+      console.log(result);
+
+      if (result) {
+        //TODO backend
+        await ResetAlarm(this.nowGroupName, 'All','All' );
+      }
+    },
+    async ShowConfirmMsgBox() {
+      return await this.$bvModal
+        .msgBoxConfirm(
+          `確定要清除 ${this.selectedCell.eqid}-${this.selectedCell.column.label} 異常?`,
+          {
+            title: "異常清除",
+            // size: 'sm',
+            // buttonSize: 'sm',
+            okVariant: "primary",
+            okTitle: "YES",
+            cancelTitle: "NO",
+            footerClass: "p-2",
+            hideHeaderClose: false,
+            centered: true,
+          }
+        )
+        .then((value) => {
           return value;
         })
         .catch(() => {
           // An error occurred
-        })
+        });
     },
     ThresHoldSetSuccessHandle(val) {
       if (this.thresHoldSettingOptions.settingFor.thresType == "OOC")
@@ -369,10 +432,13 @@ export default {
                   "_"
                 );
                 eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
-                this.StatusMap[EachGroupName+TargetRowName+NewDataName] = Dict_RawData[TargetDataName].isOutofControl?this.statusStyle.out_of_control:this.statusStyle.normal;
-                if(Dict_RawData[TargetDataName].isOutofSpec)
-                {
-                  this.StatusMap[EachGroupName+TargetRowName+NewDataName] = this.statusStyle.out_of_spec;
+                this.StatusMap[EachGroupName + TargetRowName + NewDataName] =
+                  Dict_RawData[TargetDataName].isOutofControl
+                    ? this.statusStyle.out_of_control
+                    : this.statusStyle.normal;
+                if (Dict_RawData[TargetDataName].isOutofSpec) {
+                  this.StatusMap[EachGroupName + TargetRowName + NewDataName] =
+                    this.statusStyle.out_of_spec;
                 }
               });
             }
