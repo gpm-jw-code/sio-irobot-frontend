@@ -120,7 +120,6 @@
     ></threshold-setting-dialog-vue>
   </div>
 </template>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.18/vue.min.js"></script>
 <script>
 import "vue-good-table/dist/vue-good-table.css";
 import ThresholdSettingDialogVue from "../ThresholdSettingDialog.vue";
@@ -147,7 +146,6 @@ export default {
   data() {
     return {
       tableShow: true,
-      Dict_GroupSetting: Object,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
@@ -201,16 +199,6 @@ export default {
         },
         unselected: {
           border: "",
-        },
-      },
-      thresHoldSettingOptions: {
-        settingFor: {
-          thresType: "OOS",
-          originVal: -1,
-        },
-        sensor: {
-          eqid: "",
-          field: "",
         },
       },
     };
@@ -334,15 +322,15 @@ export default {
     GroupWsDataHandle(e) {
       console.log("receiveGroupData");
       var data = JSON.parse(e.data);
-      this.Dict_GroupSetting = data;
+      this.$dataInfo.Dict_GroupSetting = data;
       this.List_GroupName = Object.keys(data);
       this.Dict_GroupDataRows = new Object();
       this.List_GroupName.forEach((eachGroupName) => {
         this.Dict_GroupDataRows[eachGroupName] = [];
         var AllColumnNames =
-          this.Dict_GroupSetting[eachGroupName].List_AllColumnName;
+          this.$dataInfo.Dict_GroupSetting[eachGroupName].List_AllColumnName;
         var rowNames = Object.keys(
-          this.Dict_GroupSetting[eachGroupName].Dict_RowListSensor
+          this.$dataInfo.Dict_GroupSetting[eachGroupName].Dict_RowListSensor
         );
         rowNames.forEach((eachRowName) => {
           var NewRowObject = new Object();
@@ -380,7 +368,7 @@ export default {
           value: "RowName",
           index: I,
         });
-        this.Dict_GroupSetting[groupName].List_AllColumnName.forEach(
+        this.$dataInfo.Dict_GroupSetting[groupName].List_AllColumnName.forEach(
           (columname) => {
             var NewDataName = columname.replace(" ", "_").replace(".", "_");
             I += 1;
@@ -400,10 +388,25 @@ export default {
 
     },
     RenderGroupButtonsStyle(activeGroup) {
+      var I=0;
       this.Dict_GroupButtonStyles = {};
       this.List_GroupName.forEach(group => {
         this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'warning' : 'light'
       });
+      this.$dataInfo.Dict_GroupSetting[activeGroup].List_AllColumnName.forEach(
+        (columname) => {
+          var NewDataName = columname.replace(" ", "_").replace(".", "_");
+          I += 1;
+          var NewColumnInfo = {
+            label: columname,
+            text: NewDataName,
+            field: NewDataName,
+            value: NewDataName,
+            index: I,
+          };
+          this.columns.push(NewColumnInfo);
+        }
+      );
     },
     async RawDataWSConnect() {
       this.rawDataWS = "network_error";
@@ -420,7 +423,7 @@ export default {
       var sensorName = SensorData.SensorName;
 
       this.List_GroupName.forEach((EachGroupName) => {
-        var NowGroup = this.Dict_GroupSetting[EachGroupName];
+        var NowGroup = this.$dataInfo.Dict_GroupSetting[EachGroupName];
         if (!NowGroup.List_SensorName.includes(sensorName)) return;
 
         var RowsName = Object.keys(NowGroup.Dict_RowListSensor);
@@ -456,7 +459,7 @@ export default {
 
       if (this.nowGroupName === "") return;
 
-      var NowGroup = this.Dict_GroupSetting[this.nowGroupName];
+      var NowGroup = this.$dataInfo.Dict_GroupSetting[this.nowGroupName];
       if (!NowGroup.List_SensorName.includes(sensorName)) return;
 
       var TargetRowName = "";

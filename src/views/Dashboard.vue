@@ -443,9 +443,8 @@ export default {
       return;
     }
 
-
-    this.$dataInfo.eqidls = EQIDList;
-    this.$dataInfo.fields = await GetFieldList();
+    // this.$dataInfo.eqidls = EQIDList;
+    // this.$dataInfo.fields = await GetFieldList();
 
 
     this.CreateColumns();

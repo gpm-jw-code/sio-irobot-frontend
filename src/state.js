@@ -12,6 +12,7 @@ var userInfo={
 
 /**儲存 */
 var dataInfo={
+    Dict_GroupSetting: Object,
     eqidls:[],
     fields: [],
 }
