@@ -211,13 +211,12 @@ export default {
     },
     async onCellClick(params) {
       if (params.column.field == "RowName") return;
-      this.selectedCell.column = params.column.field;
-      this.selectedCell.rowName = params.row.RowName;
-
-      this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
-      await this.UpdateSelectedThresDisplay();
       this.showFootPanel = false;
-      setTimeout(() => {
+      setTimeout(async () => {
+        this.selectedCell.column = params.column.field;
+        this.selectedCell.rowName = params.row.RowName;
+        this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
+        await this.UpdateSelectedThresDisplay();
         this.showFootPanel = true;
       }, 50);
     },
@@ -388,7 +387,7 @@ export default {
 
     },
     RenderGroupButtonsStyle(activeGroup) {
-      var I=0;
+      var I = 0;
       this.Dict_GroupButtonStyles = {};
       this.List_GroupName.forEach(group => {
         this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'warning' : 'light'
