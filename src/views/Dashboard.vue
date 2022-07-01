@@ -1,123 +1,134 @@
 <template>
-  <div class="dashboard">
-    <div class="robot-idms-switch-container text-center pt-4 pl-1">
-      <b-button
-        pill
-        class="mr-2 type-switch-btn"
-        :variant="!idms_dt_show? 'primary':'secondary'"
-        @click="idms_dt_show=false"
-      >ROBOT數據</b-button>
-      <b-button
-        class="type-switch-btn"
-        pill
-        :variant="idms_dt_show? 'primary':'secondary'"
-        @click="idms_dt_show=true"
-      >振動訊號</b-button>
-    </div>
-    <el-divider></el-divider>
-    <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show" :userInfo="userInfo"></IDMSDataTable>
-    <DistributeTable v-show="!idms_dt_show"></DistributeTable>
-    <div
-      v-show="!idms_dt_show"
-      id="robot-data-table"
-      v-loading="controlCenterWSErr"
-      element-loading-text="網路異常"
-    >
-      <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
-        <b-row>
-          <b-col>
-            <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
-            <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
-            <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
-          </b-col>
-          <b-col class="text-right">
-            <b-button class="mr-2" variant="danger" size="sm" @click="ResetAllAlarmHandle">清除所有警報</b-button>
-          </b-col>
-        </b-row>
+  <transition name="el-zoom-in-bottom">
+    <div class="dashboard" v-show="showOut">
+      <div class="robot-idms-switch-container text-center pt-4 pl-1">
+        <b-button
+          squared
+          size="lg"
+          class="mr-2 type-switch-btn"
+          :variant="!idms_dt_show? 'info':'secondary'"
+          @click="idms_dt_show=false"
+        >分散式系統</b-button>
+        <b-button
+          class="type-switch-btn"
+          squared
+          size="lg"
+          :variant="idms_dt_show? 'info':'secondary'"
+          @click="idms_dt_show=true"
+        >振動訊號</b-button>
       </div>
-      <vue-good-table
-        class="p-2"
-        :columns="columns"
-        :rows="RobotDatas"
-        @on-cell-click="onCellClick"
-        :max-height="ViewPortHeight"
-        :fixed-header="true"
-        :sort-options="{enabled:false}"
+      <el-divider></el-divider>
+      <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show" :userInfo="userInfo"></IDMSDataTable>
+      <transition name="el-fade-in">
+        <DistributeTable v-show="!idms_dt_show"></DistributeTable>
+      </transition>
+      <div
+        v-show="false"
+        id="robot-data-table"
+        v-loading="controlCenterWSErr"
+        element-loading-text="網路異常"
       >
-        <template slot="table-row" slot-scope="props">
-          <div
-            v-b-tooltip.hover
-            title
-            @dblclick="onRowDoubleClick"
-            :key="renderKey"
-            class="inner-val"
-            v-bind:style="StatusMap[props.formattedRow['eqid']+props.column.field]"
-          >{{props.formattedRow[props.column.field]}}</div>
-        </template>
-      </vue-good-table>
-
-      <!-- <transition name="el-fade-in-linear">
-      <div v-show="showFootPanel" class="threshold-info-panel">fff</div>
-      </transition>-->
-      <transition name="el-zoom-in-bottom">
-        <div v-show="showFootPanel" class="foot-panel">
+        <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
           <b-row>
-            <b-col cols="2" class="text-left pl-3">
-              <b-button-group>
-                <b-button variant="dark" squared>{{selectedCell.eqid}}</b-button>
-                <b-button variant="light" squared>{{selectedCell.column.label}}</b-button>
-              </b-button-group>
-            </b-col>
-            <b-col cols="3" class="text-left threshold-region-foot">
-              <b-row cols="2" no-gutters>
-                <b-col class="text-right pr-4">OOC閥值</b-col>
-                <b-col class="ooc-style">
-                  <span
-                    class="threval"
-                    @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
-                    v-b-tooltip.hover
-                    title="點一下進行設定"
-                  >{{selectOOCThresval}}</span>
-                </b-col>
-              </b-row>
-              <b-row cols="2" no-gutters>
-                <b-col class="text-right pr-4">OOS閥值</b-col>
-                <b-col class="oos-style">
-                  <span
-                    class="threval"
-                    @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
-                    v-b-tooltip.hover
-                    title="點一下進行設定"
-                  >{{selectOOSThresval}}</span>
-                </b-col>
-              </b-row>
-            </b-col>
             <b-col>
-              <b-button
-                variant="light"
-                block
-                :disabled="(!Resetable||userInfo.level==0)"
-                @click="ResetAlarmHandle"
-              >
-                <span v-if="userInfo.level!=0">RESET ALARM</span>
-                <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
-              </b-button>
+              <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
+              <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
+              <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
             </b-col>
             <b-col class="text-right">
-              <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
+              <b-button class="mr-2" variant="danger" size="sm" @click="ResetAllAlarmHandle">清除所有警報</b-button>
             </b-col>
           </b-row>
         </div>
-      </transition>
+        <vue-good-table
+          class="p-2"
+          :columns="columns"
+          :rows="RobotDatas"
+          @on-cell-click="onCellClick"
+          :max-height="ViewPortHeight"
+          :fixed-header="true"
+          :sort-options="{enabled:false}"
+        >
+          <template slot="table-row" slot-scope="props">
+            <div
+              v-b-tooltip.hover
+              title
+              @dblclick="onRowDoubleClick"
+              :key="renderKey"
+              class="inner-val"
+              v-bind:style="StatusMap[props.formattedRow['eqid']+props.column.field]"
+            >{{props.formattedRow[props.column.field]}}</div>
+          </template>
+        </vue-good-table>
 
-      <threshold-setting-dialog-vue
-        :show="thresSettingDialogShow"
-        :options="thresHoldSettingOptions"
-        @onSuccess="ThresHoldSetSuccessHandle"
-        @hide="thresSettingDialogShow=false"
-      ></threshold-setting-dialog-vue>
+        <!-- <transition name="el-fade-in-linear">
+      <div v-show="showFootPanel" class="threshold-info-panel">fff</div>
+        </transition>-->
+        <transition name="el-zoom-in-bottom">
+          <div v-show="showFootPanel" class="foot-panel">
+            <b-row>
+              <b-col cols="2" class="text-left pl-3">
+                <b-button-group>
+                  <b-button variant="dark" squared>{{selectedCell.eqid}}</b-button>
+                  <b-button variant="light" squared>{{selectedCell.column.label}}</b-button>
+                </b-button-group>
+              </b-col>
+              <b-col cols="3" class="text-left threshold-region-foot">
+                <b-row cols="2" no-gutters>
+                  <b-col class="text-right pr-4">OOC閥值</b-col>
+                  <b-col class="ooc-style">
+                    <span
+                      class="threval"
+                      @click="ShowTresSettingDialog('OOC',selectOOCThresval)"
+                      v-b-tooltip.hover
+                      title="點一下進行設定"
+                    >{{selectOOCThresval}}</span>
+                  </b-col>
+                </b-row>
+                <b-row cols="2" no-gutters>
+                  <b-col class="text-right pr-4">OOS閥值</b-col>
+                  <b-col class="oos-style">
+                    <span
+                      class="threval"
+                      @click="ShowTresSettingDialog('OOS',selectOOSThresval)"
+                      v-b-tooltip.hover
+                      title="點一下進行設定"
+                    >{{selectOOSThresval}}</span>
+                  </b-col>
+                </b-row>
+              </b-col>
+              <b-col>
+                <b-button
+                  variant="light"
+                  block
+                  :disabled="(!Resetable||userInfo.level==0)"
+                  @click="ResetAlarmHandle"
+                >
+                  <span v-if="userInfo.level!=0">RESET ALARM</span>
+                  <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
+                </b-button>
+              </b-col>
+              <b-col class="text-right">
+                <b-button
+                  variant="danger"
+                  v-b-tooltip.hover
+                  title="關閉(ESC)"
+                  @click="CloseFootPanel"
+                >X</b-button>
+              </b-col>
+            </b-row>
+          </div>
+        </transition>
+
+        <threshold-setting-dialog-vue
+          :show="thresSettingDialogShow"
+          :options="thresHoldSettingOptions"
+          @onSuccess="ThresHoldSetSuccessHandle"
+          @hide="thresSettingDialogShow=false"
+        ></threshold-setting-dialog-vue>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -130,10 +141,11 @@ import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 import DistributeTable from '../components/Dashboard/DistributeDataTable.vue'
 export default {
   components: {
-    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable,DistributeTable
+    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable
   },
   data() {
     return {
+      showOut: false,
       controlCenterWSErr: true,
       idms_dt_show: false,
       websocket_sensorData: WebSocket,
@@ -339,7 +351,7 @@ export default {
       }
       this.$bus.$emit(sensorkey, obj);
     },
-    async HandleGroupSettingWS(e){
+    async HandleGroupSettingWS(e) {
       //var GroupInfo = JSON.parse(e.data);
     },
     async HandleWSdata(e) {
@@ -364,7 +376,7 @@ export default {
 
       }
       else {
-         //this.$dataInfo.eqidls = await GetEQIDList();
+        //this.$dataInfo.eqidls = await GetEQIDList();
         // this.$dataInfo.fields = await GetFieldList();
         this.CreateColumns();
         this.GenRobotDatas();
@@ -381,7 +393,7 @@ export default {
 
       this.controlCenterWSErr = false;
       console.log("ws instance rebuild", this.websocket_sensorData);
-     // this.websocket_sensorData.onmessage = this.HandleWSdata;
+      // this.websocket_sensorData.onmessage = this.HandleWSdata;
       this.websocket_sensorData.onclose = () => {
         this.ReconnecWeSocket()
       };
@@ -453,15 +465,7 @@ export default {
         this.CloseFootPanel();
       }
     })
-    // //模擬
-    // setInterval(() => {
-    //   this.RobotDatas.forEach(d => {
-    //     d.vac_upper_arm = Math.random().toFixed(3);
-    //     d.vac_lower_arm = Math.random().toFixed(3);
-    //     d.x_axis_motor_temp = Math.random().toFixed(3);
-    //     d.x_axis_torge = Math.random().toFixed(3);
-    //   })
-    // }, 1000);
+    this.showOut = true;
   },
   watch: {
     $userInfo: {
@@ -554,5 +558,6 @@ table.vgt-table td {
 
 .type-switch-btn {
   width: 150px;
+  font-size: 20px;
 }
 </style>

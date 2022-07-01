@@ -1,77 +1,73 @@
 <template >
-  <div class="p-1">
-    <b class="mr-3 ml-1">顯示項目</b>
-    <b-form-checkbox-group :options="columnsOptions"></b-form-checkbox-group>
- <b-button
-      size="lg"
-      class="m-2"
-      @click="changeGroup(item)"
-      v-for="item in List_GroupName"
-      :key="item"
-      >{{ item }}</b-button
-    >
+  <div class="p-1 text-white">
+    <h3>Group 列表</h3>
+    <div class="group-button-container">
+      <b-button
+        size="lg"
+        squared
+        class="m-2"
+        @click="changeGroup(item)"
+        v-for="item in List_GroupName"
+        :key="item"
+        :variant="GetGroupButtonStyle(item)"
+      >{{ item }}</b-button>
+    </div>
+
+    <h3 class="mt-4">DATA TABLE</h3>
+
     <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
       <b-row>
         <b-col>
-          <b-button class="legend-btn" squared size="sm" variant="light"
-            >正常</b-button
-          >
-          <b-button class="legend-btn" squared size="sm" variant="primary"
-            >OOC</b-button
-          >
-          <b-button class="legend-btn" squared size="sm" variant="danger"
-            >OOS</b-button
-          >
+          <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
+          <b-button class="legend-btn" squared size="sm" variant="primary">OOC</b-button>
+          <b-button class="legend-btn" squared size="sm" variant="danger">OOS</b-button>
         </b-col>
-        
+
         <b-col class="text-right">
-          <b-button
-            class="mr-2"
-            variant="danger"
-            size="sm"
-            @click="ResetAllAlarmHandle"
-            >清除所有警報</b-button
-          >
+          <b-button class="mr-2" variant="danger" size="sm" @click="ResetAllAlarmHandle">清除所有警報</b-button>
         </b-col>
       </b-row>
     </div>
-   
 
-    <vue-good-table
-      :key="-1"
-      :columns="columns"
-      :fixed-header="true"
-      :sort-options="{ enabled: false }"
-      :rows="dataRows"
-      @on-cell-click="onCellClick"
-    >
-      <template slot="table-row" slot-scope="props">
-        <div
-          v-b-tooltip.hover
-          title
-          v-bind:style="
+    <transition name="el-fade-in">
+      <vue-good-table
+        v-show="tableShow"
+        :key="-1"
+        :columns="columns"
+        :fixed-header="true"
+        :sort-options="{ enabled: false }"
+        :rows="dataRows"
+        @on-cell-click="onCellClick"
+      >
+        <template slot="table-row" slot-scope="props">
+          <div
+            v-b-tooltip.hover
+            title
+            v-bind:style="
             StatusMap[
               nowGroupName + props.formattedRow['RowName'] + props.column.field
             ]
           "
-          class="inner-val"
-        >
-          {{ props.formattedRow[props.column.field] }}
-        </div>
-      </template>
-    </vue-good-table>
-
-    <div class="footer" v-if="showFootPanel">
-      <div class="footer-content">
+            class="inner-val"
+          >{{ props.formattedRow[props.column.field] }}</div>
+        </template>
+      </vue-good-table>
+    </transition>
+    <transition name="el-zoom-in-bottom">
+      <div class="footer-content" v-if="showFootPanel">
         <b-row>
           <b-col cols="2" class="text-left pl-3">
             <b-button-group>
-              <b-button variant="dark" squared>{{
-                selectedCell.column
-              }}</b-button>
-              <b-button variant="light" squared>{{
+              <b-button variant="info" squared>
+                {{
                 selectedCell.rowName
-              }}</b-button>
+                }}
+              </b-button>
+              <b-button variant="light" squared>
+                {{
+                selectedCell.column
+                }}
+              </b-button>
             </b-button-group>
           </b-col>
           <b-col cols="1"></b-col>
@@ -84,8 +80,7 @@
                   @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
                   v-b-tooltip.hover
                   title="點一下進行設定"
-                  >{{ selectOOCThresval }}</span
-                >
+                >{{ selectOOCThresval }}</span>
               </b-col>
             </b-row>
           </b-col>
@@ -98,8 +93,7 @@
                   @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
                   v-b-tooltip.hover
                   title="點一下進行設定"
-                  >{{ selectOOSThresval }}</span
-                >
+                >{{ selectOOSThresval }}</span>
               </b-col>
             </b-row>
           </b-col>
@@ -115,17 +109,11 @@
             </b-button>
           </b-col>
           <b-col class="text-right">
-            <b-button
-              variant="danger"
-              v-b-tooltip.hover
-              title="關閉(ESC)"
-              @click="CloseFootPanel"
-              >X</b-button
-            >
+            <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
           </b-col>
         </b-row>
       </div>
-    </div>
+    </transition>
     <threshold-setting-dialog-vue
       :show="thresSettingDialogShow"
       :options="thresHoldSettingOptions"
@@ -159,8 +147,9 @@ export default {
   },
   data() {
     return {
-      //Dict_GroupSetting: Object,
+      tableShow: true,
       List_GroupName: [],
+      Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
       dataRows: [],
       columns: [],
@@ -218,6 +207,10 @@ export default {
   },
   computed: {},
   methods: {
+    GetGroupButtonStyle(group) {
+      var style = this.Dict_GroupButtonStyles[group];
+      return style == undefined ? 'dark' : style;
+    },
     async onCellClick(params) {
       if (params.column.field == "RowName") return;
       this.selectedCell.column = params.column.field;
@@ -225,7 +218,10 @@ export default {
 
       this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
       await this.UpdateSelectedThresDisplay();
-      this.showFootPanel = true;
+      this.showFootPanel = false;
+      setTimeout(() => {
+        this.showFootPanel = true;
+      }, 50);
     },
     ShowTresSettingDialog(type, oriVal) {
       this.thresHoldSettingOptions.settingFor.thresType = type;
@@ -284,7 +280,7 @@ export default {
 
       if (result) {
         //TODO backend
-        await ResetAlarm(this.nowGroupName, 'All','All' );
+        await ResetAlarm(this.nowGroupName, 'All', 'All');
       }
     },
     async ShowConfirmMsgBox() {
@@ -359,17 +355,47 @@ export default {
     },
     changeGroup(groupName) {
       if (this.nowGroupName === groupName) return;
-      this.columns = [];
-      this.nowGroupName = groupName;
-      var I = 0;
-      this.columns.push({
-        label: "RowName",
-        text: "RowName",
-        field: "RowName",
-        value: "RowName",
-        index: I,
+      this.RenderGroupButtonsStyle(groupName);
+
+      this.tableShow = false;
+      setTimeout(() => {
+        this.tableShow = true;
+        this.columns = [];
+        this.nowGroupName = groupName;
+        var I = 0;
+        this.columns.push({
+          label: "RowName",
+          text: "RowName",
+          field: "RowName",
+          value: "RowName",
+          index: I,
+        });
+        this.$dataInfo.Dict_GroupSetting[groupName].List_AllColumnName.forEach(
+          (columname) => {
+            var NewDataName = columname.replace(" ", "_").replace(".", "_");
+            I += 1;
+            var NewColumnInfo = {
+              label: columname,
+              text: NewDataName,
+              field: NewDataName,
+              value: NewDataName,
+              index: I,
+            };
+            this.columns.push(NewColumnInfo);
+          }
+        );
+        this.dataRows = this.Dict_GroupDataRows[groupName];
+        this.showFootPanel = false;
+      }, 100);
+
+    },
+    RenderGroupButtonsStyle(activeGroup) {
+      var I=0;
+      this.Dict_GroupButtonStyles = {};
+      this.List_GroupName.forEach(group => {
+        this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'warning' : 'light'
       });
-      this.$dataInfo.Dict_GroupSetting[groupName].List_AllColumnName.forEach(
+      this.$dataInfo.Dict_GroupSetting[activeGroup].List_AllColumnName.forEach(
         (columname) => {
           var NewDataName = columname.replace(" ", "_").replace(".", "_");
           I += 1;
@@ -383,8 +409,6 @@ export default {
           this.columns.push(NewColumnInfo);
         }
       );
-      this.dataRows = this.Dict_GroupDataRows[groupName];
-      this.showFootPanel = false;
     },
     async RawDataWSConnect() {
       this.rawDataWS = "network_error";
@@ -498,6 +522,14 @@ body {
   width: 100%;
   line-height: var(--footer-height);
   background: #343a40;
+  box-shadow: 10px 10px 22px 10px black;
   color: #fff;
+}
+
+.group-button-container {
+  /* background-color: rgb(12, 12, 23); */
+  border: 1px solid grey;
+  padding: 20px;
+  margin: auto 40px;
 }
 </style>
