@@ -82,10 +82,7 @@
                   title="點一下進行設定"
                 >{{ selectOOCThresval }}</span>
               </b-col>
-            </b-row>
-          </b-col>
-          <b-col cols="2" class="text-left threshold-region-foot">
-            <b-row cols="2" no-gutters>
+
               <b-col class="text-right pr-4">OOS閥值</b-col>
               <b-col class="oos-style">
                 <span
