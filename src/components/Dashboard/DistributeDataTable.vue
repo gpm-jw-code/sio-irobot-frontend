@@ -96,6 +96,7 @@
           </b-col>
           <b-col>
             <b-button
+              id="reset-alarm-button"
               variant="light"
               block
               :disabled="!Resetable || this.$userInfo.level == 0"
@@ -525,5 +526,13 @@ body {
   border: 1px solid grey;
   padding: 20px;
   margin: auto 40px;
+}
+
+#reset-alarm-button {
+  height: 100%;
+}
+
+h3 {
+  letter-spacing: 0.2em;
 }
 </style>
