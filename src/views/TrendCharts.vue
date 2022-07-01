@@ -126,7 +126,8 @@
     <b-sidebar id="filter-sidebar" right backdrop>
       <filter-vue
         ref="filter"
-        @robotSelectedOnchange="RobotLsOnchange"
+        @groupsSelectedOnChange="ChangeSelectedGroupName" 
+        @rowSelectedOnchange="RobotLsOnchange"
         @sensorTypeSelectedOnchange="TypeLsOnchange"
         @statusSelectedOnchange="RobotLsOnchange"
       ></filter-vue>
@@ -146,6 +147,7 @@ export default {
   },
   data() {
     return {
+      nowGroupName: '',
       realtime_ws: undefined,
       isShowRealTimeData: true,
       parameters: {
@@ -168,6 +170,7 @@ export default {
         realtime: true
       },
       filter: {
+        GroupName:"",
         robotLs: [],
         typeLs: [],
         statusLs: []
@@ -197,6 +200,9 @@ export default {
       } else {
         // this.$router.push({ path: this.$route.path, query: this.currentQuery });
       }
+    },
+    ChangeSelectedGroupName(groupName){
+      this.filter.groupName = groupName;
     },
     RobotLsOnchange(list) {
       list.sort();
@@ -231,6 +237,7 @@ export default {
       return 2;
     },
     OOCThresHoldValue(eqid, field) {
+
       if (!field || !field)
         return 999;
       return this.$caches.thresholdsDataCaches[`${eqid}${field}`][`${field}_OOC`];
@@ -349,6 +356,7 @@ export default {
     },
     AllEqidList() {
       var ls = [];
+      console.log(this.$dataInfo);
       this.$dataInfo.eqidls.forEach(eqid => {
         ls.push(eqid);
       })
