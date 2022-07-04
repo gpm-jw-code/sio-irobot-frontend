@@ -1,6 +1,6 @@
 <template >
   <div class="p-1 text-white">
-    <h3>Group 列表</h3>
+    <h3 class="mt-2">-GROUPS-</h3>
     <div class="group-button-container">
       <b-button
         size="lg"
@@ -13,9 +13,10 @@
       >{{ item }}</b-button>
     </div>
 
-    <h3 class="mt-4">DATA TABLE</h3>
+    <el-divider></el-divider>
+    <h3 class="mt-5">-DATA TABLE-</h3>
 
-    <div class="text-left pt-2 pl-2" @click="CloseFootPanel">
+    <div class="text-left pt-2 pl-3 pr-2" @click="CloseFootPanel">
       <b-row>
         <b-col>
           <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
@@ -30,28 +31,30 @@
     </div>
 
     <transition name="el-fade-in">
-      <vue-good-table
-        v-show="tableShow"
-        :key="-1"
-        :columns="columns"
-        :fixed-header="true"
-        :sort-options="{ enabled: false }"
-        :rows="dataRows"
-        @on-cell-click="onCellClick"
-      >
-        <template slot="table-row" slot-scope="props">
-          <div
-            v-b-tooltip.hover
-            title
-            v-bind:style="
+      <div class="pl-3 pr-3">
+        <vue-good-table
+          v-show="tableShow"
+          :key="-1"
+          :columns="columns"
+          :fixed-header="true"
+          :sort-options="{ enabled: false }"
+          :rows="dataRows"
+          @on-cell-click="onCellClick"
+        >
+          <template slot="table-row" slot-scope="props">
+            <div
+              v-b-tooltip.hover
+              title
+              v-bind:style="
             StatusMap[
               nowGroupName + props.formattedRow['RowName'] + props.column.field
             ]
           "
-            class="inner-val"
-          >{{ props.formattedRow[props.column.field] }}</div>
-        </template>
-      </vue-good-table>
+              class="inner-val"
+            >{{ props.formattedRow[props.column.field] }}</div>
+          </template>
+        </vue-good-table>
+      </div>
     </transition>
     <transition name="el-zoom-in-bottom">
       <div class="footer-content" v-if="showFootPanel">
@@ -524,10 +527,10 @@ body {
 }
 
 .group-button-container {
-  /* background-color: rgb(12, 12, 23); */
-  border: 1px solid grey;
+  background-color: rgb(12, 12, 23, 0.3);
+  border: 1px solid black;
   padding: 20px;
-  margin: auto 40px;
+  margin: auto 15px;
 }
 
 #reset-alarm-button {
