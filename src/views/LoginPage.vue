@@ -22,6 +22,7 @@
           <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
         </div>
         <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
+        <p class="logining-info" v-show="logining">登入中...</p>
         <b-button class="action-btn" id="login-btn" squared @click="LoginHandle(false)">登入</b-button>
         <b-button class="action-btn" id="cancel-btn" squared @click="LoginHandle(true)">取消</b-button>
         <b-row class="mt-3 ml-0 regist">
@@ -43,6 +44,7 @@ export default {
   components: {},
   data() {
     return {
+      logining: false,
       form: {
         userName: '',
         password: ''
@@ -62,7 +64,7 @@ export default {
         this.$router.push({ name: this.$route.params.from });
         return;
       }
-
+      this.logining = true;
       if (this.form.userName.toUpperCase() == "KKK") {
         this.$userInfo.login = true;
         this.$userInfo.level = 3;
@@ -71,6 +73,8 @@ export default {
       }
 
       this.loginResult = await Login(this.form.userName, this.form.password);
+
+      this.logining = false;
       if (this.loginResult.success) {
         var userInfo = {
           login: true,
@@ -130,6 +134,9 @@ export default {
   color: white;
   background-color: rgb(255 0 0 / 30%);
 }
+.logining-info {
+  color: white;
+}
 
 .regist {
   cursor: pointer;
@@ -163,21 +170,16 @@ export default {
   width: 100%;
   text-align: center;
   color: white;
-  border: none;
   margin-bottom: 10px;
   height: 50px;
-}
-
-input[type="text"],
-textarea {
-  background-color: transparent;
-  color: white;
+  /* border-radius: 1rem; */
 }
 
 input[type="text"],
 input[type="password"],
 textarea:-webkit-autofill {
   background-color: transparent !important;
+  border-bottom: 0.1rem solid white;
 }
 
 ::placeholder {
