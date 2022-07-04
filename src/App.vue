@@ -20,11 +20,21 @@
 import Nav from "./components/Nav/Nav.vue";
 import ScrollToTopButton from "./components/ScrollToTop/ScrollTopButton.vue";
 import { GetUIStartupConfig } from "./web-api/Backend/UIAPI.js";
+import { inner_functions } from './web-api/Distribution_Host';
+import { GetNetworkConfigs } from './web-api/Backend/NetworkConfigsAPI'
+
+
+
 export default {
   components: { Nav, ScrollToTopButton },
   data() {
     return {};
   },
+  async mounted() {
+    var networkConfigs = await GetNetworkConfigs();
+    console.info('network configs:', networkConfigs);
+    inner_functions.change_control_center_ws_host(networkConfigs.controlCenterWsHost);
+  }
 };
 </script>
 

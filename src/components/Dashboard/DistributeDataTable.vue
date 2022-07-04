@@ -33,7 +33,7 @@
     </div>
 
     <transition name="el-fade-in">
-      <div class="pl-3 pr-3">
+      <div class="table-container pl-3 pr-3">
         <vue-good-table
           v-show="tableShow"
           :key="selectedKey"
@@ -227,8 +227,12 @@ export default {
         this.selectedCell.rowName = params.row.RowName;
         this.UpdateSelectedThresDisplay();
         this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-        this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
-        this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
+
+        var statusObj = this.StatusMap[this.selectedKey];
+        if (statusObj !== undefined) {
+          statusObj.border = this.selectStyle.selected.border;
+          statusObj.padding = this.selectStyle.selected.padding;
+        }
         this.showFootPanel = true;
       }, 100);
     },
@@ -264,17 +268,18 @@ export default {
     CloseFootPanel() {
       this.showFootPanel = false;
       if (this.selectedKey != "") {
-        this.StatusMap[this.selectedKey].border = this.selectStyle.unselected.border;
-        this.StatusMap[this.selectedKey].padding = this.selectStyle.unselected.padding;
+        var statusObj = this.StatusMap[this.selectedKey];
+        if (statusObj !== undefined) {
+          statusObj.border = this.selectStyle.unselected.border;
+          statusObj.padding = this.selectStyle.unselected.padding;
+        }
         this.selectedKey = "";
       }
-
     },
     async ResetAlarmHandle() {
-
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
-      //TODO backend reset alarm
+
       var result = await ResetAlarm(
         this.nowGroupName,
         this.selectedCell.rowName,
@@ -310,7 +315,6 @@ export default {
       console.log(result);
 
       if (result) {
-        //TODO backend
         await ResetAlarm(this.nowGroupName, 'All', 'All');
       }
     },
@@ -447,6 +451,7 @@ export default {
       while (this.rawDataWS == "network_error") {
         this.rawDataWS = await SensorRawDataWsConnect();
       }
+      console.info('CT Raw Data WS Connected');
       this.rawDataWS.onmessage = (e) => this.RawDataHandle(e);
       this.rawDataWS.onclose = () => {
         this.RawDataWSConnect();
@@ -455,7 +460,6 @@ export default {
     RawDataHandle(e) {
       var SensorData = JSON.parse(e.data);
       var sensorName = SensorData.SensorName;
-
       this.List_GroupName.forEach((EachGroupName) => {
         var NowGroup = this.$dataInfo.Dict_GroupSetting[EachGroupName];
         if (!NowGroup.List_SensorName.includes(sensorName)) return;
@@ -502,7 +506,6 @@ export default {
       });
 
       if (this.nowGroupName === "") return;
-
       var NowGroup = this.$dataInfo.Dict_GroupSetting[this.nowGroupName];
       if (!NowGroup.List_SensorName.includes(sensorName)) return;
 
@@ -558,7 +561,7 @@ export default {
   }
 };
 </script>
-<style>
+<style scoped>
 :root {
   --footer-height: 30px;
 }
@@ -566,6 +569,10 @@ body {
   padding: 0;
   margin: 0;
 }
+h3 {
+  letter-spacing: 0.2em;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -574,12 +581,7 @@ body {
   color: #2c3e50;
   margin-top: 60px;
 }
-.main {
-  overflow-y: auto;
-}
-.footer {
-  height: var(--footer-height);
-}
+
 .footer-content {
   position: fixed;
   bottom: 0;
@@ -601,10 +603,6 @@ body {
   height: 100%;
 }
 
-h3 {
-  letter-spacing: 0.2em;
-}
-
 .threshold-reg {
   color: black;
   background-color: #2c3e50;
@@ -621,7 +619,7 @@ h3 {
   text-decoration: underline;
 }
 
-.group-button {
-  font-size: 10px;
+.table-container {
+  overflow-y: auto;
 }
 </style>
