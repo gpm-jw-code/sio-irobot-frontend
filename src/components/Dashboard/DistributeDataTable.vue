@@ -16,7 +16,7 @@
     <el-divider></el-divider>
     <h3 class="mt-5">-DATA TABLE-</h3>
 
-    <div class="text-left pt-2 pl-3 pr-2" @click="CloseFootPanel">
+    <div class="text-left pt-2 pl-3 pr-2">
       <b-row>
         <b-col>
           <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
@@ -58,16 +58,8 @@
         <b-row>
           <b-col cols="2" class="text-left pl-3">
             <b-button-group>
-              <b-button variant="info" squared>
-                {{
-                selectedCell.rowName
-                }}
-              </b-button>
-              <b-button variant="light" squared>
-                {{
-                selectedCell.column
-                }}
-              </b-button>
+              <b-button variant="info" squared>{{ selectedCell.rowName }}</b-button>
+              <b-button variant="light" squared>{{ selectedCell.column }}</b-button>
             </b-button-group>
           </b-col>
           <b-col cols="1"></b-col>
@@ -193,7 +185,7 @@ export default {
           padding: "",
         },
         out_of_control: {
-          backgroundColor: "#a5b600", //屎黃色
+          backgroundColor: "rgb(0,105,217)", //屎黃色
           color: "white",
           border: "",
           padding: "",
