@@ -22,15 +22,15 @@
           <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
         </div>
         <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
-        <b-button class="mt-1" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
-        <b-button class block squared @click="LoginHandle(true)">取消</b-button>
+        <b-button class="mt-1" id="login-btn" block squared @click="LoginHandle(false)">登入</b-button>
+        <b-button id="cancel-btn" block squared @click="LoginHandle(true)">取消</b-button>
 
-        <b-row class="mt-4">
+        <b-row class="mt-3 ml-0 regist">
           <b-col>
             <b-form-checkbox>儲存登入資訊</b-form-checkbox>
           </b-col>
           <b-col class="text-right mr-1">
-            <span class="regist" size="small">註冊</span>
+            <span size="small">註冊</span>
           </b-col>
         </b-row>
       </div>
@@ -133,9 +133,18 @@ export default {
 
 .regist {
   cursor: pointer;
-  color: rgb(2, 2, 2);
+  color: rgb(255, 255, 255);
+  background-color: #687eaf;
+  padding: 3px;
+  width: 100%;
 }
 
+#login-btn {
+  background-color: #4e6086;
+}
+#cancel-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 .input-item {
   background-color: red;
 }

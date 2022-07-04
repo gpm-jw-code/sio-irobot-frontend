@@ -225,11 +225,11 @@ export default {
 
         this.selectedCell.column = params.column.field;
         this.selectedCell.rowName = params.row.RowName;
+        this.UpdateSelectedThresDisplay();
         this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
         this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
         this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
         this.showFootPanel = true;
-        await this.UpdateSelectedThresDisplay();
       }, 100);
     },
     ShowTresSettingDialog(type, oriVal) {
@@ -592,7 +592,7 @@ body {
 
 .group-button-container {
   background-color: rgb(12, 12, 23, 0.3);
-  border: 1px solid black;
+  border: 1px dashed rgb(199, 199, 199);
   padding: 20px;
   margin: auto 15px;
 }
