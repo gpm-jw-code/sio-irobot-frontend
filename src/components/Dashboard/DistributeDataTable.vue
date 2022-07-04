@@ -268,6 +268,7 @@ export default {
 
     },
     async ResetAlarmHandle() {
+
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
       //TODO backend reset alarm
@@ -473,7 +474,7 @@ export default {
                   "_"
                 );
 
-                eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
+                eachRow[NewDataName] = Dict_RawData[TargetDataName].value.toFixed(3);
 
                 var _style = this.GetAlarmStatesStyle(Dict_RawData, TargetDataName);
 
@@ -520,7 +521,7 @@ export default {
               ".",
               "_"
             );
-            eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
+            eachRow[NewDataName] = Dict_RawData[TargetDataName].value.toFixed(3);
           });
         }
       });
