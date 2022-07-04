@@ -1,12 +1,12 @@
 <template >
   <div class="p-1 text-white">
-    <h3 class="mt-2">-GROUPS-</h3>
+    <h3 class="font-weight-bold mt-2">-GROUPS-</h3>
     <transition name="el-fade-in">
       <div class="group-button-container" v-show="groupsShow">
         <b-button
+          class="m-1"
           size="lg"
           squared
-          class="m-2"
           @click="changeGroup(item)"
           v-for="item in List_GroupName"
           :key="item"
@@ -16,7 +16,7 @@
     </transition>
 
     <el-divider></el-divider>
-    <h3 class="mt-5">-DATA TABLE-</h3>
+    <h3 class="font-weight-bold mt-5">-DATA TABLE-</h3>
 
     <div class="text-left pt-2 pl-3 pr-2">
       <b-row>
@@ -59,16 +59,16 @@
       <div class="footer-content" v-if="showFootPanel">
         <b-row>
           <b-col cols="2" class="text-left pl-3">
-            <b-button-group>
-              <b-button variant="info" squared>{{ selectedCell.rowName }}</b-button>
-              <b-button variant="light" squared>{{ selectedCell.column }}</b-button>
+            <b-button-group class="font-weight-bold">
+              <b-button class="font-weight-bold" variant="info" squared>{{ selectedCell.rowName }}</b-button>
+              <b-button class="font-weight-bold" variant="dark" squared>{{ selectedCell.column }}</b-button>
             </b-button-group>
           </b-col>
           <b-col cols="1"></b-col>
-          <b-col cols="2" class="text-left threshold-region-foot">
+          <b-col cols="2" class="threshold-reg text-left" v-loading="tresholdValueLoading">
             <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4">OOC閥值</b-col>
-              <b-col class="ooc-style">
+              <b-col class="text-right pr-4 thres-title">OOC閥值</b-col>
+              <b-col class="oo-style ooc-style">
                 <span
                   class="threval"
                   @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
@@ -76,9 +76,8 @@
                   title="點一下進行設定"
                 >{{ selectOOCThresval }}</span>
               </b-col>
-
-              <b-col class="text-right pr-4">OOS閥值</b-col>
-              <b-col class="oos-style">
+              <b-col class="text-right pr-4 thres-title">OOS閥值</b-col>
+              <b-col class="oo-style oos-style">
                 <span
                   class="threval"
                   @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
@@ -91,7 +90,7 @@
           <b-col>
             <b-button
               id="reset-alarm-button"
-              variant="light"
+              variant="danger"
               block
               :disabled="!Resetable || this.$userInfo.level == 0"
               @click="ResetAlarmHandle"
@@ -142,6 +141,7 @@ export default {
       style_str: "color:red",
       tableShow: false,
       groupsShow: false,
+      tresholdValueLoading: true,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
@@ -221,13 +221,16 @@ export default {
       });
 
       this.showFootPanel = false;
-      this.selectedCell.column = params.column.field;
-      this.selectedCell.rowName = params.row.RowName;
-      this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-      this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
-      this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
-      await this.UpdateSelectedThresDisplay();
-      this.showFootPanel = true;
+      setTimeout(async () => {
+
+        this.selectedCell.column = params.column.field;
+        this.selectedCell.rowName = params.row.RowName;
+        this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
+        this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
+        this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
+        this.showFootPanel = true;
+        await this.UpdateSelectedThresDisplay();
+      }, 100);
     },
     ShowTresSettingDialog(type, oriVal) {
       this.thresHoldSettingOptions.settingFor.thresType = type;
@@ -240,18 +243,23 @@ export default {
       this.thresSettingDialogShow = true;
     },
     async UpdateSelectedThresDisplay() {
+      this.tresholdValueLoading = true;
       var returnData = await getThresholdSetting(
         this.nowGroupName,
         this.selectedCell.rowName,
         this.selectedCell.column
       );
-      var ThresholdSetting = JSON.parse(returnData);
-      if (ThresholdSetting == null) {
-        return;
-      }
+      if (returnData == null) {
+        this.$message.error(`${this.selectedCell.rowName}  ${this.selectedCell.column} 閥值資訊下載失敗`);
+        this.selectOOCThresval = 'known';
+        this.selectOOSThresval = 'known';
+      } else {
 
-      this.selectOOCThresval = ThresholdSetting["OOC"];
-      this.selectOOSThresval = ThresholdSetting["OOS"];
+        var ThresholdSetting = JSON.parse(returnData);
+        this.selectOOCThresval = ThresholdSetting["OOC"];
+        this.selectOOSThresval = ThresholdSetting["OOS"];
+      }
+      this.tresholdValueLoading = false;
     },
     CloseFootPanel() {
       this.showFootPanel = false;
@@ -579,7 +587,7 @@ body {
   line-height: var(--footer-height);
   background: #343a40;
   box-shadow: 10px 10px 22px 10px black;
-  color: #fff;
+  color: rgb(255, 255, 255);
 }
 
 .group-button-container {
@@ -595,5 +603,25 @@ body {
 
 h3 {
   letter-spacing: 0.2em;
+}
+
+.threshold-reg {
+  color: black;
+  background-color: #2c3e50;
+  border: 1px solid rgb(185, 185, 185);
+  margin: 2px;
+  border-radius: 5px;
+}
+
+.thres-title {
+  color: rgb(255, 255, 255);
+}
+
+.oo-style {
+  text-decoration: underline;
+}
+
+.group-button {
+  font-size: 10px;
 }
 </style>

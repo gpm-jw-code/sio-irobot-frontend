@@ -111,7 +111,7 @@ export async function getThresholdSetting(GroupName,RowName,ColumnName) {
       `ws://localhost:8090/GPM/GetThreshold/?groupName=${GroupName}&rowName=${RowName}&Data=${ColumnName}`,
     )
     ws.onmessage = (ret) => resolve(ret.data)
-    ws.onerror = (err) => reject(err)
+    ws.onerror = (err) => resolve(null)
   })
 }
 /**閥值設定 */
