@@ -148,6 +148,7 @@ export default {
   },
   data() {
     return {
+      style_str: "color:red",
       tableShow: true,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
@@ -215,13 +216,11 @@ export default {
     async onCellClick(params) {
       if (params.column.field == "RowName") return;
       this.showFootPanel = false;
-      setTimeout(async () => {
-        this.selectedCell.column = params.column.field;
-        this.selectedCell.rowName = params.row.RowName;
-        this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
-        await this.UpdateSelectedThresDisplay();
-        this.showFootPanel = true;
-      }, 50);
+      this.selectedCell.column = params.column.field;
+      this.selectedCell.rowName = params.row.RowName;
+      this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
+      await this.UpdateSelectedThresDisplay();
+      this.showFootPanel = true;
     },
     ShowTresSettingDialog(type, oriVal) {
       this.thresHoldSettingOptions.settingFor.thresType = type;
