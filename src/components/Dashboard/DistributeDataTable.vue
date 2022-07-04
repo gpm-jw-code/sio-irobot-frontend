@@ -1,17 +1,19 @@
 <template >
   <div class="p-1 text-white">
     <h3 class="mt-2">-GROUPS-</h3>
-    <div class="group-button-container">
-      <b-button
-        size="lg"
-        squared
-        class="m-2"
-        @click="changeGroup(item)"
-        v-for="item in List_GroupName"
-        :key="item"
-        :variant="GetGroupButtonStyle(item)"
-      >{{ item }}</b-button>
-    </div>
+    <transition name="el-fade-in">
+      <div class="group-button-container" v-show="groupsShow">
+        <b-button
+          size="lg"
+          squared
+          class="m-2"
+          @click="changeGroup(item)"
+          v-for="item in List_GroupName"
+          :key="item"
+          :variant="GetGroupButtonStyle(item)"
+        >{{ item }}</b-button>
+      </div>
+    </transition>
 
     <el-divider></el-divider>
     <h3 class="mt-5">-DATA TABLE-</h3>
@@ -138,7 +140,8 @@ export default {
   data() {
     return {
       style_str: "color:red",
-      tableShow: true,
+      tableShow: false,
+      groupsShow: false,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
@@ -407,7 +410,7 @@ export default {
         this.dataRows = this.Dict_GroupDataRows[groupName];
         this.CloseFootPanel();
 
-      }, 100);
+      }, 200);
 
     },
     RenderGroupButtonsStyle(activeGroup) {
@@ -531,6 +534,9 @@ export default {
   async mounted() {
     this.WebSocketConnect();
     this.RawDataWSConnect();
+    setTimeout(() => {
+      this.groupsShow = true;
+    }, 500);
   },
   watch: {
     $userInfo: {
