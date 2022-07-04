@@ -43,6 +43,7 @@
         >
           <template slot="table-row" slot-scope="props">
             <div
+              :key="props.formattedRow[props.column.field]"
               v-b-tooltip.hover
               title
               v-bind:style="StatusMap[nowGroupName + props.formattedRow['RowName'] + props.column.field]"
@@ -270,12 +271,22 @@ export default {
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
       //TODO backend reset alarm
-      await ResetAlarm(
+      var result = await ResetAlarm(
         this.nowGroupName,
         this.selectedCell.rowName,
         this.selectedCell.column
       );
-      this.showFootPanel = false;
+      console.info(`Reset alarm : ${this.selectedCell}`, result);
+      // this.showFootPanel = false;
+      if (result.toUpperCase() == 'OK') {
+        this.$message.info(`已清除 ${this.selectedCell.rowName}  ${this.selectedCell.column} 的Alarm`);
+        var key = this.selectedKey + "";
+        this.StatusMap[this.selectedKey].backgroundColor = this.statusStyle.normal.backgroundColor;
+        this.selectedKey = -1;
+        setTimeout(() => {
+          this.selectedKey = key;
+        }, 300);
+      }
     },
     async ResetAllAlarmHandle() {
       if (this.$userInfo.level == 0) {
@@ -302,7 +313,7 @@ export default {
     async ShowConfirmMsgBox() {
       return await this.$bvModal
         .msgBoxConfirm(
-          `確定要清除 ${this.selectedCell.eqid}-${this.selectedCell.column.label} 異常?`,
+          `確定要清除 ${this.selectedCell.rowName}-${this.selectedCell.column} 異常?`,
           {
             title: "異常清除",
             // size: 'sm',
@@ -464,9 +475,7 @@ export default {
 
                 eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
 
-                var _style = Dict_RawData[TargetDataName].isOutofControl
-                  ? this.statusStyle.out_of_control
-                  : this.statusStyle.normal;
+                var _style = this.GetAlarmStatesStyle(Dict_RawData, TargetDataName);
 
                 var statusMapkey = EachGroupName + TargetRowName + NewDataName;
                 if (this.StatusMap[statusMapkey] == undefined) {
@@ -474,7 +483,8 @@ export default {
                     backgroundColor: 'black',
                     color: 'white',
                     border: "",
-                    padding: ""
+                    padding: "",
+                    key: -1
                   };
                 }
 
@@ -515,6 +525,15 @@ export default {
         }
       });
     },
+    GetAlarmStatesStyle(Dict_RawData, TargetDataName) {
+
+      if (Dict_RawData[TargetDataName].isOutofControl)
+        return this.statusStyle.out_of_control;
+      if (Dict_RawData[TargetDataName].isOutofSpec)
+        return this.statusStyle.out_of_spec;
+
+      return this.statusStyle.normal;
+    }
   },
   async mounted() {
     this.WebSocketConnect();
