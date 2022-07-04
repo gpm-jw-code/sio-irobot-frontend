@@ -22,9 +22,8 @@
           <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
         </div>
         <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
-        <b-button class="mt-1" id="login-btn" block squared @click="LoginHandle(false)">登入</b-button>
-        <b-button id="cancel-btn" block squared @click="LoginHandle(true)">取消</b-button>
-
+        <b-button class="action-btn" id="login-btn" squared @click="LoginHandle(false)">登入</b-button>
+        <b-button class="action-btn" id="cancel-btn" squared @click="LoginHandle(true)">取消</b-button>
         <b-row class="mt-3 ml-0 regist">
           <b-col>
             <b-form-checkbox>儲存登入資訊</b-form-checkbox>
@@ -128,7 +127,8 @@ export default {
 }
 
 .login-fail {
-  color: red;
+  color: white;
+  background-color: rgb(255 0 0 / 30%);
 }
 
 .regist {
@@ -137,8 +137,17 @@ export default {
   background-color: #687eaf;
   padding: 3px;
   width: 100%;
+  opacity: 0.7;
 }
 
+.action-btn {
+  width: 180px;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+.action-btn:hover {
+  background-color: goldenrod;
+}
 #login-btn {
   background-color: #4e6086;
 }
