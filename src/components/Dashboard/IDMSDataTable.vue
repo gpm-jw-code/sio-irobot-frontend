@@ -1,8 +1,7 @@
 <template >
   <div class="p-1">
-    <b-row class="p-2 pl-4 display-item-selector">
-      <b-icon-check-circle-fill scale="1" class="mt-1"></b-icon-check-circle-fill>
-      <b class="mr-3 ml-1">顯示項目</b>
+    <b-row class="p-2 display-item-selector text-white">
+      <b class="mr-3 ml-1">顯示項目 :</b>
       <b-form-checkbox-group
         :options="columnsOptions"
         v-model="selectedColumns"
