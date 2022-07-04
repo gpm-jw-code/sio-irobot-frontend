@@ -34,7 +34,7 @@
       <div class="pl-3 pr-3">
         <vue-good-table
           v-show="tableShow"
-          :key="-1"
+          :key="selectedKey"
           :columns="columns"
           :fixed-header="true"
           :sort-options="{ enabled: false }"
@@ -45,11 +45,7 @@
             <div
               v-b-tooltip.hover
               title
-              v-bind:style="
-            StatusMap[
-              nowGroupName + props.formattedRow['RowName'] + props.column.field
-            ]
-          "
+              v-bind:style="StatusMap[nowGroupName + props.formattedRow['RowName'] + props.column.field]"
               class="inner-val"
             >{{ props.formattedRow[props.column.field] }}</div>
           </template>
@@ -186,14 +182,20 @@ export default {
           // backgroundColor: 'rgb(71, 124, 71)',
           backgroundColor: "black",
           color: "white",
+          border: "",
+          padding: "",
         },
         out_of_spec: {
           backgroundColor: "#d51919", //紅色
           color: "white",
+          border: "",
+          padding: "",
         },
         out_of_control: {
           backgroundColor: "#a5b600", //屎黃色
           color: "white",
+          border: "",
+          padding: "",
         },
       },
       selectStyle: {
@@ -215,10 +217,26 @@ export default {
     },
     async onCellClick(params) {
       if (params.column.field == "RowName") return;
+
+      Object.keys(this.StatusMap).forEach(key => {
+        this.StatusMap[key].border = "";
+        this.StatusMap[key].padding = "";
+        console.log(this.StatusMap[key], 'change to unselected status');
+      });
+
+      // if (this.selectedKey != "") {
+      //   console.log('unselected style:', this.selectStyle.unselected);
+      //   this.StatusMap[this.selectedKey].border = this.selectStyle.unselected.border;
+      //   this.StatusMap[this.selectedKey].padding = this.selectStyle.unselected.padding;
+      // }
       this.showFootPanel = false;
       this.selectedCell.column = params.column.field;
       this.selectedCell.rowName = params.row.RowName;
-      this.selectedKey = this.selectedCell.rowName + this.selectedCell.column;
+      this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
+      console.log(this.selectedKey);
+      this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
+      this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
+
       await this.UpdateSelectedThresDisplay();
       this.showFootPanel = true;
     },
@@ -248,6 +266,12 @@ export default {
     },
     CloseFootPanel() {
       this.showFootPanel = false;
+      if (this.selectedKey != "") {
+        this.StatusMap[this.selectedKey].border = this.selectStyle.unselected.border;
+        this.StatusMap[this.selectedKey].padding = this.selectStyle.unselected.padding;
+        this.selectedKey = "";
+      }
+
     },
     async ResetAlarmHandle() {
       var ok = await this.ShowConfirmMsgBox();
@@ -384,7 +408,8 @@ export default {
           }
         );
         this.dataRows = this.Dict_GroupDataRows[groupName];
-        this.showFootPanel = false;
+        this.CloseFootPanel();
+
       }, 100);
 
     },
@@ -443,15 +468,26 @@ export default {
                   ".",
                   "_"
                 );
+
                 eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
-                this.StatusMap[EachGroupName + TargetRowName + NewDataName] =
-                  Dict_RawData[TargetDataName].isOutofControl
-                    ? this.statusStyle.out_of_control
-                    : this.statusStyle.normal;
-                if (Dict_RawData[TargetDataName].isOutofSpec) {
-                  this.StatusMap[EachGroupName + TargetRowName + NewDataName] =
-                    this.statusStyle.out_of_spec;
+
+                var _style = Dict_RawData[TargetDataName].isOutofControl
+                  ? this.statusStyle.out_of_control
+                  : this.statusStyle.normal;
+
+                var statusMapkey = EachGroupName + TargetRowName + NewDataName;
+                if (this.StatusMap[statusMapkey] == undefined) {
+                  this.StatusMap[statusMapkey] = {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    border: "",
+                    padding: ""
+                  };
                 }
+
+                this.StatusMap[statusMapkey].backgroundColor = _style.backgroundColor;
+
+
               });
             }
           });
