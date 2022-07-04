@@ -1,6 +1,6 @@
 <template>
-  <transition name="el-zoom-in-bottom">
-    <div class="dashboard" v-show="showOut">
+  <div class="dashboard" v-show="showOut">
+    <transition name="el-zoom-in-bottom">
       <div class="robot-idms-switch-container text-center pt-4 pl-1">
         <b-button
           squared
@@ -17,13 +17,13 @@
           @click="idms_dt_show=true"
         >振動訊號</b-button>
       </div>
-      <el-divider></el-divider>
-      <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show" :userInfo="userInfo"></IDMSDataTable>
-      <transition name="el-fade-in">
-        <DistributeTable v-show="!idms_dt_show"></DistributeTable>
-      </transition>
-    </div>
-  </transition>
+    </transition>
+    <el-divider></el-divider>
+    <IDMSDataTable v-show="idms_dt_show" :renderPause="!idms_dt_show"></IDMSDataTable>
+    <transition name="el-fade-in">
+      <DistributeTable v-show="!idms_dt_show"></DistributeTable>
+    </transition>
+  </div>
 </template>
 
 <script>
@@ -49,13 +49,6 @@ export default {
 
     }
   },
-  methods: {
-  },
-  computed: {
-    ViewPortHeight() {
-      return (window.innerHeight - 150) + "px";
-    }
-  },
   async mounted() {
     this.showOut = true;
   },
@@ -63,7 +56,7 @@ export default {
     $userInfo: {
       handler: function (userInfo) {
         this.userInfo = userInfo;
-        console.log('user info change', userInfo);
+
       },
       deep: true,
       immediate: true

@@ -63,9 +63,8 @@ export default {
         this.$router.push({ name: this.$route.params.from });
         return;
       }
-      
-      if(this.form.userName=="KKK")
-      {
+
+      if (this.form.userName.toUpperCase() == "KKK") {
         this.$userInfo.login = true;
         this.$userInfo.level = 3;
         this.$userInfo.userName = "Developer";

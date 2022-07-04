@@ -207,6 +207,7 @@ export default {
           border: "",
         },
       },
+      userInfo: {}
     };
   },
   computed: {},
@@ -221,22 +222,14 @@ export default {
       Object.keys(this.StatusMap).forEach(key => {
         this.StatusMap[key].border = "";
         this.StatusMap[key].padding = "";
-        console.log(this.StatusMap[key], 'change to unselected status');
       });
 
-      // if (this.selectedKey != "") {
-      //   console.log('unselected style:', this.selectStyle.unselected);
-      //   this.StatusMap[this.selectedKey].border = this.selectStyle.unselected.border;
-      //   this.StatusMap[this.selectedKey].padding = this.selectStyle.unselected.padding;
-      // }
       this.showFootPanel = false;
       this.selectedCell.column = params.column.field;
       this.selectedCell.rowName = params.row.RowName;
       this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-      console.log(this.selectedKey);
       this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
       this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
-
       await this.UpdateSelectedThresDisplay();
       this.showFootPanel = true;
     },
@@ -527,6 +520,16 @@ export default {
     this.WebSocketConnect();
     this.RawDataWSConnect();
   },
+  watch: {
+    $userInfo: {
+      handler: function (userInfo) {
+        console.log('user info change!!!!', userInfo);
+        this.userInfo = userInfo;
+      },
+      deep: true,
+      immediate: true
+    }
+  }
 };
 </script>
 <style>
