@@ -3,18 +3,6 @@
     <div class="loginPage">
       <div class="login-form pt-3">
         <h1 class="mb-3 pb-3 text-white">LOGIN</h1>
-        <!-- <b-form-input
-            v-model="form.userName"
-            class="text-center input-item"
-            placeholder="USER NAME"
-            title="?"
-          ></b-form-input>
-          <b-form-input
-            v-model="form.password"
-            class="text-center"
-            placeholder="PASSWORD"
-            type="password"
-        ></b-form-input>-->
         <div>
           <input class="login-input" type="text" placeholder="User Name" v-model="form.userName" />
         </div>
@@ -55,7 +43,15 @@ export default {
   },
   computed: {},
   watch: {
-
+    $route: {
+      handler: function (from) {
+        this.logining = false;
+        this.loginResult.success = true;
+        console.log(from);
+      },
+      deep: true,
+      immediate: true
+    }
   },
   methods: {
     async LoginHandle(cancel = false) {
@@ -70,6 +66,7 @@ export default {
         this.$userInfo.level = 3;
         this.$userInfo.userName = "Developer";
         this.$router.push({ name: this.$route.params.from, params: userInfo });
+        this.$bus.$emit("admin-login", "^_^");
       }
 
       this.loginResult = await Login(this.form.userName, this.form.password);
@@ -97,13 +94,6 @@ export default {
   },
   mounted() {
   },
-  beforeCreate() { }, //生命周期 - 创建之前
-  beforeMount() { }, //生命周期 - 挂载之前
-  beforeUpdate() { }, //生命周期 - 更新之前
-  updated() { }, //生命周期 - 更新之后
-  beforeDestroy() { }, //生命周期 - 销毁之前
-  destroyed() { }, //生命周期 - 销毁完成
-  activated() { }, //如果页面有keep-alive缓存功能，这个函数会触发
 }
 </script>
 <style  scoped>
