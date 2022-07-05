@@ -6,10 +6,10 @@
         <b-button
           class="m-1"
           size="lg"
-          squared
-          @click="changeGroup(item)"
+          pill
           v-for="item in List_GroupName"
           :key="item"
+          @click="changeGroup(item)"
           :variant="GetGroupButtonStyle(item)"
         >{{ item }}</b-button>
       </div>
@@ -496,6 +496,9 @@ h3 {
   border: 1px dashed rgb(199, 199, 199);
   padding: 20px;
   margin: auto 15px;
+}
+
+.group-btn-badge {
 }
 
 .table-container {
