@@ -1,5 +1,5 @@
 <template >
-  <div class="p-1">
+  <div class="p-1" id="idms-datatable" :key="renderKey" v-loading="ws_connecting">
     <b-row class="p-2 display-item-selector text-white">
       <b class="mr-3 ml-1">顯示項目 :</b>
       <b-form-checkbox-group
@@ -38,7 +38,8 @@ export default {
   },
   data() {
     return {
-      idms_ws: WebSocket,
+      idms_ws: null,
+      ws_connecting: true,
       renderKey: -1,
       columns: [
       ],
@@ -103,21 +104,36 @@ export default {
       return 0;
     },
     async WebSocketConnect() {
+      this.ws_connecting = true;
+      this.renderKey = Date.now()
       this.idms_ws = await IDMSSensorRawDataWsConnect();
-      this.idms_ws.onmessage = (e) => this.WsDataHandle(e);
+      if (this.idms_ws == null) {
+        console.info('idms ws connect fail');
+        this.WebSocketConnect();
+        return;
+      }
+
+      this.idms_ws.onmessage = (e) => {
+        this.ws_connecting = false;
+        this.WsDataHandle(e);
+      }
       this.idms_ws.onclose = () => {
         this.WebSocketConnect();
       }
     }
   },
   async mounted() {
+    this.renderKey = Date.now()
     this.ShowAllColums();
     this.WebSocketConnect();
 
   }
 }
 </script >
-<style scoped>
+<style >
+#idms-datatable {
+  height: 100%;
+}
 .display-item-selector {
   background-color: rgb(0, 0, 0);
   margin: 0 1px;
