@@ -55,56 +55,15 @@
         </vue-good-table>
       </div>
     </transition>
-    <transition name="el-zoom-in-bottom">
-      <div class="footer-content" v-if="showFootPanel">
-        <b-row>
-          <b-col cols="2" class="text-left pl-3">
-            <b-button-group class="font-weight-bold">
-              <b-button class="font-weight-bold" variant="info" squared>{{ selectedCell.rowName }}</b-button>
-              <b-button class="font-weight-bold" variant="dark" squared>{{ selectedCell.column }}</b-button>
-            </b-button-group>
-          </b-col>
-          <b-col cols="1"></b-col>
-          <b-col cols="2" class="threshold-reg text-left" v-loading="tresholdValueLoading">
-            <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4 thres-title">OOC閥值</b-col>
-              <b-col class="oo-style ooc-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{ selectOOCThresval }}</span>
-              </b-col>
-              <b-col class="text-right pr-4 thres-title">OOS閥值</b-col>
-              <b-col class="oo-style oos-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{ selectOOSThresval }}</span>
-              </b-col>
-            </b-row>
-          </b-col>
-          <b-col>
-            <b-button
-              id="reset-alarm-button"
-              variant="danger"
-              block
-              :disabled="!Resetable || this.$userInfo.level == 0"
-              @click="ResetAlarmHandle"
-            >
-              <span v-if="this.$userInfo.level != 0">RESET ALARM</span>
-              <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
-            </b-button>
-          </b-col>
-          <b-col class="text-right">
-            <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
-          </b-col>
-        </b-row>
-      </div>
-    </transition>
+
+    <DashboardFooter
+      :showFootPanel="showFootPanel"
+      :nowGroupName="nowGroupName"
+      :selectedCell="selectedCell"
+      @AlarmResetDone="AlarmResetDoneHandle"
+      @onClose="FootCloseHandle"
+    ></DashboardFooter>
+
     <threshold-setting-dialog-vue
       :show="thresSettingDialogShow"
       :options="thresHoldSettingOptions"
@@ -117,6 +76,7 @@
 import "vue-good-table/dist/vue-good-table.css";
 import ThresholdSettingDialogVue from "../ThresholdSettingDialog.vue";
 import { VueGoodTable } from "vue-good-table";
+import DashboardFooter from './DashboardFooter.vue'
 import {
   GroupSettingWSConnect,
   SensorRawDataWsConnect,
@@ -127,7 +87,7 @@ import {
 export default {
   components: {
     VueGoodTable,
-    ThresholdSettingDialogVue,
+    ThresholdSettingDialogVue, DashboardFooter
   },
   props: {
     groupInfo: Object,
@@ -222,12 +182,9 @@ export default {
 
       this.showFootPanel = false;
       setTimeout(async () => {
-
         this.selectedCell.column = params.column.field;
         this.selectedCell.rowName = params.row.RowName;
-        this.UpdateSelectedThresDisplay();
         this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-
         var statusObj = this.StatusMap[this.selectedKey];
         if (statusObj !== undefined) {
           statusObj.border = this.selectStyle.selected.border;
@@ -236,37 +193,19 @@ export default {
         this.showFootPanel = true;
       }, 100);
     },
-    ShowTresSettingDialog(type, oriVal) {
-      this.thresHoldSettingOptions.settingFor.thresType = type;
-      this.thresHoldSettingOptions.settingFor.originVal = oriVal;
-      this.thresHoldSettingOptions.sensor = {
-        groupName: this.nowGroupName,
-        rowName: this.selectedCell.rowName,
-        field: this.selectedCell.column,
-      };
-      this.thresSettingDialogShow = true;
-    },
-    async UpdateSelectedThresDisplay() {
-      this.tresholdValueLoading = true;
-      var returnData = await getThresholdSetting(
-        this.nowGroupName,
-        this.selectedCell.rowName,
-        this.selectedCell.column
-      );
-      if (returnData == null) {
-        this.$message.error(`${this.selectedCell.rowName}  ${this.selectedCell.column} 閥值資訊下載失敗`);
-        this.selectOOCThresval = 'known';
-        this.selectOOSThresval = 'known';
-      } else {
-
-        var ThresholdSetting = JSON.parse(returnData);
-        this.selectOOCThresval = ThresholdSetting["OOC"].toFixed(3);
-        this.selectOOSThresval = ThresholdSetting["OOS"].toFixed(3);
-      }
-      this.tresholdValueLoading = false;
-    },
     CloseFootPanel() {
       this.showFootPanel = false;
+    },
+    AlarmResetDoneHandle() {
+      this.$message.info(`已清除 ${this.selectedCell.rowName}  ${this.selectedCell.column} 的Alarm`);
+      var key = this.selectedKey + "";
+      this.StatusMap[this.selectedKey].backgroundColor = this.statusStyle.normal.backgroundColor;
+      this.selectedKey = -1;
+      setTimeout(() => {
+        this.selectedKey = key;
+      }, 300);
+    },
+    FootCloseHandle() {
       if (this.selectedKey != "") {
         var statusObj = this.StatusMap[this.selectedKey];
         if (statusObj !== undefined) {
@@ -274,27 +213,6 @@ export default {
           statusObj.padding = this.selectStyle.unselected.padding;
         }
         this.selectedKey = "";
-      }
-    },
-    async ResetAlarmHandle() {
-      var ok = await this.ShowConfirmMsgBox();
-      if (!ok) return;
-
-      var result = await ResetAlarm(
-        this.nowGroupName,
-        this.selectedCell.rowName,
-        this.selectedCell.column
-      );
-      console.info(`Reset alarm : ${this.selectedCell}`, result);
-      // this.showFootPanel = false;
-      if (result.toUpperCase() == 'OK') {
-        this.$message.info(`已清除 ${this.selectedCell.rowName}  ${this.selectedCell.column} 的Alarm`);
-        var key = this.selectedKey + "";
-        this.StatusMap[this.selectedKey].backgroundColor = this.statusStyle.normal.backgroundColor;
-        this.selectedKey = -1;
-        setTimeout(() => {
-          this.selectedKey = key;
-        }, 300);
       }
     },
     async ResetAllAlarmHandle() {
