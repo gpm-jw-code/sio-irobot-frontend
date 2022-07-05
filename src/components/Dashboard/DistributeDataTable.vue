@@ -17,8 +17,15 @@
 
     <transition name="el-zoom-in-top">
       <div id="group-name-display" v-if="groupNameDisplay">
-        GROUP :
-        <button class="font-weight-bold">{{nowGroupName}}</button>
+        <!-- GROUP :
+        <button class="font-weight-bold">{{nowGroupName}}</button>-->
+        <b-form-select
+          v-model="selectedGroupName"
+          :options="List_GroupName"
+          size="lg"
+          style="text-align: center"
+          @change="GroupSelectChangeHandle"
+        ></b-form-select>
       </div>
     </transition>
 
@@ -117,6 +124,7 @@ export default {
       columns: [],
       columnsOptions: [],
       nowGroupName: "",
+      selectedGroupName: "known",
       groupInfoWS: WebSocket,
       rawDataWS: WebSocket,
       StatusMap: {},
@@ -327,7 +335,7 @@ export default {
       setTimeout(() => {
         this.tableShow = true;
         this.columns = [];
-        this.nowGroupName = groupName;
+        this.nowGroupName = this.selectedGroupName = groupName;
         var I = 0;
         this.columns.push({
           label: "RowName",
@@ -355,6 +363,9 @@ export default {
 
       }, 200);
 
+    },
+    GroupSelectChangeHandle() {
+      this.changeGroup(this.selectedGroupName);
     },
     RenderGroupButtonsStyle(activeGroup) {
       var I = 0;
@@ -586,8 +597,7 @@ table.vgt-table td {
   width: 100%;
   z-index: 40;
   top: 60px;
-  opacity: 0.8;
+  opacity: 0.9;
   padding: 10px;
-  visibility: visible;
 }
 </style>
