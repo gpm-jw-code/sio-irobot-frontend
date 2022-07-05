@@ -39,18 +39,21 @@ export default {
   text-align: center;
   background-color: #2c3e50;
   color: white;
-  height: 100%;
   width: 100%;
-  position: fixed;
   overflow-y: scroll;
   z-index: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
 }
 
 body {
   margin: 0;
   padding: 0;
 }
-
 .selector-for-some-widget {
   box-sizing: content-box;
 }

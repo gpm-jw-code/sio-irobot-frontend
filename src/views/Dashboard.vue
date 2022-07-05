@@ -51,7 +51,6 @@ export default {
     }
   },
   async mounted() {
-
     this.showOut = true;
   },
   watch: {
