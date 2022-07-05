@@ -4,8 +4,8 @@
       <b-row>
         <b-col cols="2" class="text-left pl-3">
           <b-button-group class="font-weight-bold">
-            <b-button class="font-weight-bold" variant="info" squared>{{ selectedCell.rowName }}</b-button>
-            <b-button class="font-weight-bold" variant="dark" squared>{{ selectedCell.column }}</b-button>
+            <b-button class="font-weight-bold" variant="warning" squared>{{ selectedCell.rowName }}</b-button>
+            <b-button class="font-weight-bold" variant="light" squared>{{ selectedCell.column }}</b-button>
           </b-button-group>
         </b-col>
         <b-col cols="1"></b-col>
@@ -33,7 +33,7 @@
         </b-col>
         <b-col>
           <b-button
-            id="reset-alarm-button"
+            class="h-100"
             variant="danger"
             block
             :disabled=" this.$userInfo.level == 0"
@@ -42,6 +42,9 @@
             <span v-if="this.$userInfo.level != 0">RESET ALARM</span>
             <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
           </b-button>
+        </b-col>
+        <b-col class="text-right">
+          <b-button class="h-100" variant="light">即時數據圖表</b-button>
         </b-col>
         <b-col class="text-right">
           <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
@@ -227,10 +230,6 @@ export default {
   box-shadow: -10px 10px 22px 10px black;
   color: rgb(255, 255, 255);
   z-index: 13;
-}
-
-#reset-alarm-button {
-  height: 100%;
 }
 
 .threshold-reg {

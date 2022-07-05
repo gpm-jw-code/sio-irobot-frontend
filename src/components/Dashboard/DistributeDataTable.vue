@@ -53,6 +53,7 @@
             >{{ props.formattedRow[props.column.field] }}</div>
           </template>
         </vue-good-table>
+        <div style="height:80px"></div>
       </div>
     </transition>
 
@@ -136,7 +137,7 @@ export default {
       statusStyle: {
         normal: {
           // backgroundColor: 'rgb(71, 124, 71)',
-          backgroundColor: "black",
+          backgroundColor: "#171717",
           color: "white",
           border: "",
           padding: "",
@@ -166,7 +167,8 @@ export default {
       userInfo: {}
     };
   },
-  computed: {},
+  computed: {
+  },
   methods: {
     GetGroupButtonStyle(group) {
       var style = this.Dict_GroupButtonStyles[group];
@@ -347,7 +349,7 @@ export default {
       var I = 0;
       this.Dict_GroupButtonStyles = {};
       this.List_GroupName.forEach(group => {
-        this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'warning' : 'light'
+        this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'info' : 'light'
       });
       this.$dataInfo.Dict_GroupSetting[activeGroup].List_AllColumnName.forEach(
         (columname) => {
@@ -482,7 +484,7 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style >
 :root {
   --footer-height: 30px;
 }
@@ -503,5 +505,61 @@ h3 {
 
 .table-container {
   overflow-y: auto;
+}
+
+.inner-val:hover {
+  padding: 8px;
+  border: 2px solid rgb(17, 17, 17);
+}
+
+.vgt-table thead th {
+  color: black;
+  vertical-align: bottom;
+  border-bottom: 1px solid #004cff;
+  padding-right: 1.5em;
+  background: rgb(255, 255, 255);
+}
+
+table.vgt-table td {
+  padding: 0;
+  vertical-align: top;
+  background-color: #171717;
+  border-bottom: 1px solid #dcdfe6;
+  color: #ffffff;
+}
+
+.inner-val {
+  padding: 10px;
+  cursor: pointer;
+}
+.my-modal {
+  height: max-content;
+}
+
+.legend-btn {
+  width: 60px;
+  border: 1px solid black;
+}
+
+.ooc-style {
+  color: rgb(0, 136, 248);
+}
+.oos-style {
+  color: red;
+}
+.threshold-region-foot {
+  color: white;
+}
+.threval {
+  cursor: pointer;
+}
+.threval:hover {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.type-switch-btn {
+  width: 150px;
+  font-size: 20px;
 }
 </style>
