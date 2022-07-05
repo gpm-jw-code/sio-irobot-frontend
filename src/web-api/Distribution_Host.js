@@ -45,6 +45,17 @@ export async function GetEQIDList(edgeName = 'SIOIROBOT') {
     }
   })
 }
+export async function GetSensorInfo()
+{
+  return await new Promise(function(resolve,reject){
+    var ws = new WebSocket(`ws://localhost:8090/GPM/SensorInfo`);
+    ws.onopen=()=>{console.log('ws SensorInfo Connect')};
+    ws.onmessage=(ret)=>{
+      ws.close();
+      resolve(JSON.parse(ret.data));
+    }
+  })
+}
 /**取得所有感測項目列表 */
 export async function GetFieldList(edgeName = 'SIOIROBOT') {
   return await new Promise(function (resolve, reject) {

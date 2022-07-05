@@ -37,9 +37,9 @@
         >
           <b-form-checkbox
             v-for="sensorType in sensorTypes"
-            :key="sensorType.field"
-            :value="sensorType.field"
-            >{{ sensorType.label }}</b-form-checkbox
+            :key="sensorType"
+            :value="sensorType"
+            >{{ sensorType }}</b-form-checkbox
           >
         </b-form-checkbox-group>
       </b-dropdown-form>
@@ -85,7 +85,6 @@ export default {
       this.$emit("groupsSelectedOnChange", this.selectGroups);
     },
     RowChange() {
-      console.log(this.selectRows);
       this.$emit("rowSelectedOnchange", this.selectRows);
     },
     SensorTypesChange() {
@@ -120,7 +119,6 @@ export default {
     },
     groupNames: {
       get() {
-        console.log(123);
         var groupItems = [];
         var NewGroupItem = {};
         NewGroupItem.value = "";
@@ -133,7 +131,6 @@ export default {
           groupItems.push(NewGroupItem);
         });
 
-        console.log(groupItems);
         return groupItems;
       },
     },
@@ -145,13 +142,26 @@ export default {
         );
       },
     },
+    sensorTypes: {
+      get() {
+        var Types = [];
+        if (this.selectGroups == "") return null;
+        this.$dataInfo.AllSensorInfo.forEach((element) => {
+          if (this.$dataInfo.Dict_GroupSetting[this.selectGroups].List_SensorName.includes(element.SensorName)) 
+          {
+            if (!Types.includes(element.SensorType)) 
+            {
+              Types.push(element.SensorType);
+            }
+          }
+        });
+        return Types;
+      },
+    },
     eqidls: {
       get() {
         return this.$dataInfo.eqidls;
       },
-    },
-    sensorTypes() {
-      return this.$dataInfo.fields;
     },
   },
   mounted() {

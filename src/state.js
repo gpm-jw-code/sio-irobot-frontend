@@ -15,6 +15,7 @@ var dataInfo={
     Dict_GroupSetting: Object,
     eqidls:[],
     fields: [],
+    AllSensorInfo:[],
 }
 
 var caches={

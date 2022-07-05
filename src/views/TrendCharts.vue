@@ -138,7 +138,7 @@
 <script>
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
-import { Query } from '../web-api/Distribution_Host';
+import { Query,GetSensorInfo } from '../web-api/Distribution_Host';
 import { QueryAll } from '../web-api/Query';
 import moment from 'moment';
 export default {
@@ -178,10 +178,14 @@ export default {
       keywordsInput: ""
     }
   },
-  mounted() {
+  async mounted() {
     console.log('mounted');
     this.DisplayModeHandle();
     this.ReloadQueryParamFromLocalStorage();
+    this.$dataInfo.AllSensorInfo = await GetSensorInfo();
+   
+   // this.$dataInfo.AllSensorInfo = JSON.parse(await GetSensorInfo()) ;
+    console.log("TT",this.$dataInfo.AllSensorInfo);
   },
   beforeDestroy() {
     console.log('beforeDestroy');
@@ -356,7 +360,6 @@ export default {
     },
     AllEqidList() {
       var ls = [];
-      console.log(this.$dataInfo);
       this.$dataInfo.eqidls.forEach(eqid => {
         ls.push(eqid);
       })
