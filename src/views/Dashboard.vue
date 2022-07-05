@@ -33,6 +33,7 @@ import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue'
 import { VueGoodTable } from 'vue-good-table';
 import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 import DistributeTable from '../components/Dashboard/DistributeDataTable.vue'
+
 export default {
   components: {
     VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable
@@ -50,6 +51,7 @@ export default {
     }
   },
   async mounted() {
+
     this.showOut = true;
   },
   watch: {
@@ -66,9 +68,6 @@ export default {
 </script>
 
 <style >
-.dashboard {
-}
-
 .foot-panel {
   width: 100%;
   bottom: 0;

@@ -3,18 +3,6 @@
     <div class="loginPage">
       <div class="login-form pt-3">
         <h1 class="mb-3 pb-3 text-white">LOGIN</h1>
-        <!-- <b-form-input
-            v-model="form.userName"
-            class="text-center input-item"
-            placeholder="USER NAME"
-            title="?"
-          ></b-form-input>
-          <b-form-input
-            v-model="form.password"
-            class="text-center"
-            placeholder="PASSWORD"
-            type="password"
-        ></b-form-input>-->
         <div>
           <input class="login-input" type="text" placeholder="User Name" v-model="form.userName" />
         </div>
@@ -22,15 +10,15 @@
           <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
         </div>
         <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
-        <b-button class="mt-1" block squared @click="LoginHandle(false)" variant="primary">登入</b-button>
-        <b-button class block squared @click="LoginHandle(true)">取消</b-button>
-
-        <b-row class="mt-4">
+        <p class="logining-info" v-show="logining">登入中...</p>
+        <b-button class="action-btn" id="login-btn" squared @click="LoginHandle(false)">登入</b-button>
+        <b-button class="action-btn" id="cancel-btn" squared @click="LoginHandle(true)">取消</b-button>
+        <b-row class="mt-3 ml-0 regist">
           <b-col>
             <b-form-checkbox>儲存登入資訊</b-form-checkbox>
           </b-col>
           <b-col class="text-right mr-1">
-            <span class="regist" size="small">註冊</span>
+            <span size="small">註冊</span>
           </b-col>
         </b-row>
       </div>
@@ -44,6 +32,7 @@ export default {
   components: {},
   data() {
     return {
+      logining: false,
       form: {
         userName: '',
         password: ''
@@ -54,7 +43,15 @@ export default {
   },
   computed: {},
   watch: {
-
+    $route: {
+      handler: function (from) {
+        this.logining = false;
+        this.loginResult.success = true;
+        console.log(from);
+      },
+      deep: true,
+      immediate: true
+    }
   },
   methods: {
     async LoginHandle(cancel = false) {
@@ -63,15 +60,18 @@ export default {
         this.$router.push({ name: this.$route.params.from });
         return;
       }
-
+      this.logining = true;
       if (this.form.userName.toUpperCase() == "KKK") {
         this.$userInfo.login = true;
         this.$userInfo.level = 3;
         this.$userInfo.userName = "Developer";
         this.$router.push({ name: this.$route.params.from, params: userInfo });
+        this.$bus.$emit("admin-login", "^_^");
       }
 
       this.loginResult = await Login(this.form.userName, this.form.password);
+
+      this.logining = false;
       if (this.loginResult.success) {
         var userInfo = {
           login: true,
@@ -94,13 +94,6 @@ export default {
   },
   mounted() {
   },
-  beforeCreate() { }, //生命周期 - 创建之前
-  beforeMount() { }, //生命周期 - 挂载之前
-  beforeUpdate() { }, //生命周期 - 更新之前
-  updated() { }, //生命周期 - 更新之后
-  beforeDestroy() { }, //生命周期 - 销毁之前
-  destroyed() { }, //生命周期 - 销毁完成
-  activated() { }, //如果页面有keep-alive缓存功能，这个函数会触发
 }
 </script>
 <style  scoped>
@@ -128,14 +121,36 @@ export default {
 }
 
 .login-fail {
-  color: red;
+  color: white;
+  background-color: rgb(255 0 0 / 30%);
+}
+.logining-info {
+  color: white;
 }
 
 .regist {
   cursor: pointer;
-  color: rgb(2, 2, 2);
+  color: rgb(255, 255, 255);
+  background-color: #687eaf;
+  padding: 3px;
+  width: 100%;
+  opacity: 0.7;
 }
 
+.action-btn {
+  width: 180px;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+.action-btn:hover {
+  background-color: goldenrod;
+}
+#login-btn {
+  background-color: #4e6086;
+}
+#cancel-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 .input-item {
   background-color: red;
 }
@@ -145,21 +160,16 @@ export default {
   width: 100%;
   text-align: center;
   color: white;
-  border: none;
   margin-bottom: 10px;
   height: 50px;
-}
-
-input[type="text"],
-textarea {
-  background-color: transparent;
-  color: white;
+  /* border-radius: 1rem; */
 }
 
 input[type="text"],
 input[type="password"],
 textarea:-webkit-autofill {
   background-color: transparent !important;
+  border-bottom: 0.1rem solid white;
 }
 
 ::placeholder {

@@ -14,9 +14,7 @@ import { userInfo, dataInfo, caches } from './state'
 import { Chart } from 'chart.js'
 import VueObserveVisibility from 'vue-observe-visibility'
 import Bus from './bus'
-
 Vue.use(VueObserveVisibility)
-
 Vue.component('apexchart', VueApexCharts)
 Vue.use(ElementUI)
 Vue.use(VueApexCharts)

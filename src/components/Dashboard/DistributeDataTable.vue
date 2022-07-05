@@ -1,22 +1,24 @@
 <template >
   <div class="p-1 text-white">
-    <h3 class="mt-2">-GROUPS-</h3>
-    <div class="group-button-container">
-      <b-button
-        size="lg"
-        squared
-        class="m-2"
-        @click="changeGroup(item)"
-        v-for="item in List_GroupName"
-        :key="item"
-        :variant="GetGroupButtonStyle(item)"
-      >{{ item }}</b-button>
-    </div>
+    <h3 class="font-weight-bold mt-2">-GROUPS-</h3>
+    <transition name="el-fade-in">
+      <div class="group-button-container" v-show="groupsShow">
+        <b-button
+          class="m-1"
+          size="lg"
+          squared
+          @click="changeGroup(item)"
+          v-for="item in List_GroupName"
+          :key="item"
+          :variant="GetGroupButtonStyle(item)"
+        >{{ item }}</b-button>
+      </div>
+    </transition>
 
     <el-divider></el-divider>
-    <h3 class="mt-5">-DATA TABLE-</h3>
+    <h3 class="font-weight-bold mt-5">-DATA TABLE-</h3>
 
-    <div class="text-left pt-2 pl-3 pr-2" @click="CloseFootPanel">
+    <div class="text-left pt-2 pl-3 pr-2">
       <b-row>
         <b-col>
           <b-button class="legend-btn" squared size="sm" variant="light">正常</b-button>
@@ -31,7 +33,7 @@
     </div>
 
     <transition name="el-fade-in">
-      <div class="pl-3 pr-3">
+      <div class="table-container pl-3 pr-3">
         <vue-good-table
           v-show="tableShow"
           :key="selectedKey"
@@ -57,24 +59,16 @@
       <div class="footer-content" v-if="showFootPanel">
         <b-row>
           <b-col cols="2" class="text-left pl-3">
-            <b-button-group>
-              <b-button variant="info" squared>
-                {{
-                selectedCell.rowName
-                }}
-              </b-button>
-              <b-button variant="light" squared>
-                {{
-                selectedCell.column
-                }}
-              </b-button>
+            <b-button-group class="font-weight-bold">
+              <b-button class="font-weight-bold" variant="info" squared>{{ selectedCell.rowName }}</b-button>
+              <b-button class="font-weight-bold" variant="dark" squared>{{ selectedCell.column }}</b-button>
             </b-button-group>
           </b-col>
           <b-col cols="1"></b-col>
-          <b-col cols="2" class="text-left threshold-region-foot">
+          <b-col cols="2" class="threshold-reg text-left" v-loading="tresholdValueLoading">
             <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4">OOC閥值</b-col>
-              <b-col class="ooc-style">
+              <b-col class="text-right pr-4 thres-title">OOC閥值</b-col>
+              <b-col class="oo-style ooc-style">
                 <span
                   class="threval"
                   @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
@@ -82,9 +76,8 @@
                   title="點一下進行設定"
                 >{{ selectOOCThresval }}</span>
               </b-col>
-
-              <b-col class="text-right pr-4">OOS閥值</b-col>
-              <b-col class="oos-style">
+              <b-col class="text-right pr-4 thres-title">OOS閥值</b-col>
+              <b-col class="oo-style oos-style">
                 <span
                   class="threval"
                   @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
@@ -97,7 +90,7 @@
           <b-col>
             <b-button
               id="reset-alarm-button"
-              variant="light"
+              variant="danger"
               block
               :disabled="!Resetable || this.$userInfo.level == 0"
               @click="ResetAlarmHandle"
@@ -146,7 +139,9 @@ export default {
   data() {
     return {
       style_str: "color:red",
-      tableShow: true,
+      tableShow: false,
+      groupsShow: false,
+      tresholdValueLoading: true,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
@@ -193,7 +188,7 @@ export default {
           padding: "",
         },
         out_of_control: {
-          backgroundColor: "#a5b600", //屎黃色
+          backgroundColor: "rgb(0,105,217)", //屎黃色
           color: "white",
           border: "",
           padding: "",
@@ -226,13 +221,20 @@ export default {
       });
 
       this.showFootPanel = false;
-      this.selectedCell.column = params.column.field;
-      this.selectedCell.rowName = params.row.RowName;
-      this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-      this.StatusMap[this.selectedKey].border = this.selectStyle.selected.border;
-      this.StatusMap[this.selectedKey].padding = this.selectStyle.selected.padding;
-      await this.UpdateSelectedThresDisplay();
-      this.showFootPanel = true;
+      setTimeout(async () => {
+
+        this.selectedCell.column = params.column.field;
+        this.selectedCell.rowName = params.row.RowName;
+        this.UpdateSelectedThresDisplay();
+        this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
+
+        var statusObj = this.StatusMap[this.selectedKey];
+        if (statusObj !== undefined) {
+          statusObj.border = this.selectStyle.selected.border;
+          statusObj.padding = this.selectStyle.selected.padding;
+        }
+        this.showFootPanel = true;
+      }, 100);
     },
     ShowTresSettingDialog(type, oriVal) {
       this.thresHoldSettingOptions.settingFor.thresType = type;
@@ -245,32 +247,39 @@ export default {
       this.thresSettingDialogShow = true;
     },
     async UpdateSelectedThresDisplay() {
+      this.tresholdValueLoading = true;
       var returnData = await getThresholdSetting(
         this.nowGroupName,
         this.selectedCell.rowName,
         this.selectedCell.column
       );
-      var ThresholdSetting = JSON.parse(returnData);
-      if (ThresholdSetting == null) {
-        return;
-      }
+      if (returnData == null) {
+        this.$message.error(`${this.selectedCell.rowName}  ${this.selectedCell.column} 閥值資訊下載失敗`);
+        this.selectOOCThresval = 'known';
+        this.selectOOSThresval = 'known';
+      } else {
 
-      this.selectOOCThresval = ThresholdSetting["OOC"];
-      this.selectOOSThresval = ThresholdSetting["OOS"];
+        var ThresholdSetting = JSON.parse(returnData);
+        this.selectOOCThresval = ThresholdSetting["OOC"];
+        this.selectOOSThresval = ThresholdSetting["OOS"];
+      }
+      this.tresholdValueLoading = false;
     },
     CloseFootPanel() {
       this.showFootPanel = false;
       if (this.selectedKey != "") {
-        this.StatusMap[this.selectedKey].border = this.selectStyle.unselected.border;
-        this.StatusMap[this.selectedKey].padding = this.selectStyle.unselected.padding;
+        var statusObj = this.StatusMap[this.selectedKey];
+        if (statusObj !== undefined) {
+          statusObj.border = this.selectStyle.unselected.border;
+          statusObj.padding = this.selectStyle.unselected.padding;
+        }
         this.selectedKey = "";
       }
-
     },
     async ResetAlarmHandle() {
       var ok = await this.ShowConfirmMsgBox();
       if (!ok) return;
-      //TODO backend reset alarm
+
       var result = await ResetAlarm(
         this.nowGroupName,
         this.selectedCell.rowName,
@@ -306,7 +315,6 @@ export default {
       console.log(result);
 
       if (result) {
-        //TODO backend
         await ResetAlarm(this.nowGroupName, 'All', 'All');
       }
     },
@@ -414,7 +422,7 @@ export default {
         this.dataRows = this.Dict_GroupDataRows[groupName];
         this.CloseFootPanel();
 
-      }, 100);
+      }, 200);
 
     },
     RenderGroupButtonsStyle(activeGroup) {
@@ -443,6 +451,7 @@ export default {
       while (this.rawDataWS == "network_error") {
         this.rawDataWS = await SensorRawDataWsConnect();
       }
+      console.info('CT Raw Data WS Connected');
       this.rawDataWS.onmessage = (e) => this.RawDataHandle(e);
       this.rawDataWS.onclose = () => {
         this.RawDataWSConnect();
@@ -451,7 +460,6 @@ export default {
     RawDataHandle(e) {
       var SensorData = JSON.parse(e.data);
       var sensorName = SensorData.SensorName;
-
       this.List_GroupName.forEach((EachGroupName) => {
         var NowGroup = this.$dataInfo.Dict_GroupSetting[EachGroupName];
         if (!NowGroup.List_SensorName.includes(sensorName)) return;
@@ -473,7 +481,7 @@ export default {
                   "_"
                 );
 
-                eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
+                eachRow[NewDataName] = Dict_RawData[TargetDataName].value.toFixed(3);
 
                 var _style = this.GetAlarmStatesStyle(Dict_RawData, TargetDataName);
 
@@ -498,7 +506,6 @@ export default {
       });
 
       if (this.nowGroupName === "") return;
-
       var NowGroup = this.$dataInfo.Dict_GroupSetting[this.nowGroupName];
       if (!NowGroup.List_SensorName.includes(sensorName)) return;
 
@@ -520,7 +527,7 @@ export default {
               ".",
               "_"
             );
-            eachRow[NewDataName] = Dict_RawData[TargetDataName].value;
+            eachRow[NewDataName] = Dict_RawData[TargetDataName].value.toFixed(3);
           });
         }
       });
@@ -538,6 +545,9 @@ export default {
   async mounted() {
     this.WebSocketConnect();
     this.RawDataWSConnect();
+    setTimeout(() => {
+      this.groupsShow = true;
+    }, 500);
   },
   watch: {
     $userInfo: {
@@ -551,7 +561,7 @@ export default {
   }
 };
 </script>
-<style>
+<style scoped>
 :root {
   --footer-height: 30px;
 }
@@ -559,6 +569,10 @@ body {
   padding: 0;
   margin: 0;
 }
+h3 {
+  letter-spacing: 0.2em;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -567,12 +581,7 @@ body {
   color: #2c3e50;
   margin-top: 60px;
 }
-.main {
-  overflow-y: auto;
-}
-.footer {
-  height: var(--footer-height);
-}
+
 .footer-content {
   position: fixed;
   bottom: 0;
@@ -580,12 +589,12 @@ body {
   line-height: var(--footer-height);
   background: #343a40;
   box-shadow: 10px 10px 22px 10px black;
-  color: #fff;
+  color: rgb(255, 255, 255);
 }
 
 .group-button-container {
   background-color: rgb(12, 12, 23, 0.3);
-  border: 1px solid black;
+  border: 1px dashed rgb(199, 199, 199);
   padding: 20px;
   margin: auto 15px;
 }
@@ -594,7 +603,23 @@ body {
   height: 100%;
 }
 
-h3 {
-  letter-spacing: 0.2em;
+.threshold-reg {
+  color: black;
+  background-color: #2c3e50;
+  border: 1px solid rgb(185, 185, 185);
+  margin: 2px;
+  border-radius: 5px;
+}
+
+.thres-title {
+  color: rgb(255, 255, 255);
+}
+
+.oo-style {
+  text-decoration: underline;
+}
+
+.table-container {
+  overflow-y: auto;
 }
 </style>
