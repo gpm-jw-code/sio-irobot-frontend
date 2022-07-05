@@ -11,7 +11,14 @@
       yAxisLabel="Y軸 Title"
       style="width:100%;height:400px"
     ></gchart>
-
+    <gchart
+      ref="gchart2"
+      id="demo-chart2"
+      title="圖標題"
+      xAxisLabel="X軸 Title"
+      yAxisLabel="Y軸 Title"
+      style="width:100%;height:400px"
+    ></gchart>
     <el-divider></el-divider>
     <h1>Others</h1>
   </div>
@@ -33,11 +40,10 @@ export default {
         borderColor: 'lime'
       }]
       this.$refs.gchart.Update(timeList, datasets)
+      this.$refs.gchart2.Update(timeList, datasets)
     }
   },
 }
 </script>
 <style>
-h1 {
-}
 </style>

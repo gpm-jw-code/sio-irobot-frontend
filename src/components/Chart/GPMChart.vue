@@ -4,6 +4,7 @@
   </div>
 </template>
 <script>
+import { BIconJournal } from 'bootstrap-vue';
 import Chart from 'chart.js'
 export default {
   props: {
@@ -110,11 +111,11 @@ export default {
       });
       this.chartInstance.options.animation = false;
     },
+    /**dsfsdf */
     Update(timeList, dataSets) {
       console.info('chart render');
       this.chartInstance.data.labels = timeList;
       this.chartInstance.data.datasets = [];
-
       dataSets.forEach(dataObj => {
         this.chartInstance.data.datasets.push({
           label: dataObj.label,
@@ -127,10 +128,61 @@ export default {
           pointRadius: 0, lineTension: 0,
         })
       })
-
       //   this.chartInstance.options = this.options;
       this.chartInstance.update();
+    },
+    Append(time, dataSets) {
+      if (dataSets.length == 0)
+        return;
 
+      var dataAry = [];
+      var timeAry = [];
+      dataAry = this.chartInstance.data.datasets;
+      timeAry = this.chartInstance.data.labels;
+
+      timeAry.push(time);
+
+      dataSets.forEach(dataObj => {
+        var series = dataAry.find(s => s.label == dataObj.label);
+        if (series) {
+          series.data.push(dataObj.data);
+        } else {
+          dataAry.push({
+            label: dataObj.label,
+            data: [dataObj.data],
+            backgroundColor: "",
+            borderColor: dataObj.borderColor ? dataObj.borderColor : 'blue',
+            borderWidth: dataObj.borderWidth ? dataObj.borderWidth : 1,
+            fill: false,
+            pointStyle: 'none',
+            pointRadius: 0, lineTension: 0,
+          })
+        }
+      })
+      this.DataFIFO();
+      this.chartInstance.update();
+
+    },
+    DataFIFO() {
+      if (this.chartInstance.data.labels.length > 50) {
+        this.chartInstance.data.labels.splice(0, 1);
+        this.chartInstance.data.datasets.forEach(s => {
+          s.data.splice(0, 1)
+        })
+      }
+    }
+  },
+  computed: {
+    currentDataSet() {
+      var dataAry = [];
+      this.chartInstance.data.datasets.forEach(s => {
+        dataAry.push(s.data)
+      })
+
+      return {
+        labels: this.chartInstance.data.labels,
+        datas: dataAry
+      }
     }
   },
   mounted() {
