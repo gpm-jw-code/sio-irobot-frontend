@@ -1,10 +1,10 @@
 <template>
-  <div v-bind:style="chart_style">
+  <div v-bind:style="chart_style" v-loading="loading">
     <canvas :id="id"></canvas>
   </div>
 </template>
 <script>
-import { BIconJournal } from 'bootstrap-vue';
+
 import Chart from 'chart.js'
 export default {
   props: {
@@ -25,9 +25,9 @@ export default {
       default: "YLabel"
     }
   },
-
   data() {
     return {
+      loading: false,
       chart_style: {
         backgroundColor: '#202020',
         border: '1px solid grey',
@@ -38,6 +38,10 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
         lineTension: 0,
+        tooltips: {
+          mode: 'index',
+          intersect: true
+        },
         layout: {
           padding: {
             bottom: 20
@@ -91,33 +95,43 @@ export default {
             }
           }]
         },
+        annotation: {
+          drawTime: 'afterDraw',
+          annotations: [{
+            type: 'line',
+            id: 'line',
+            mode: 'horizontal',
+            scaleID: 'y-axis-0',
+            value: 2,
+            borderWidth: 2,
+            borderColor: 'red'
+          }]
+        },
+
       },
-      datasets: []
+      xlabels: [],
+      datasets: [],
     }
   },
   methods: {
     ChartInit() {
-      console.info('chartini', this.id);
       const ctx = document.getElementById(this.id);
-
-      console.info(this.options);
       this.chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: [],
           datasets: []
         },
-        options: this.options
+        options: this.options,
       });
       this.chartInstance.options.animation = false;
     },
-    /**dsfsdf */
-    Update(timeList, dataSets) {
-      console.info('chart render');
-      this.chartInstance.data.labels = timeList;
-      this.chartInstance.data.datasets = [];
-      dataSets.forEach(dataObj => {
-        this.chartInstance.data.datasets.push({
+    Update(timeList, dataSetsInput) {
+      this.loading = true;
+      this.xlabels = timeList;
+      this.datasets = [];
+      dataSetsInput.forEach(dataObj => {
+        this.datasets.push({
           label: dataObj.label,
           data: dataObj.data,
           backgroundColor: "",
@@ -128,26 +142,22 @@ export default {
           pointRadius: 0, lineTension: 0,
         })
       })
-      //   this.chartInstance.options = this.options;
-      this.chartInstance.update();
+      setTimeout(() => {
+        this.loading = false;
+        this.RenderData();
+      }, 200);
     },
-    Append(time, dataSets) {
+
+    FeedData(time, dataSets) {
       if (dataSets.length == 0)
         return;
-
-      var dataAry = [];
-      var timeAry = [];
-      dataAry = this.chartInstance.data.datasets;
-      timeAry = this.chartInstance.data.labels;
-
-      timeAry.push(time);
-
+      this.xlabels.push(time);
       dataSets.forEach(dataObj => {
-        var series = dataAry.find(s => s.label == dataObj.label);
+        var series = this.datasets.find(s => s.label == dataObj.label);
         if (series) {
           series.data.push(dataObj.data);
         } else {
-          dataAry.push({
+          this.datasets.push({
             label: dataObj.label,
             data: [dataObj.data],
             backgroundColor: "",
@@ -160,13 +170,17 @@ export default {
         }
       })
       this.DataFIFO();
+      this.RenderData();
+    },
+    RenderData() {
+      this.chartInstance.data.labels = this.xlabels;
+      this.chartInstance.data.datasets = this.datasets;
       this.chartInstance.update();
-
     },
     DataFIFO() {
-      if (this.chartInstance.data.labels.length > 50) {
-        this.chartInstance.data.labels.splice(0, 1);
-        this.chartInstance.data.datasets.forEach(s => {
+      if (this.xlabels.length > 50) {
+        this.xlabels.splice(0, 1);
+        this.datasets.forEach(s => {
           s.data.splice(0, 1)
         })
       }

@@ -33,7 +33,7 @@ export default {
       var data = moment(Date.now()).millisecond() / 10.0;
       var data2 = moment(Date.now()).millisecond() / 60.0;
 
-      this.chart.Append(timestr, [{
+      this.chart.FeedData(timestr, [{
         data: data,
         label: 'data',
         borderColor: 'gold',
