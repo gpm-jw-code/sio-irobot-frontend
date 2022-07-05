@@ -32,8 +32,12 @@ export default {
   },
   async mounted() {
     var networkConfigs = await GetNetworkConfigs();
-    console.info('network configs:', networkConfigs);
-    inner_functions.change_control_center_ws_host(networkConfigs.controlCenterWsHost);
+    if (networkConfigs !== 'network_error') {
+      console.info('network configs:', networkConfigs);
+      inner_functions.change_control_center_ws_host(networkConfigs.controlCenterWsHost);
+    } else {
+      console.error('從後端取得網路參數配置失敗,使用預設值')
+    }
   }
 };
 </script>

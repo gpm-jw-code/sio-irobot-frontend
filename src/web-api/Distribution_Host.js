@@ -1,5 +1,5 @@
 import axios from 'axios'
-axios.defaults.baseURL = 'http://192.168.0.201:8080'
+axios.defaults.baseURL = 'http://localhost:8080'
 export var control_center_ws_host = 'ws://localhost:8090'
 /**使用者登入 */
 export async function Login(user = { userName: '', password: '' }) {
