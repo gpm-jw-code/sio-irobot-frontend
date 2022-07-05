@@ -1,5 +1,5 @@
 <template >
-  <div class="p-1 text-white">
+  <div class="text-white">
     <h3 class="font-weight-bold mt-2">-GROUPS-</h3>
     <transition name="el-fade-in">
       <div class="group-button-container" v-show="groupsShow">
@@ -12,6 +12,13 @@
           @click="changeGroup(item)"
           :variant="GetGroupButtonStyle(item)"
         >{{ item }}</b-button>
+      </div>
+    </transition>
+
+    <transition name="el-zoom-in-top">
+      <div id="group-name-display" v-if="groupNameDisplay">
+        GROUP :
+        <button class="font-weight-bold">{{nowGroupName}}</button>
       </div>
     </transition>
 
@@ -164,10 +171,14 @@ export default {
           border: "",
         },
       },
-      userInfo: {}
+      userInfo: {},
+      groupNameDisplay: false
     };
   },
   computed: {
+    FixDataRows() {
+      return [this.dataRows[0]]
+    }
   },
   methods: {
     GetGroupButtonStyle(group) {
@@ -471,6 +482,11 @@ export default {
         this.groupsShow = true;
       }, 500);
     });
+
+    window.addEventListener("scroll", (event) => {
+      this.groupNameDisplay = event.target.scrollTop > 400;
+    }, true);
+
   },
   watch: {
     $userInfo: {
@@ -561,5 +577,17 @@ table.vgt-table td {
 .type-switch-btn {
   width: 150px;
   font-size: 20px;
+}
+#group-name-display {
+  font-size: 30px;
+  background-color: white;
+  color: black;
+  position: absolute;
+  width: 100%;
+  z-index: 40;
+  top: 60px;
+  opacity: 0.8;
+  padding: 10px;
+  visibility: visible;
 }
 </style>
