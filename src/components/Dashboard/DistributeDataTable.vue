@@ -24,7 +24,7 @@
           :options="List_GroupName"
           size="lg"
           style="text-align: center"
-          @change="GroupSelectChangeHandle"
+          @change="()=>changeGroup(selectedGroupName)"
         ></b-form-select>
       </div>
     </transition>
@@ -364,9 +364,6 @@ export default {
       }, 200);
 
     },
-    GroupSelectChangeHandle() {
-      this.changeGroup(this.selectedGroupName);
-    },
     RenderGroupButtonsStyle(activeGroup) {
       var I = 0;
       this.Dict_GroupButtonStyles = {};
@@ -495,7 +492,7 @@ export default {
     });
 
     window.addEventListener("scroll", (event) => {
-      this.groupNameDisplay = event.target.scrollTop > 400;
+      this.groupNameDisplay = event.target.scrollTop > 230;
     }, true);
 
   },
@@ -597,7 +594,6 @@ table.vgt-table td {
   width: 100%;
   z-index: 40;
   top: 60px;
-  opacity: 0.9;
   padding: 10px;
 }
 </style>
