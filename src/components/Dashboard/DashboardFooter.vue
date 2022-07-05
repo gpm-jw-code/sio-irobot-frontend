@@ -1,6 +1,6 @@
 <template >
   <transition name="el-zoom-in-bottom">
-    <div class="footer-content" v-if="showing">
+    <div class="footer-content" v-if="showing" id="dashboard-footer">
       <b-row>
         <b-col cols="2" class="text-left pl-3">
           <b-button-group class="font-weight-bold">
@@ -96,8 +96,10 @@ export default {
       if (newValue != oldValue && newValue) {
         console.log(this.selectedCell.rowName, this.selectedCell.column);
         this.UpdateSelectedThresDisplay();
+        this.$bus.$emit('footPanelShow', this.height);
       } else {
         this.$emit('onClose');
+        this.$bus.$emit('footPanelOnClose');
       }
       this.showing = newValue;
 
@@ -110,6 +112,7 @@ export default {
       tresholdValueLoading: true,
       selectOOCThresval: -1,
       selectOOSThresval: -1,
+      height: 62,
       thresHoldSettingOptions: {
         settingFor: {
           thresType: "OOS",
@@ -123,6 +126,10 @@ export default {
     }
   },
   methods: {
+    GetHeight() {
+      //   console.log(dom.clientHeight);
+      return 40;
+    },
     ShowTresSettingDialog(type, oriVal) {
       this.thresHoldSettingOptions.settingFor.thresType = type;
       this.thresHoldSettingOptions.settingFor.originVal = oriVal;
@@ -156,6 +163,7 @@ export default {
     CloseFootPanel() {
       this.showing = false;
       this.$emit('onClose');
+      this.$bus.$emit('footPanelOnClose');
 
     },
     async ResetAlarmHandle() {
@@ -203,17 +211,22 @@ export default {
       else this.selectOOSThresval = val;
     },
   },
+
+  updated() {
+    var dom = document.getElementById('dashboard-footer');
+    this.height = dom.clientHeight;
+  },
 }
 </script>
-<style scoped>
+<style>
 .footer-content {
   position: fixed;
   bottom: 0;
   width: 100%;
-  line-height: var(--footer-height);
   background: #343a40;
   box-shadow: 10px 10px 22px 10px black;
   color: rgb(255, 255, 255);
+  z-index: 13;
 }
 
 #reset-alarm-button {

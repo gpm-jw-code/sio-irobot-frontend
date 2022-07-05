@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show" class="scroll-to-top" id="sctbtn">
+  <div v-if="show" id="sctbtn" v-bind:style="btnStyle">
     <div class="h2 mb-0">
       <b-icon
         id="scroll-top-btn"
@@ -17,6 +17,10 @@ export default {
   data() {
     return {
       show: false,
+      btnStyle: {
+        bottom: '30px'
+      },
+      bottom_offset_tmp: ""
     };
   },
   methods: {
@@ -26,23 +30,39 @@ export default {
         behavior: "smooth",
       });
     },
+    Offset() {
+    }
   },
   mounted() {
     window.addEventListener("scroll", (event) => {
+      this.btnStyle.bottom = this.bottom_offset_tmp
       this.show = event.target.scrollTop > 100;
     }, true);
 
+    this.$bus.$on('footPanelShow', (height) => {
+      this.bottom_offset_tmp = `${height + 5}px`;
+      if (!this.show)
+        return;
+      this.btnStyle.bottom = this.bottom_offset_tmp
+    });
+
+    this.$bus.$on('footPanelOnClose', () => {
+      this.bottom_offset_tmp = '30px'
+      if (!this.show)
+        return;
+      this.btnStyle.bottom = '30px'
+    });
 
   },
 };
 </script>
 
 <style>
-.scroll-to-top {
+#sctbtn {
   position: fixed;
   bottom: 30px;
   right: 42px;
-  z-index: 12312312;
+  z-index: 12;
 }
 
 #scroll-top-btn {
