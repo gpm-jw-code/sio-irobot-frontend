@@ -1,6 +1,5 @@
 <template >
   <div class="pt-3">
-    <h1>REAL-TIME VIEWER</h1>
     <div class="rt-chart-container">
       <GPMChartVue class="h-100" ref="chart" id="rt-chart" :title="ChartOptions.title"></GPMChartVue>
     </div>
@@ -51,7 +50,7 @@ export default {
 
 <style >
 .rt-chart-container {
-  height: 400px;
+  height: 80vh;
   margin: 10px;
 }
 </style>
