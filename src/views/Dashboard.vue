@@ -33,10 +33,9 @@ import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue'
 import { VueGoodTable } from 'vue-good-table';
 import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 import DistributeTable from '../components/Dashboard/DistributeDataTable.vue'
-
 export default {
   components: {
-    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable
+    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable,
   },
   data() {
     return {

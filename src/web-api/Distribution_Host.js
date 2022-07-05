@@ -2,14 +2,13 @@ import { GetNetworkConfigs } from '../web-api/Backend/NetworkConfigsAPI'
 import Bus from '../bus'
 
 GetNetworkConfigs().then((config) => {
-  console.info(config)
-  if (config != 'netwrok_error') {
+  if (config != 'network_error') {
     control_center_ws_host = config.controlCenterWsHost
   }
   Bus.$emit('network_configs_download_done')
 })
 
-export var control_center_ws_host = 'ws://localhost:8090'
+var control_center_ws_host = 'ws://localhost:8090'
 /**Reset Alarm  */
 export async function ResetAlarm(GroupName, RowName, DataName) {
   return await new Promise(function (resolve, reject) {
@@ -48,17 +47,19 @@ export async function GetEQIDList(edgeName = 'SIOIROBOT') {
     }
   })
 }
-export async function GetSensorInfo()
-{
-  return await new Promise(function(resolve,reject){
-    var ws = new WebSocket(`ws://localhost:8090/GPM/SensorInfo`);
-    ws.onopen=()=>{console.log('ws SensorInfo Connect')};
-    ws.onmessage=(ret)=>{
-      ws.close();
-      resolve(JSON.parse(ret.data));
+export async function GetSensorInfo() {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(`ws://localhost:8090/GPM/SensorInfo`)
+    ws.onopen = () => {
+      console.log('ws SensorInfo Connect')
+    }
+    ws.onmessage = (ret) => {
+      ws.close()
+      resolve(JSON.parse(ret.data))
     }
   })
 }
+
 /**取得所有感測項目列表 */
 export async function GetFieldList(edgeName = 'SIOIROBOT') {
   return await new Promise(function (resolve, reject) {
