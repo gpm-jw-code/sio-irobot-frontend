@@ -543,11 +543,14 @@ export default {
     }
   },
   async mounted() {
-    this.WebSocketConnect();
-    this.RawDataWSConnect();
-    setTimeout(() => {
-      this.groupsShow = true;
-    }, 500);
+    //從後端下載網路配置後再開始websocket連線作業
+    this.$bus.$on("network_configs_download_done", () => {
+      this.WebSocketConnect();
+      this.RawDataWSConnect();
+      setTimeout(() => {
+        this.groupsShow = true;
+      }, 500);
+    });
   },
   watch: {
     $userInfo: {

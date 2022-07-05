@@ -1,12 +1,15 @@
-import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:8080'
-export var control_center_ws_host = 'ws://localhost:8090'
-/**使用者登入 */
-export async function Login(user = { userName: '', password: '' }) {
-  var ret = await axios.post('api/login', user)
-  return ret.data
-}
+import { GetNetworkConfigs } from '../web-api/Backend/NetworkConfigsAPI'
+import Bus from '../bus'
 
+GetNetworkConfigs().then((config) => {
+  console.info(config)
+  if (config != 'netwrok_error') {
+    control_center_ws_host = config.controlCenterWsHost
+  }
+  Bus.$emit('network_configs_download_done')
+})
+
+export var control_center_ws_host = 'ws://localhost:8090'
 /**Reset Alarm  */
 export async function ResetAlarm(GroupName, RowName, DataName) {
   return await new Promise(function (resolve, reject) {
