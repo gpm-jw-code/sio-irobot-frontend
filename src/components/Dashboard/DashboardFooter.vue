@@ -218,13 +218,13 @@ export default {
   },
 }
 </script>
-<style>
+<style scoped>
 .footer-content {
   position: fixed;
   bottom: 0;
   width: 100%;
   background: #343a40;
-  box-shadow: 10px 10px 22px 10px black;
+  box-shadow: -10px 10px 22px 10px black;
   color: rgb(255, 255, 255);
   z-index: 13;
 }

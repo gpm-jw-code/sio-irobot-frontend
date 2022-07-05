@@ -486,31 +486,9 @@ export default {
 :root {
   --footer-height: 30px;
 }
-body {
-  padding: 0;
-  margin: 0;
-}
+
 h3 {
   letter-spacing: 0.2em;
-}
-
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-.footer-content {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  line-height: var(--footer-height);
-  background: #343a40;
-  box-shadow: 10px 10px 22px 10px black;
-  color: rgb(255, 255, 255);
 }
 
 .group-button-container {
@@ -518,26 +496,6 @@ h3 {
   border: 1px dashed rgb(199, 199, 199);
   padding: 20px;
   margin: auto 15px;
-}
-
-#reset-alarm-button {
-  height: 100%;
-}
-
-.threshold-reg {
-  color: black;
-  background-color: #2c3e50;
-  border: 1px solid rgb(185, 185, 185);
-  margin: 2px;
-  border-radius: 5px;
-}
-
-.thres-title {
-  color: rgb(255, 255, 255);
-}
-
-.oo-style {
-  text-decoration: underline;
 }
 
 .table-container {
