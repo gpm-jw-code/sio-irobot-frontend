@@ -260,8 +260,8 @@ export default {
       } else {
 
         var ThresholdSetting = JSON.parse(returnData);
-        this.selectOOCThresval = ThresholdSetting["OOC"];
-        this.selectOOSThresval = ThresholdSetting["OOS"];
+        this.selectOOCThresval = ThresholdSetting["OOC"].toFixed(3);
+        this.selectOOSThresval = ThresholdSetting["OOS"].toFixed(3);
       }
       this.tresholdValueLoading = false;
     },
