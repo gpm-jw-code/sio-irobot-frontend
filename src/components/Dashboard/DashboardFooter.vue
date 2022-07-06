@@ -44,7 +44,11 @@
           </b-button>
         </b-col>
         <b-col class="text-right">
-          <b-button class="h-100" variant="light">即時數據圖表</b-button>
+          <b-button
+            class="h-100"
+            variant="light"
+            @click="$emit('ShowRealTimeDataButnOnClick',selectedCell)"
+          >即時數據圖表</b-button>
         </b-col>
         <b-col class="text-right">
           <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>

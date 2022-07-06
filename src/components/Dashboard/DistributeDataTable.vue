@@ -23,7 +23,7 @@
     </transition>
 
     <transition name="el-zoom-in-top">
-      <div id="group-name-display" v-if="groupNameDisplay">
+      <div id="group-name-display" sticky v-if="groupNameDisplay">
         <!-- GROUP :
         <button class="font-weight-bold">{{nowGroupName}}</button>-->
         <b-form-select
@@ -84,6 +84,7 @@
       :selectedCell="selectedCell"
       @AlarmResetDone="AlarmResetDoneHandle"
       @onClose="FootCloseHandle"
+      @ShowRealTimeDataButnOnClick="()=>showRealTimePanel = true"
     ></DashboardFooter>
 
     <threshold-setting-dialog-vue
@@ -92,6 +93,15 @@
       @onSuccess="ThresHoldSetSuccessHandle"
       @hide="thresSettingDialogShow = false"
     ></threshold-setting-dialog-vue>
+
+    <transition name="el-fade-in">
+      <RealTimeDataShowPanel
+        v-show="showRealTimePanel"
+        :groupName="nowGroupName"
+        :selectedCell="selectedCell"
+        @Close="showRealTimePanel=false"
+      ></RealTimeDataShowPanel>
+    </transition>
   </div>
 </template>
 <script>
@@ -99,6 +109,7 @@ import "vue-good-table/dist/vue-good-table.css";
 import ThresholdSettingDialogVue from "../ThresholdSettingDialog.vue";
 import { VueGoodTable } from "vue-good-table";
 import DashboardFooter from './DashboardFooter.vue'
+import RealTimeDataShowPanel from './RealTimeDataShowPanel.vue'
 import {
   GroupSettingWSConnect,
   SensorRawDataWsConnect,
@@ -107,8 +118,7 @@ import {
 
 export default {
   components: {
-    VueGoodTable,
-    ThresholdSettingDialogVue, DashboardFooter
+    VueGoodTable, ThresholdSettingDialogVue, DashboardFooter, RealTimeDataShowPanel
   },
   props: {
     groupInfo: Object,
@@ -123,6 +133,7 @@ export default {
       tableShow: false,
       groupsShow: false,
       tresholdValueLoading: true,
+      showRealTimePanel: false,
       List_GroupName: [],
       Dict_GroupButtonStyles: {},
       Dict_GroupDataRows: Object,
@@ -139,6 +150,10 @@ export default {
       selectedCell: {
         rowName: "",
         column: "",
+        newestData: {
+          time: undefined,
+          value: undefined
+        }
       },
       selectedKey: "",
       thresSettingDialogShow: false,
@@ -186,7 +201,8 @@ export default {
         },
       },
       userInfo: {},
-      groupNameDisplay: false
+      groupNameDisplay: false,
+
     };
   },
   computed: {
@@ -240,6 +256,8 @@ export default {
           statusObj.padding = this.selectStyle.unselected.padding;
         }
         this.selectedKey = "";
+        this.selectedCell.rowName = undefined;
+        this.selectedCell.column = undefined;
       }
     },
     async ResetAllAlarmHandle() {
@@ -428,6 +446,13 @@ export default {
 
                 eachRow[NewDataName] = Dict_RawData[TargetDataName].value.toFixed(3);
 
+                //更新被選取cell的最新數值
+                if (this.selectedCell.rowName == eachRow.RowName) {
+                  console.info(SensorData);
+                  this.selectedCell.newestData.time = SensorData.TimeLog;
+                  this.selectedCell.newestData.value = Dict_RawData[TargetDataName].value;
+                }
+
                 var _style = this.GetAlarmStatesStyle(Dict_RawData, TargetDataName);
 
                 var statusMapkey = EachGroupName + TargetRowName + NewDataName;
@@ -485,7 +510,12 @@ export default {
         return this.statusStyle.out_of_spec;
 
       return this.statusStyle.normal;
+    },
+    ShowRealTimeDataHandle(arg) {
+      console.info('show realtime data view', arg);
+      this.showRealTimePanel = true;
     }
+
   },
   async mounted() {
     //從後端下載網路配置後再開始websocket連線作業

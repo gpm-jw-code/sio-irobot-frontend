@@ -151,6 +151,9 @@ export default {
     FeedData(time, dataSets) {
       if (dataSets.length == 0)
         return;
+      if (time == undefined)
+        return;
+
       this.xlabels.push(time);
       dataSets.forEach(dataObj => {
         var series = this.datasets.find(s => s.label == dataObj.label);
@@ -170,6 +173,11 @@ export default {
         }
       })
       this.DataFIFO();
+      this.RenderData();
+    },
+    Clear() {
+      this.xlabels = [];
+      this.datasets = [];
       this.RenderData();
     },
     RenderData() {
