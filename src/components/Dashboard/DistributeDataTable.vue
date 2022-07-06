@@ -448,7 +448,6 @@ export default {
 
                 //更新被選取cell的最新數值
                 if (this.selectedCell.rowName == eachRow.RowName) {
-                  console.info(SensorData);
                   this.selectedCell.newestData.time = SensorData.TimeLog;
                   this.selectedCell.newestData.value = Dict_RawData[TargetDataName].value;
                 }

@@ -50,7 +50,6 @@ export default {
           return;
         var key = ((newValue.column + newValue.rowName));
         if (key !== this.lastDataKey) {
-          console.info('Clear Chart!');
           this.ClearChart();
         }
         this.RenderChart();
@@ -69,7 +68,6 @@ export default {
       if (this.selectedCell.newestData == undefined)
         return;
 
-      console.log('update~', this.selectedCell);
       var time = this.selectedCell.newestData.time;
       var dataSets = [{
         label: `${this.selectedCell.rowName}-${this.selectedCell.column}`,
