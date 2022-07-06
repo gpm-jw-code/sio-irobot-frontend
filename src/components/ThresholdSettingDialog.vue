@@ -1,6 +1,6 @@
 <template >
   <b-modal
-    content-class="my-modal"
+    centered
     size="sm"
     v-model="showDialog"
     @ok="SettingThres"
