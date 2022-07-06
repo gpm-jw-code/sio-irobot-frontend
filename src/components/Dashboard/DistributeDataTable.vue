@@ -2,7 +2,7 @@
   <div
     class="text-white"
     id="distribute-datatable"
-    v-loading="groupInfoWS == null"
+    v-loading="Loading"
     element-loading-text="連線中"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)"
@@ -208,6 +208,11 @@ export default {
   computed: {
     FixDataRows() {
       return [this.dataRows[0]]
+    },
+    Loading() {
+      if (process.env.NODE_ENV === 'development')
+        return false;
+      return this.groupInfoWS == null;
     }
   },
   methods: {
