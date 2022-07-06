@@ -1,5 +1,6 @@
 <template >
   <b-modal
+    content-class="my-modal"
     size="sm"
     v-model="showDialog"
     @ok="SettingThres"
@@ -29,7 +30,7 @@ export default {
             originVal: -1
           },
           sensor: {
-            groupName:"",
+            groupName: "",
             rowName: "",
             field: ""
           },
@@ -63,9 +64,9 @@ export default {
     async SettingThres() {
       var result;
       if (this.options.settingFor.thresType == "OOS") {
-        result = await ThresHoldSetting.SetOOS(this.options.sensor.groupName,this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
+        result = await ThresHoldSetting.SetOOS(this.options.sensor.groupName, this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
       } else {
-        result = await ThresHoldSetting.SetOOC(this.options.sensor.groupName,this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
+        result = await ThresHoldSetting.SetOOC(this.options.sensor.groupName, this.options.sensor.rowName, this.options.sensor.field, this.thresHoldValSetting);
       }
       console.log(result);
       if (result == 'ok')
@@ -81,4 +82,7 @@ export default {
 }
 </script>
 <style >
+.my-modal {
+  top: 90px;
+}
 </style>

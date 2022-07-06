@@ -276,7 +276,7 @@ export default {
       }
 
       var result = await this.$bvModal.msgBoxConfirm(`確定要清除${this.nowGroupName}所有警報?`, {
-        title: "CONFIRM"
+        title: "CONFIRM",
       }).then((val) => {
         return val
       })
@@ -285,29 +285,6 @@ export default {
       if (result) {
         await ResetAlarm(this.nowGroupName, 'All', 'All');
       }
-    },
-    async ShowConfirmMsgBox() {
-      return await this.$bvModal
-        .msgBoxConfirm(
-          `確定要清除 ${this.selectedCell.rowName}-${this.selectedCell.column} 異常?`,
-          {
-            title: "異常清除",
-            // size: 'sm',
-            // buttonSize: 'sm',
-            okVariant: "primary",
-            okTitle: "YES",
-            cancelTitle: "NO",
-            footerClass: "p-2",
-            hideHeaderClose: false,
-            centered: true,
-          }
-        )
-        .then((value) => {
-          return value;
-        })
-        .catch(() => {
-          // An error occurred
-        });
     },
     ThresHoldSetSuccessHandle(val) {
       if (this.thresHoldSettingOptions.settingFor.thresType == "OOC")
