@@ -9,7 +9,11 @@
         <div>
           <input class="login-input" type="password" placeholder="Password" v-model="form.password" />
         </div>
-        <p class="login-fail" v-show="!loginResult.success">{{loginResult.message}}</p>
+        <p
+          class="login-fail"
+          :key="loginResult.message"
+          v-show="!loginResult.success"
+        >{{loginResult.message}}</p>
         <p class="logining-info" v-show="logining">登入中...</p>
         <b-button class="action-btn" id="login-btn" squared @click="LoginHandle(false)">登入</b-button>
         <b-button class="action-btn" id="cancel-btn" squared @click="LoginHandle(true)">取消</b-button>
@@ -37,7 +41,10 @@ export default {
         userName: '',
         password: ''
       },
-      loginResult: {}
+      loginResult: {
+        success: true,
+        message: ""
+      }
 
     };
   },
@@ -55,11 +62,19 @@ export default {
   },
   methods: {
     async LoginHandle(cancel = false) {
-      // await Login(this.form);
       if (cancel) {
         this.$router.push({ name: this.$route.params.from });
         return;
       }
+
+      var ValidateResult = this.Validate();
+      if (ValidateResult != 'OK') {
+        this.loginResult.success = false;
+        this.loginResult.message = ValidateResult;
+        console.log(this.loginResult);
+        return;
+      }
+
       this.logining = true;
       if (this.form.userName.toUpperCase() == "KKK") {
         this.$userInfo.login = true;
@@ -87,6 +102,13 @@ export default {
           this.$bus.$emit("admin-login", "^_^");
       }
 
+    },
+    Validate() {
+      if (this.form.userName == '')
+        return 'User Name 不得為空'
+      if (this.form.password == '')
+        return 'Password 不得為空'
+      return 'OK';
     }
 
   },
