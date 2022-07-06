@@ -1,5 +1,5 @@
 <template >
-  <div class="fixed-top" sticky>
+  <div class="fixed-top" sticky style="z-index:2001">
     <b-navbar toggleable="lg" ref="nav" :variant="nav_style" :type="nav_style">
       <b-navbar-brand v-b-toggle.sidebar>
         <b-icon-menu-button></b-icon-menu-button>
@@ -184,9 +184,12 @@ export default {
 };
 </script>
 
-<style>
+<style >
 .nav-right {
   width: 100%;
+}
+#sidebar {
+  z-index: 339099999;
 }
 #sidebar-title {
   background-color: rgb(35, 37, 39);

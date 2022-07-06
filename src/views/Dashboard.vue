@@ -66,6 +66,9 @@ export default {
 </script>
 
 <style >
+.dashboard {
+  height: 100vh;
+}
 .foot-panel {
   width: 100%;
   bottom: 0;

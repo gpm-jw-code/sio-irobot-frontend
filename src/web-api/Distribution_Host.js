@@ -101,7 +101,7 @@ export async function GroupSettingWSConnect() {
       resolve(ws)
     }
     ws.onerror = (err) => {
-      resolve('network_error')
+      resolve(null)
     }
   })
 }
@@ -114,7 +114,7 @@ export async function IDMSSensorRawDataWsConnect() {
       console.log('IDMS_SensorRawData ws connect')
       resolve(ws)
     }
-    ws.onerror = (err) => reject(err)
+    ws.onerror = (err) => resolve(null)
   })
 }
 

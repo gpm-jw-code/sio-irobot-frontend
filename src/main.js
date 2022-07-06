@@ -11,7 +11,6 @@ import VueApexCharts from 'vue-apexcharts'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import { userInfo, dataInfo, caches } from './state'
-import { Chart } from 'chart.js'
 import VueObserveVisibility from 'vue-observe-visibility'
 import Bus from './bus'
 Vue.use(VueObserveVisibility)

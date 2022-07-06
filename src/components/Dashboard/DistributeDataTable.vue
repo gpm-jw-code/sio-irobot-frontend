@@ -1,5 +1,12 @@
 <template >
-  <div class="text-white">
+  <div
+    class="text-white"
+    id="distribute-datatable"
+    v-loading="groupInfoWS == null"
+    element-loading-text="連線中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+  >
     <h3 class="font-weight-bold mt-2">-GROUPS-</h3>
     <transition name="el-fade-in">
       <div class="group-button-container" v-show="groupsShow">
@@ -95,7 +102,6 @@ import DashboardFooter from './DashboardFooter.vue'
 import {
   GroupSettingWSConnect,
   SensorRawDataWsConnect,
-  getThresholdSetting,
   ResetAlarm,
 } from "../../web-api/Distribution_Host";
 
@@ -125,8 +131,8 @@ export default {
       columnsOptions: [],
       nowGroupName: "",
       selectedGroupName: "known",
-      groupInfoWS: WebSocket,
-      rawDataWS: WebSocket,
+      groupInfoWS: null,
+      rawDataWS: null,
       StatusMap: {},
 
       showFootPanel: false,
@@ -286,8 +292,8 @@ export default {
       else this.selectOOSThresval = val;
     },
     async WebSocketConnect() {
-      this.groupInfoWS = "network_error";
-      while (this.groupInfoWS == "network_error") {
+      this.groupInfoWS = null;
+      while (this.groupInfoWS == null) {
         this.groupInfoWS = await GroupSettingWSConnect();
       }
       this.groupInfoWS.onmessage = (e) => this.GroupWsDataHandle(e);
@@ -511,6 +517,10 @@ export default {
 <style >
 :root {
   --footer-height: 30px;
+}
+
+#distribute-datatable {
+  height: 100%;
 }
 
 h3 {
