@@ -1,12 +1,21 @@
 <template >
   <div id="realtime-data-panel" @click="ModalClick">
-    <div class="text-right pr-5 pt-5">
-      <b-button variant="danger" pill @click="$emit('Close')">X</b-button>
-    </div>
     <div class="rt-data-container" id="realtime-data-container">
-      <h4>{{selectedCell.rowName}} - {{selectedCell.column}}</h4>
-      <div style="height:92%">
-        <GPMChart ref="chart" style="height:100%" :title="groupName"></GPMChart>
+      <b-row>
+        <b-col cols="10" class="text-left pt-2 pl-3 border-bottom">
+          <h4>{{selectedCell.rowName}} - {{selectedCell.column}}</h4>
+        </b-col>
+        <b-col cols="2" class="text-right pr-4 pt-2">
+          <b-button variant="danger" pill @click="$emit('Close')">X</b-button>
+        </b-col>
+      </b-row>
+      <div style="height:90%;margin-top: 3px;">
+        <GPMChart
+          class="pr-3 pl-1"
+          ref="chart"
+          style="height:100%; margin:0;border: none;"
+          :title="groupName"
+        ></GPMChart>
       </div>
     </div>
   </div>
@@ -103,8 +112,10 @@ export default {
   width: 90%;
   margin: 0 auto;
   padding: 0;
-  top: 50px;
+  top: 80px;
   position: relative;
+  border-radius: 10px;
+  border-bottom: 10px solid #171717;
 }
 .rt-data-container h4 {
   letter-spacing: 2px;
