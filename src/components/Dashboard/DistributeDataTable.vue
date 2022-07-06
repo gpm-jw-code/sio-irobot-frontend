@@ -511,7 +511,7 @@ export default {
     });
 
     window.addEventListener("scroll", (event) => {
-      this.groupNameDisplay = event.target.scrollTop > 230;
+      this.groupNameDisplay = event.target.scrollTop > 230 && this.$router.history.current.path === '/';
     }, true);
 
   },
