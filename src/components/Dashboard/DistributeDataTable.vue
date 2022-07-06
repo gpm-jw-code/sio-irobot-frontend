@@ -268,7 +268,8 @@ export default {
     async ResetAllAlarmHandle() {
       if (this.$userInfo.level == 0) {
         this.$bvModal.msgBoxOk("權限不足!\r\n若要進行此操作，請先進行登入。", {
-          title: "NO PERMISSION"
+          title: "NO PERMISSION",
+          centered: true,
         }).then(() => {
           this.$router.push(`/login/${this.$route.name}`);
         })
@@ -277,6 +278,7 @@ export default {
 
       var result = await this.$bvModal.msgBoxConfirm(`確定要清除${this.nowGroupName}所有警報?`, {
         title: "CONFIRM",
+        centered: true,
       }).then((val) => {
         return val
       })
