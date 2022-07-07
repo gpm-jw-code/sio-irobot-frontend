@@ -162,14 +162,13 @@ export var Query = {
   QuerySensorRawData: async function (
     startTime = Date(),
     endTime = Date(),
-    edgeName = 'SIOIROBOT',
-    eqid = 'eqid',
-    field = 'field',
+    groupName = '',
+    rowName = '',
+    sensorType = '',
   ) {
-    var sensorName = `${eqid}_${field}`
     return await new Promise(function (resolve, reject) {
       var ws = new WebSocket(
-        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&edgeName=${edgeName}&sensorName=${sensorName}`,
+        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&groupName=${groupName}&rowName=${rowName}&sensorType=${sensorType}`,
       )
       ws.onmessage = (e) => {
         ws.close()

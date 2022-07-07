@@ -74,7 +74,17 @@
       </b-col>
     </b-row>
     <el-divider></el-divider>
+
+    <!-- <div>   
+      <b-row  v-for="{item,index} in QueryResult" :key="index" >
+      <query-chart :QueryResult="item"></query-chart>
+      </b-row>
+    </div> -->
+    
     <!--圖表區-->
+    <div id="charts-container">
+      <div></div>
+    </div>
     <div id="charts-container">
       <div
         class="text-left"
@@ -127,7 +137,7 @@
       <filter-vue
         ref="filter"
         @groupsSelectedOnChange="ChangeSelectedGroupName" 
-        @rowSelectedOnchange="RobotLsOnchange"
+        @rowSelectedOnchange="ChangeSelectedRows"
         @sensorTypeSelectedOnchange="TypeLsOnchange"
         @statusSelectedOnchange="RobotLsOnchange"
       ></filter-vue>
@@ -171,11 +181,12 @@ export default {
       },
       filter: {
         GroupName:"",
-        robotLs: [],
-        typeLs: [],
+        RowNames: [],
+        sensorTypes: [],
         statusLs: []
       },
-      keywordsInput: ""
+      keywordsInput: "",
+      QueryResult:[],
     }
   },
   async mounted() {
@@ -183,9 +194,6 @@ export default {
     this.DisplayModeHandle();
     this.ReloadQueryParamFromLocalStorage();
     this.$dataInfo.AllSensorInfo = await GetSensorInfo();
-   
-   // this.$dataInfo.AllSensorInfo = JSON.parse(await GetSensorInfo()) ;
-    console.log("TT",this.$dataInfo.AllSensorInfo);
   },
   beforeDestroy() {
     console.log('beforeDestroy');
@@ -206,16 +214,20 @@ export default {
       }
     },
     ChangeSelectedGroupName(groupName){
-      this.filter.groupName = groupName;
+      this.filter.GroupName = groupName;
+    },
+    ChangeSelectedRows(Rows)
+    {
+      this.filter.RowNames = Rows;
     },
     RobotLsOnchange(list) {
       list.sort();
       this.filter.robotLs = list;
       this.RenderQueryData();
     },
-    TypeLsOnchange(list) {
-      this.filter.typeLs = list;
-      this.RenderQueryData();
+    TypeLsOnchange(sensorTypes) {
+      this.filter.sensorTypes = sensorTypes;
+      //this.RenderQueryData();
     },
 
     async RenderQueryData() {
@@ -254,27 +266,30 @@ export default {
     async QueryBtnClickHandle() {
       this.SaveQueryParmToLocalStorage();
       this.isShowRealTimeData = new Date(Date.parse(this.quEndTime)) >= Date.now()
-      if (!this.isShowRealTimeData)
-        await QueryAll(this.quStartTime, this.quEndTime);
-      this.filter.robotLs.forEach(robotId => {
-        this.filter.typeLs.forEach(field => {
-          var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
-          var isShowRealTimeData = this.isShowRealTimeData;
-          setTimeout(() => {
-            new Promise(
-              function () {
-                if (isShowRealTimeData)
-                  sioChart.ChangeToDisplayRealTimeDataMode();
-                else {
-                  sioChart.ChangeToDisplayQueryDataMode();
-                }
-              }
-            )
-          }, 100);
-        });
-      })
-      if (!this.isShowRealTimeData)
-        this.RenderQueryData();
+      this.QueryResult = [];
+      if (!this.isShowRealTimeData){
+            this.QueryResult = await QueryAll(this.quStartTime, this.quEndTime,this.filter.GroupName,this.filter.RowNames,this.filter.sensorTypes);
+      }
+        
+      // this.filter.robotLs.forEach(robotId => {
+      //   this.filter.typeLs.forEach(field => {
+      //     var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
+      //     var isShowRealTimeData = this.isShowRealTimeData;
+      //     setTimeout(() => {
+      //       new Promise(
+      //         function () {
+      //           if (isShowRealTimeData)
+      //             sioChart.ChangeToDisplayRealTimeDataMode();
+      //           else {
+      //             sioChart.ChangeToDisplayQueryDataMode();
+      //           }
+      //         }
+      //       )
+      //     }, 100);
+      //   });
+      // })
+      // if (!this.isShowRealTimeData)
+      //   this.RenderQueryData();
     },
     ShowRealTimeHandle() {
       this.isShowRealTimeData = true;

@@ -3,6 +3,7 @@
     <b-form-select
       v-model="selectGroups"
       :options="groupNames"
+      @change="GroupChange"
       size="lg"
       style="text-align: center"
     ></b-form-select>
