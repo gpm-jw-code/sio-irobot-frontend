@@ -7,38 +7,60 @@
       style="text-align: center"
       @change="GroupChange"
     ></b-form-select>
-    <b-dropdown text="選擇感測器" block variant="light">
-      <b-dropdown-form form-class="dropdown-form">
-        <b-form-checkbox-group
-          size="md"
-          id="checkbox-group-2"
-          v-model="selectRows"
-          name="flavour-2"
-          stacked
-          @change="RowChange"
-        >
-          <b-form-checkbox v-for="robot in rowNames" :key="robot" :value="robot">{{ robot }}</b-form-checkbox>
-        </b-form-checkbox-group>
-      </b-dropdown-form>
-    </b-dropdown>
+    <div class="pt-0">
+      <div class="selected-description">
+        已選擇
+        <el-tag
+          type="success"
+          size="small"
+          closable
+          @close="()=>{selectRows=[] ,$emit('rowSelectedOnchange', selectRows)}"
+        >{{selectRows.length}}</el-tag>
+      </div>
+      <b-dropdown text="選擇感測器" block variant="light">
+        <b-dropdown-form form-class="dropdown-form">
+          <b-form-checkbox-group
+            size="md"
+            id="checkbox-group-2"
+            v-model="selectRows"
+            name="flavour-2"
+            stacked
+            @change="RowChange"
+          >
+            <b-form-checkbox v-for="robot in rowNames" :key="robot" :value="robot">{{ robot }}</b-form-checkbox>
+          </b-form-checkbox-group>
+        </b-dropdown-form>
+      </b-dropdown>
+    </div>
 
-    <b-dropdown text="選擇數據類型" block variant="light">
-      <b-dropdown-form>
-        <b-form-checkbox-group
-          id="checkbox-group-2"
-          v-model="selectedSensorTypes"
-          name="flavour-2"
-          stacked
-          @change="SensorTypesChange"
-        >
-          <b-form-checkbox
-            v-for="sensorType in sensorTypes"
-            :key="sensorType"
-            :value="sensorType"
-          >{{ sensorType }}</b-form-checkbox>
-        </b-form-checkbox-group>
-      </b-dropdown-form>
-    </b-dropdown>
+    <div>
+      <div class="selected-description">
+        已選擇
+        <el-tag
+          type="success"
+          size="small"
+          closable
+          @close="selectedSensorTypes=[],$emit('sensorTypeSelectedOnchange', selectedSensorTypes)"
+        >{{selectedSensorTypes.length}}</el-tag>
+      </div>
+      <b-dropdown text="選擇數據類型" block variant="light">
+        <b-dropdown-form>
+          <b-form-checkbox-group
+            id="checkbox-group-2"
+            v-model="selectedSensorTypes"
+            name="flavour-2"
+            stacked
+            @change="SensorTypesChange"
+          >
+            <b-form-checkbox
+              v-for="sensorType in sensorTypes"
+              :key="sensorType"
+              :value="sensorType"
+            >{{ sensorType }}</b-form-checkbox>
+          </b-form-checkbox-group>
+        </b-dropdown-form>
+      </b-dropdown>
+    </div>
     <!-- 
     <b-dropdown text="狀態" block variant="light">
       <b-dropdown-form>
@@ -56,6 +78,13 @@
   </div>
 </template>
 <script>
+
+class clsSelectedItem {
+  selectRows = [];
+  selectedSensorTypes = [];
+  allSelectedItem = [];
+}
+
 export default {
   props: {
     GroupModel: {
@@ -76,17 +105,27 @@ export default {
       selectedSensorTypes: [],
       selectedStatusList: [],
       allSelectedItem: [],
+      SelectedItems: {}
     };
   },
   methods: {
     GroupChange() {
-      this.selectRows = [];
+      if (!Object.keys(this.SelectedItems).includes(this.selectedGroup)) {
+        this.SelectedItems[this.selectedGroup] = new clsSelectedItem();
+      }
+      this.selectRows = this.SelectedItems[this.selectedGroup].selectRows;
+      this.selectedSensorTypes = this.SelectedItems[this.selectedGroup].selectedSensorTypes;
+
       this.$emit("groupsSelectedOnChange", this.selectedGroup);
+      this.$emit("rowSelectedOnchange", this.selectRows);
+      this.$emit("sensorTypeSelectedOnchange", this.selectedSensorTypes);
     },
     RowChange() {
       this.$emit("rowSelectedOnchange", this.selectRows);
+      this.SelectedItems[this.selectedGroup].selectRows = this.selectRows;
     },
     SensorTypesChange() {
+      this.SelectedItems[this.selectedGroup].selectedSensorTypes = this.selectedSensorTypes;
       this.$emit("sensorTypeSelectedOnchange", this.selectedSensorTypes);
     },
     StatusChange() {
@@ -135,9 +174,7 @@ export default {
     rowNames: {
       get() {
         if (this.selectedGroup == "") return null;
-        return Object.keys(
-          this.GroupModel[this.selectedGroup].Dict_RowListSensor
-        );
+        return this.GroupModel[this.selectedGroup].List_SensorName;
       },
     },
     sensorTypes: {
@@ -169,6 +206,15 @@ export default {
 }
 
 .group-filter {
+}
+
+.selected-description {
+  position: relative;
+  top: 33px;
+  text-align: left;
+  z-index: 33;
+  padding-left: 9px;
+  width: 150px;
 }
 </style>
 

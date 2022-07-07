@@ -49,13 +49,7 @@
         </b-row>
       </b-col>
       <b-col lg="3" class="text-right pr-4">
-        <b-icon-filter
-          scale="2"
-          v-b-toggle.filter-sidebar
-          variant="info"
-          v-b-tooltip.hover
-          title="過濾器"
-        ></b-icon-filter>
+        <b-icon-filter scale="2" v-b-toggle.filter-sidebar variant="info" v-b-tooltip.hover></b-icon-filter>
       </b-col>
     </b-row>
 
@@ -75,20 +69,36 @@
     </b-row>
     <el-divider></el-divider>
     <div id="charts-container">
-      <h3 class="text-left ml-1">
+      <h3 class="text-left ml-1" @click="filterSideBarShow=true">
         GROUP:
         <u class="font-weight-bold;">{{filter.GroupName}}</u>
       </h3>
+
+      <div v-show="filter.robotLs.length==0" class="not-selected-div text-center">
+        <p class="pt-3">
+          <u class="pt-3" style="color:gold;cursor:pointer" @click="filterSideBarShow=true">未選擇感測器</u>
+        </p>
+      </div>
+
       <div
         class="text-left mb-2"
         v-for="eqid in AllEqidList"
         :key="eqid"
         v-show="filter.robotLs.includes(eqid)"
       >
-        <b-button pill block class="text-left" variant="dark">
+        <b-button pill block size="lg" class="text-left" variant="dark">
           感測器:
           <span style="color:#0069d9">{{eqid}}</span>
         </b-button>
+        <div v-show="filter.typeLs.length==0" class="not-selected-div text-center">
+          <p class="pt-3">
+            <u
+              class="pt-3"
+              style="color:gold;cursor:pointer"
+              @click="filterSideBarShow=true"
+            >未選擇感測數據類別</u>
+          </p>
+        </div>
         <div>
           <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
             <b-col
@@ -101,7 +111,7 @@
               <GPMChartVue
                 :ref="`chart-${eqid}-${field}`"
                 class="ma-0"
-                style="height:300px;"
+                style="height:250px;"
                 :id="eqid+field"
                 :title="field"
               ></GPMChartVue>
@@ -137,7 +147,14 @@
           <el-divider></el-divider>
       </div>-->
     </div>
-    <b-sidebar id="filter-sidebar" right backdrop width="500px">
+    <b-sidebar
+      id="filter-sidebar"
+      right
+      backdrop
+      width="500px"
+      :visible="filterSideBarShow"
+      @change="(v)=> filterSideBarShow=v"
+    >
       <filter-vue
         ref="filter"
         :GroupModel="GroupModel"
@@ -167,6 +184,7 @@ export default {
       nowGroupName: '',
       realtime_ws: undefined,
       isShowRealTimeData: true,
+      filterSideBarShow: false,
       parameters: {
         eqid: 0,
         column: {
@@ -374,7 +392,6 @@ export default {
     AllFieldList() {
       if (this.filter.GroupName == '')
         return [];
-
       return this.GroupModel[this.filter.GroupName].List_AllColumnName;
     },
     AllEqidList() {
@@ -398,6 +415,14 @@ export default {
 .query-button {
   width: 90px;
 }
-#charts-container {
+
+.not-selected-div {
+  border: 1px dashed white;
+  border-radius: 10px;
+  font-size: 23px;
+}
+
+#charts-container h3 {
+  cursor: pointer;
 }
 </style>

@@ -31,7 +31,8 @@ export default {
       chart_style: {
         backgroundColor: '#202020',
         border: '1px solid grey',
-        margin: '3px'
+        margin: '3px',
+        borderRadius: '4px'
       },
       chartInstance: {},
       options: {
