@@ -3,9 +3,9 @@
     <b-form-select
       v-model="selectedGroup"
       :options="groupNames"
+      @change="GroupChange"
       size="lg"
       style="text-align: center"
-      @change="GroupChange"
     ></b-form-select>
     <b-dropdown text="選擇感測器" block variant="light">
       <b-dropdown-form form-class="dropdown-form">
