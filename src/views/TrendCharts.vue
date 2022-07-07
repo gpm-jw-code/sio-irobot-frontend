@@ -75,30 +75,37 @@
     </b-row>
     <el-divider></el-divider>
     <div id="charts-container">
-      {{filter.GroupName}}
+      <h3 class="text-left ml-1">
+        GROUP:
+        <u class="font-weight-bold;">{{filter.GroupName}}</u>
+      </h3>
       <div
-        class="text-left"
+        class="text-left mb-2"
         v-for="eqid in AllEqidList"
         :key="eqid"
         v-show="filter.robotLs.includes(eqid)"
       >
-        {{eqid}}
-        <b-button squared block class="ml-1" variant="light">{{eqid}}</b-button>
-        <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
-          <b-col
-            v-for="field in AllFieldList"
-            :key="field"
-            class="mb-1 text-center"
-            lg
-            v-show="filter.typeLs.includes(field)"
-          >
-            <GPMChartVue
-              :ref="`chart-${eqid}-${field}`"
-              style="height:300px"
-              :id="eqid+field"
-              :title="field"
-            ></GPMChartVue>
-            <!-- <sio-chart-vue
+        <b-button pill block class="text-left" variant="dark">
+          感測器:
+          <span style="color:#0069d9">{{eqid}}</span>
+        </b-button>
+        <div>
+          <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
+            <b-col
+              v-for="field in AllFieldList"
+              :key="field"
+              class="ma-0 pa-1 text-center"
+              :md="filter.typeLs.length==1? 12: 3"
+              v-show="filter.typeLs.includes(field)"
+            >
+              <GPMChartVue
+                :ref="`chart-${eqid}-${field}`"
+                class="ma-0"
+                style="height:300px;"
+                :id="eqid+field"
+                :title="field"
+              ></GPMChartVue>
+              <!-- <sio-chart-vue
               :ref="`sio-chart-${eqid}${field}`"
               :id="`scv-${eqid}${field}`"
               :eqid="eqid"
@@ -106,10 +113,10 @@
               :oocThresHold="OOCThresHoldValue(eqid,field)"
               :oosThresHold="OOSThresHoldValue(eqid,field)"
               :showQueryData="!isShowRealTimeData"
-            ></sio-chart-vue>-->
-          </b-col>
-        </b-row>
-        <el-divider></el-divider>
+              ></sio-chart-vue>-->
+            </b-col>
+          </b-row>
+        </div>
       </div>
       <!-- 
         <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
