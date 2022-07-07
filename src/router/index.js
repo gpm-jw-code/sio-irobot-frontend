@@ -4,6 +4,8 @@ import Dashboard from '../views/Dashboard'
 import TrendCharts from '../views/TrendCharts'
 import LoginPage from '../views/LoginPage'
 import AdminPage from '../views/AdminPage.vue'
+import DemoPage from '../views/DemoPage.vue'
+import RealTimeViewPage from '../views/RealTimeDataViewPage.vue'
 
 Vue.use(VueRouter)
 
@@ -15,8 +17,14 @@ var routes = [
     showInSideBar: true,
   },
   {
+    path: '/real-time-view',
+    name: '即時數據圖表',
+    component: RealTimeViewPage,
+    showInSideBar: true,
+  },
+  {
     path: '/trend-charts',
-    name: '趨勢圖與查詢',
+    name: '歷史查詢',
     component: TrendCharts,
     showInSideBar: true,
   },
@@ -25,6 +33,12 @@ var routes = [
     name: 'Login',
     component: LoginPage,
     showInSideBar: false,
+  },
+  {
+    path: '/demo',
+    name: 'Demo',
+    component: DemoPage,
+    showInSideBar: process.env.NODE_ENV !== 'production',
   },
   {
     path: '/admin',

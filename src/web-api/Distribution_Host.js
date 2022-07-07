@@ -1,12 +1,14 @@
-import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:8080'
-export var control_center_ws_host = 'ws://localhost:8090'
-/**使用者登入 */
-export async function Login(user = { userName: '', password: '' }) {
-  var ret = await axios.post('api/login', user)
-  return ret.data
-}
+import { GetNetworkConfigs } from '../web-api/Backend/NetworkConfigsAPI'
+import Bus from '../bus'
 
+GetNetworkConfigs().then((config) => {
+  if (config != 'network_error') {
+    control_center_ws_host = config.controlCenterWsHost
+  }
+  Bus.$emit('network_configs_download_done')
+})
+
+var control_center_ws_host = 'ws://localhost:8090'
 /**Reset Alarm  */
 export async function ResetAlarm(GroupName, RowName, DataName) {
   return await new Promise(function (resolve, reject) {
@@ -45,17 +47,19 @@ export async function GetEQIDList(edgeName = 'SIOIROBOT') {
     }
   })
 }
-export async function GetSensorInfo()
-{
-  return await new Promise(function(resolve,reject){
-    var ws = new WebSocket(`ws://localhost:8090/GPM/SensorInfo`);
-    ws.onopen=()=>{console.log('ws SensorInfo Connect')};
-    ws.onmessage=(ret)=>{
-      ws.close();
-      resolve(JSON.parse(ret.data));
+export async function GetSensorInfo() {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(`ws://localhost:8090/GPM/SensorInfo`)
+    ws.onopen = () => {
+      console.log('ws SensorInfo Connect')
+    }
+    ws.onmessage = (ret) => {
+      ws.close()
+      resolve(JSON.parse(ret.data))
     }
   })
 }
+
 /**取得所有感測項目列表 */
 export async function GetFieldList(edgeName = 'SIOIROBOT') {
   return await new Promise(function (resolve, reject) {
@@ -97,7 +101,7 @@ export async function GroupSettingWSConnect() {
       resolve(ws)
     }
     ws.onerror = (err) => {
-      resolve('network_error')
+      resolve(null)
     }
   })
 }
@@ -110,7 +114,7 @@ export async function IDMSSensorRawDataWsConnect() {
       console.log('IDMS_SensorRawData ws connect')
       resolve(ws)
     }
-    ws.onerror = (err) => reject(err)
+    ws.onerror = (err) => resolve(null)
   })
 }
 

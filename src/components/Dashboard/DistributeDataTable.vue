@@ -1,17 +1,38 @@
 <template >
-  <div class="p-1 text-white">
+  <div
+    class="text-white"
+    id="distribute-datatable"
+    v-loading="groupInfoWS == null"
+    element-loading-text="連線中"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+  >
     <h3 class="font-weight-bold mt-2">-GROUPS-</h3>
     <transition name="el-fade-in">
       <div class="group-button-container" v-show="groupsShow">
         <b-button
           class="m-1"
           size="lg"
-          squared
-          @click="changeGroup(item)"
+          pill
           v-for="item in List_GroupName"
           :key="item"
+          @click="changeGroup(item)"
           :variant="GetGroupButtonStyle(item)"
         >{{ item }}</b-button>
+      </div>
+    </transition>
+
+    <transition name="el-zoom-in-top">
+      <div id="group-name-display" v-if="groupNameDisplay">
+        <!-- GROUP :
+        <button class="font-weight-bold">{{nowGroupName}}</button>-->
+        <b-form-select
+          v-model="selectedGroupName"
+          :options="List_GroupName"
+          size="lg"
+          style="text-align: center"
+          @change="()=>changeGroup(selectedGroupName)"
+        ></b-form-select>
       </div>
     </transition>
 
@@ -53,58 +74,18 @@
             >{{ props.formattedRow[props.column.field] }}</div>
           </template>
         </vue-good-table>
+        <div style="height:80px"></div>
       </div>
     </transition>
-    <transition name="el-zoom-in-bottom">
-      <div class="footer-content" v-if="showFootPanel">
-        <b-row>
-          <b-col cols="2" class="text-left pl-3">
-            <b-button-group class="font-weight-bold">
-              <b-button class="font-weight-bold" variant="info" squared>{{ selectedCell.rowName }}</b-button>
-              <b-button class="font-weight-bold" variant="dark" squared>{{ selectedCell.column }}</b-button>
-            </b-button-group>
-          </b-col>
-          <b-col cols="1"></b-col>
-          <b-col cols="2" class="threshold-reg text-left" v-loading="tresholdValueLoading">
-            <b-row cols="2" no-gutters>
-              <b-col class="text-right pr-4 thres-title">OOC閥值</b-col>
-              <b-col class="oo-style ooc-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOC', selectOOCThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{ selectOOCThresval }}</span>
-              </b-col>
-              <b-col class="text-right pr-4 thres-title">OOS閥值</b-col>
-              <b-col class="oo-style oos-style">
-                <span
-                  class="threval"
-                  @click="ShowTresSettingDialog('OOS', selectOOSThresval)"
-                  v-b-tooltip.hover
-                  title="點一下進行設定"
-                >{{ selectOOSThresval }}</span>
-              </b-col>
-            </b-row>
-          </b-col>
-          <b-col>
-            <b-button
-              id="reset-alarm-button"
-              variant="danger"
-              block
-              :disabled="!Resetable || this.$userInfo.level == 0"
-              @click="ResetAlarmHandle"
-            >
-              <span v-if="this.$userInfo.level != 0">RESET ALARM</span>
-              <span v-else>(LEVEL 0 禁止 RESET ALARM)</span>
-            </b-button>
-          </b-col>
-          <b-col class="text-right">
-            <b-button variant="danger" v-b-tooltip.hover title="關閉(ESC)" @click="CloseFootPanel">X</b-button>
-          </b-col>
-        </b-row>
-      </div>
-    </transition>
+
+    <DashboardFooter
+      :showFootPanel="showFootPanel"
+      :nowGroupName="nowGroupName"
+      :selectedCell="selectedCell"
+      @AlarmResetDone="AlarmResetDoneHandle"
+      @onClose="FootCloseHandle"
+    ></DashboardFooter>
+
     <threshold-setting-dialog-vue
       :show="thresSettingDialogShow"
       :options="thresHoldSettingOptions"
@@ -117,17 +98,17 @@
 import "vue-good-table/dist/vue-good-table.css";
 import ThresholdSettingDialogVue from "../ThresholdSettingDialog.vue";
 import { VueGoodTable } from "vue-good-table";
+import DashboardFooter from './DashboardFooter.vue'
 import {
   GroupSettingWSConnect,
   SensorRawDataWsConnect,
-  getThresholdSetting,
   ResetAlarm,
 } from "../../web-api/Distribution_Host";
 
 export default {
   components: {
     VueGoodTable,
-    ThresholdSettingDialogVue,
+    ThresholdSettingDialogVue, DashboardFooter
   },
   props: {
     groupInfo: Object,
@@ -149,8 +130,9 @@ export default {
       columns: [],
       columnsOptions: [],
       nowGroupName: "",
-      groupInfoWS: WebSocket,
-      rawDataWS: WebSocket,
+      selectedGroupName: "known",
+      groupInfoWS: null,
+      rawDataWS: null,
       StatusMap: {},
 
       showFootPanel: false,
@@ -176,7 +158,7 @@ export default {
       statusStyle: {
         normal: {
           // backgroundColor: 'rgb(71, 124, 71)',
-          backgroundColor: "black",
+          backgroundColor: "#171717",
           color: "white",
           border: "",
           padding: "",
@@ -203,10 +185,15 @@ export default {
           border: "",
         },
       },
-      userInfo: {}
+      userInfo: {},
+      groupNameDisplay: false
     };
   },
-  computed: {},
+  computed: {
+    FixDataRows() {
+      return [this.dataRows[0]]
+    }
+  },
   methods: {
     GetGroupButtonStyle(group) {
       var style = this.Dict_GroupButtonStyles[group];
@@ -222,12 +209,9 @@ export default {
 
       this.showFootPanel = false;
       setTimeout(async () => {
-
         this.selectedCell.column = params.column.field;
         this.selectedCell.rowName = params.row.RowName;
-        this.UpdateSelectedThresDisplay();
         this.selectedKey = this.nowGroupName + this.selectedCell.rowName + this.selectedCell.column;
-
         var statusObj = this.StatusMap[this.selectedKey];
         if (statusObj !== undefined) {
           statusObj.border = this.selectStyle.selected.border;
@@ -236,37 +220,19 @@ export default {
         this.showFootPanel = true;
       }, 100);
     },
-    ShowTresSettingDialog(type, oriVal) {
-      this.thresHoldSettingOptions.settingFor.thresType = type;
-      this.thresHoldSettingOptions.settingFor.originVal = oriVal;
-      this.thresHoldSettingOptions.sensor = {
-        groupName: this.nowGroupName,
-        rowName: this.selectedCell.rowName,
-        field: this.selectedCell.column,
-      };
-      this.thresSettingDialogShow = true;
-    },
-    async UpdateSelectedThresDisplay() {
-      this.tresholdValueLoading = true;
-      var returnData = await getThresholdSetting(
-        this.nowGroupName,
-        this.selectedCell.rowName,
-        this.selectedCell.column
-      );
-      if (returnData == null) {
-        this.$message.error(`${this.selectedCell.rowName}  ${this.selectedCell.column} 閥值資訊下載失敗`);
-        this.selectOOCThresval = 'known';
-        this.selectOOSThresval = 'known';
-      } else {
-
-        var ThresholdSetting = JSON.parse(returnData);
-        this.selectOOCThresval = ThresholdSetting["OOC"].toFixed(3);
-        this.selectOOSThresval = ThresholdSetting["OOS"].toFixed(3);
-      }
-      this.tresholdValueLoading = false;
-    },
     CloseFootPanel() {
       this.showFootPanel = false;
+    },
+    AlarmResetDoneHandle() {
+      this.$message.info(`已清除 ${this.selectedCell.rowName}  ${this.selectedCell.column} 的Alarm`);
+      var key = this.selectedKey + "";
+      this.StatusMap[this.selectedKey].backgroundColor = this.statusStyle.normal.backgroundColor;
+      this.selectedKey = -1;
+      setTimeout(() => {
+        this.selectedKey = key;
+      }, 300);
+    },
+    FootCloseHandle() {
       if (this.selectedKey != "") {
         var statusObj = this.StatusMap[this.selectedKey];
         if (statusObj !== undefined) {
@@ -274,27 +240,6 @@ export default {
           statusObj.padding = this.selectStyle.unselected.padding;
         }
         this.selectedKey = "";
-      }
-    },
-    async ResetAlarmHandle() {
-      var ok = await this.ShowConfirmMsgBox();
-      if (!ok) return;
-
-      var result = await ResetAlarm(
-        this.nowGroupName,
-        this.selectedCell.rowName,
-        this.selectedCell.column
-      );
-      console.info(`Reset alarm : ${this.selectedCell}`, result);
-      // this.showFootPanel = false;
-      if (result.toUpperCase() == 'OK') {
-        this.$message.info(`已清除 ${this.selectedCell.rowName}  ${this.selectedCell.column} 的Alarm`);
-        var key = this.selectedKey + "";
-        this.StatusMap[this.selectedKey].backgroundColor = this.statusStyle.normal.backgroundColor;
-        this.selectedKey = -1;
-        setTimeout(() => {
-          this.selectedKey = key;
-        }, 300);
       }
     },
     async ResetAllAlarmHandle() {
@@ -347,8 +292,8 @@ export default {
       else this.selectOOSThresval = val;
     },
     async WebSocketConnect() {
-      this.groupInfoWS = "network_error";
-      while (this.groupInfoWS == "network_error") {
+      this.groupInfoWS = null;
+      while (this.groupInfoWS == null) {
         this.groupInfoWS = await GroupSettingWSConnect();
       }
       this.groupInfoWS.onmessage = (e) => this.GroupWsDataHandle(e);
@@ -396,7 +341,7 @@ export default {
       setTimeout(() => {
         this.tableShow = true;
         this.columns = [];
-        this.nowGroupName = groupName;
+        this.nowGroupName = this.selectedGroupName = groupName;
         var I = 0;
         this.columns.push({
           label: "RowName",
@@ -429,7 +374,7 @@ export default {
       var I = 0;
       this.Dict_GroupButtonStyles = {};
       this.List_GroupName.forEach(group => {
-        this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'warning' : 'light'
+        this.Dict_GroupButtonStyles[group] = group == activeGroup ? 'info' : 'light'
       });
       this.$dataInfo.Dict_GroupSetting[activeGroup].List_AllColumnName.forEach(
         (columname) => {
@@ -543,11 +488,19 @@ export default {
     }
   },
   async mounted() {
-    this.WebSocketConnect();
-    this.RawDataWSConnect();
-    setTimeout(() => {
-      this.groupsShow = true;
-    }, 500);
+    //從後端下載網路配置後再開始websocket連線作業
+    this.$bus.$on("network_configs_download_done", () => {
+      this.WebSocketConnect();
+      this.RawDataWSConnect();
+      setTimeout(() => {
+        this.groupsShow = true;
+      }, 500);
+    });
+
+    window.addEventListener("scroll", (event) => {
+      this.groupNameDisplay = event.target.scrollTop > 230;
+    }, true);
+
   },
   watch: {
     $userInfo: {
@@ -561,35 +514,17 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style >
 :root {
   --footer-height: 30px;
 }
-body {
-  padding: 0;
-  margin: 0;
+
+#distribute-datatable {
+  height: 100%;
 }
+
 h3 {
   letter-spacing: 0.2em;
-}
-
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-.footer-content {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  line-height: var(--footer-height);
-  background: #343a40;
-  box-shadow: 10px 10px 22px 10px black;
-  color: rgb(255, 255, 255);
 }
 
 .group-button-container {
@@ -599,27 +534,76 @@ h3 {
   margin: auto 15px;
 }
 
-#reset-alarm-button {
-  height: 100%;
-}
-
-.threshold-reg {
-  color: black;
-  background-color: #2c3e50;
-  border: 1px solid rgb(185, 185, 185);
-  margin: 2px;
-  border-radius: 5px;
-}
-
-.thres-title {
-  color: rgb(255, 255, 255);
-}
-
-.oo-style {
-  text-decoration: underline;
+.group-btn-badge {
 }
 
 .table-container {
   overflow-y: auto;
+}
+
+.inner-val:hover {
+  padding: 8px;
+  border: 2px solid rgb(17, 17, 17);
+}
+
+.vgt-table thead th {
+  color: black;
+  vertical-align: bottom;
+  border-bottom: 1px solid #004cff;
+  padding-right: 1.5em;
+  background: rgb(255, 255, 255);
+}
+
+table.vgt-table td {
+  padding: 0;
+  vertical-align: top;
+  background-color: #171717;
+  border-bottom: 1px solid #dcdfe6;
+  color: #ffffff;
+}
+
+.inner-val {
+  padding: 10px;
+  cursor: pointer;
+}
+.my-modal {
+  height: max-content;
+}
+
+.legend-btn {
+  width: 60px;
+  border: 1px solid black;
+}
+
+.ooc-style {
+  color: rgb(0, 136, 248);
+}
+.oos-style {
+  color: red;
+}
+.threshold-region-foot {
+  color: white;
+}
+.threval {
+  cursor: pointer;
+}
+.threval:hover {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.type-switch-btn {
+  width: 150px;
+  font-size: 20px;
+}
+#group-name-display {
+  font-size: 30px;
+  background-color: white;
+  color: black;
+  position: absolute;
+  width: 100%;
+  z-index: 40;
+  top: 60px;
+  padding: 10px;
 }
 </style>

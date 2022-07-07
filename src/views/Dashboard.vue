@@ -33,10 +33,9 @@ import ThresholdSettingDialogVue from '../components/ThresholdSettingDialog.vue'
 import { VueGoodTable } from 'vue-good-table';
 import IDMSDataTable from '../components/Dashboard/IDMSDataTable.vue';
 import DistributeTable from '../components/Dashboard/DistributeDataTable.vue'
-
 export default {
   components: {
-    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable
+    VueGoodTable, ThresholdSettingDialogVue, IDMSDataTable, DistributeTable,
   },
   data() {
     return {
@@ -51,7 +50,6 @@ export default {
     }
   },
   async mounted() {
-
     this.showOut = true;
   },
   watch: {
@@ -68,6 +66,9 @@ export default {
 </script>
 
 <style >
+.dashboard {
+  height: 100vh;
+}
 .foot-panel {
   width: 100%;
   bottom: 0;
@@ -89,59 +90,5 @@ export default {
   z-index: 200000;
   opacity: 0.8;
   color: white;
-}
-.inner-val {
-  padding: 10px;
-  cursor: pointer;
-}
-.inner-val:hover {
-  padding: 8px;
-  border: 2px solid rgb(17, 17, 17);
-}
-
-.vgt-table thead th {
-  color: white;
-  vertical-align: bottom;
-  border-bottom: 1px solid #004cff;
-  padding-right: 1.5em;
-  background: grey;
-}
-
-table.vgt-table td {
-  padding: 0;
-  vertical-align: top;
-  background-color: black;
-  border-bottom: 1px solid #dcdfe6;
-  color: #ffffff;
-}
-.my-modal {
-  height: max-content;
-}
-
-.legend-btn {
-  width: 60px;
-  border: 1px solid black;
-}
-
-.ooc-style {
-  color: rgb(0, 136, 248);
-}
-.oos-style {
-  color: red;
-}
-.threshold-region-foot {
-  color: white;
-}
-.threval {
-  cursor: pointer;
-}
-.threval:hover {
-  text-decoration: underline;
-  font-weight: bold;
-}
-
-.type-switch-btn {
-  width: 150px;
-  font-size: 20px;
 }
 </style>
