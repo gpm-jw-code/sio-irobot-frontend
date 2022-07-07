@@ -74,24 +74,31 @@
       </b-col>
     </b-row>
     <el-divider></el-divider>
-    <!--圖表區-->
     <div id="charts-container">
+      {{filter.GroupName}}
       <div
         class="text-left"
         v-for="eqid in AllEqidList"
         :key="eqid"
         v-show="filter.robotLs.includes(eqid)"
       >
+        {{eqid}}
         <b-button squared block class="ml-1" variant="light">{{eqid}}</b-button>
         <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
           <b-col
             v-for="field in AllFieldList"
             :key="field"
-            v-show="filter.typeLs.includes(field)"
             class="mb-1 text-center"
             lg
+            v-show="filter.typeLs.includes(field)"
           >
-            <sio-chart-vue
+            <GPMChartVue
+              :ref="`chart-${eqid}-${field}`"
+              style="height:300px"
+              :id="eqid+field"
+              :title="field"
+            ></GPMChartVue>
+            <!-- <sio-chart-vue
               :ref="`sio-chart-${eqid}${field}`"
               :id="`scv-${eqid}${field}`"
               :eqid="eqid"
@@ -99,7 +106,7 @@
               :oocThresHold="OOCThresHoldValue(eqid,field)"
               :oosThresHold="OOSThresHoldValue(eqid,field)"
               :showQueryData="!isShowRealTimeData"
-            ></sio-chart-vue>
+            ></sio-chart-vue>-->
           </b-col>
         </b-row>
         <el-divider></el-divider>
@@ -123,10 +130,11 @@
           <el-divider></el-divider>
       </div>-->
     </div>
-    <b-sidebar id="filter-sidebar" right backdrop>
+    <b-sidebar id="filter-sidebar" right backdrop width="500px">
       <filter-vue
         ref="filter"
-        @groupsSelectedOnChange="ChangeSelectedGroupName" 
+        :GroupModel="GroupModel"
+        @groupsSelectedOnChange="ChangeSelectedGroupName"
         @rowSelectedOnchange="RobotLsOnchange"
         @sensorTypeSelectedOnchange="TypeLsOnchange"
         @statusSelectedOnchange="RobotLsOnchange"
@@ -138,12 +146,14 @@
 <script>
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
-import { Query,GetSensorInfo } from '../web-api/Distribution_Host';
+import { Query, GetSensorInfo } from '../web-api/Distribution_Host';
 import { QueryAll } from '../web-api/Query';
+import { GetGroupList, GetGroupModel } from '../web-api/Distribution_Host'
 import moment from 'moment';
+import GPMChartVue from '../components/Chart/GPMChart.vue';
 export default {
   components: {
-    filterVue, SioChartVue
+    filterVue, SioChartVue, GPMChartVue
   },
   data() {
     return {
@@ -170,10 +180,13 @@ export default {
         realtime: true
       },
       filter: {
-        GroupName:"",
+        GroupName: "",
         robotLs: [],
         typeLs: [],
         statusLs: []
+      },
+      GroupModel: {
+
       },
       keywordsInput: ""
     }
@@ -183,9 +196,8 @@ export default {
     this.DisplayModeHandle();
     this.ReloadQueryParamFromLocalStorage();
     this.$dataInfo.AllSensorInfo = await GetSensorInfo();
-   
-   // this.$dataInfo.AllSensorInfo = JSON.parse(await GetSensorInfo()) ;
-    console.log("TT",this.$dataInfo.AllSensorInfo);
+    this.GroupModel = await GetGroupModel();
+
   },
   beforeDestroy() {
     console.log('beforeDestroy');
@@ -205,8 +217,8 @@ export default {
         // this.$router.push({ path: this.$route.path, query: this.currentQuery });
       }
     },
-    ChangeSelectedGroupName(groupName){
-      this.filter.groupName = groupName;
+    ChangeSelectedGroupName(groupName) {
+      this.filter.GroupName = groupName;
     },
     RobotLsOnchange(list) {
       list.sort();
@@ -253,28 +265,29 @@ export default {
     },
     async QueryBtnClickHandle() {
       this.SaveQueryParmToLocalStorage();
-      this.isShowRealTimeData = new Date(Date.parse(this.quEndTime)) >= Date.now()
-      if (!this.isShowRealTimeData)
-        await QueryAll(this.quStartTime, this.quEndTime);
-      this.filter.robotLs.forEach(robotId => {
-        this.filter.typeLs.forEach(field => {
-          var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
-          var isShowRealTimeData = this.isShowRealTimeData;
-          setTimeout(() => {
-            new Promise(
-              function () {
-                if (isShowRealTimeData)
-                  sioChart.ChangeToDisplayRealTimeDataMode();
-                else {
-                  sioChart.ChangeToDisplayQueryDataMode();
-                }
-              }
-            )
-          }, 100);
-        });
-      })
-      if (!this.isShowRealTimeData)
-        this.RenderQueryData();
+      var data = await QueryAll(this.quStartTime, this.quEndTime, this.filter.GroupName);
+      console.info('data', data);
+
+
+      // this.filter.robotLs.forEach(robotId => {
+      //   this.filter.typeLs.forEach(field => {
+      //     var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
+      //     var isShowRealTimeData = this.isShowRealTimeData;
+      //     setTimeout(() => {
+      //       new Promise(
+      //         function () {
+      //           if (isShowRealTimeData)
+      //             sioChart.ChangeToDisplayRealTimeDataMode();
+      //           else {
+      //             sioChart.ChangeToDisplayQueryDataMode();
+      //           }
+      //         }
+      //       )
+      //     }, 100);
+      //   });
+      // })
+      // if (!this.isShowRealTimeData)
+      //   this.RenderQueryData();
     },
     ShowRealTimeHandle() {
       this.isShowRealTimeData = true;
@@ -352,18 +365,16 @@ export default {
       return this.keywordsInput.split(',')
     },
     AllFieldList() {
-      var ls = [];
-      this.$dataInfo.fields.forEach(fi => {
-        ls.push(fi.field);
-      })
-      return ls;
+      if (this.filter.GroupName == '')
+        return [];
+
+      return this.GroupModel[this.filter.GroupName].List_AllColumnName;
     },
     AllEqidList() {
-      var ls = [];
-      this.$dataInfo.eqidls.forEach(eqid => {
-        ls.push(eqid);
-      })
-      return ls;
+      if (this.filter.GroupName == '')
+        return [];
+
+      return this.GroupModel[this.filter.GroupName].List_SensorName;
     }
   },
 }

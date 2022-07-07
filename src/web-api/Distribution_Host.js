@@ -93,6 +93,8 @@ export async function SensorRawDataWsConnect() {
   })
 }
 
+//------------------------Group相關------------------------------------------------------------------//
+
 export async function GroupSettingWSConnect() {
   return await new Promise(function (resolve, reject) {
     var ws = new WebSocket(`${control_center_ws_host}/GPM/GroupSetting`)
@@ -105,6 +107,34 @@ export async function GroupSettingWSConnect() {
     }
   })
 }
+
+/**取得 GROUP LIST */
+export async function GetGroupList() {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(
+      `${control_center_ws_host}/GPM/GroupSetting/?Action=GET_GROUP_LIST`,
+    )
+    ws.onmessage = (ret) => {
+      ws.close()
+      resolve(JSON.parse(ret.data))
+    }
+    ws.onerror = (err) => resolve(null)
+  })
+}
+
+/**取得 GROUP 完整資料結構 */
+export async function GetGroupModel() {
+  return await new Promise(function (resolve, reject) {
+    var ws = new WebSocket(`${control_center_ws_host}/GPM/GroupSetting`)
+    ws.onmessage = (ret) => {
+      ws.close()
+      resolve(JSON.parse(ret.data))
+    }
+    ws.onerror = (err) => resolve(null)
+  })
+}
+
+//--------------------------------------------------------------------------------------------------//
 
 /**for IDMS系統 */
 export async function IDMSSensorRawDataWsConnect() {
@@ -166,14 +196,14 @@ export var Query = {
   QuerySensorRawData: async function (
     startTime = Date(),
     endTime = Date(),
-    edgeName = 'SIOIROBOT',
+    groupName = 'SIOIROBOT',
     eqid = 'eqid',
     field = 'field',
   ) {
     var sensorName = `${eqid}_${field}`
     return await new Promise(function (resolve, reject) {
       var ws = new WebSocket(
-        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&edgeName=${edgeName}&sensorName=${sensorName}`,
+        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&groupName=${groupName}&sensorName=${sensorName}`,
       )
       ws.onmessage = (e) => {
         ws.close()

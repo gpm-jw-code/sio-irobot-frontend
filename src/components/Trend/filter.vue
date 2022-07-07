@@ -1,32 +1,28 @@
 <template>
-  <div>
+  <div class="pt-4" id="group-filter">
     <b-form-select
-      v-model="selectGroups"
+      v-model="selectedGroup"
       :options="groupNames"
       size="lg"
       style="text-align: center"
+      @change="GroupChange"
     ></b-form-select>
-    <b-dropdown text="Row Name" block variant="light">
+    <b-dropdown text="選擇感測器" block variant="light">
       <b-dropdown-form form-class="dropdown-form">
         <b-form-checkbox-group
-          size="lg"
+          size="md"
           id="checkbox-group-2"
           v-model="selectRows"
           name="flavour-2"
           stacked
           @change="RowChange"
         >
-          <b-form-checkbox
-            v-for="robot in rowNames"
-            :key="robot"
-            :value="robot"
-            >{{ robot }}</b-form-checkbox
-          >
+          <b-form-checkbox v-for="robot in rowNames" :key="robot" :value="robot">{{ robot }}</b-form-checkbox>
         </b-form-checkbox-group>
       </b-dropdown-form>
     </b-dropdown>
 
-    <b-dropdown text="感測器類型" block variant="light">
+    <b-dropdown text="選擇數據類型" block variant="light">
       <b-dropdown-form>
         <b-form-checkbox-group
           id="checkbox-group-2"
@@ -39,12 +35,11 @@
             v-for="sensorType in sensorTypes"
             :key="sensorType"
             :value="sensorType"
-            >{{ sensorType }}</b-form-checkbox
-          >
+          >{{ sensorType }}</b-form-checkbox>
         </b-form-checkbox-group>
       </b-dropdown-form>
     </b-dropdown>
-
+    <!-- 
     <b-dropdown text="狀態" block variant="light">
       <b-dropdown-form>
         <b-form-checkbox-group
@@ -54,25 +49,29 @@
           stacked
           @change="StatusChange"
         >
-          <b-form-checkbox
-            v-for="status in statusList"
-            :key="status"
-            :value="status"
-            >{{ status }}</b-form-checkbox
-          >
+          <b-form-checkbox v-for="status in statusList" :key="status" :value="status">{{ status }}</b-form-checkbox>
         </b-form-checkbox-group>
       </b-dropdown-form>
-    </b-dropdown>
+    </b-dropdown>-->
   </div>
 </template>
 <script>
 export default {
-  props: {},
+  props: {
+    GroupModel: {
+      type: Object,
+      default() {
+        return {
+
+        }
+      }
+    }
+  },
   data() {
     return {
       formStyle: {},
       statusList: ["OOC", "OOS"],
-      selectGroups: "",
+      selectedGroup: "",
       selectRows: [],
       selectedSensorTypes: [],
       selectedStatusList: [],
@@ -82,7 +81,7 @@ export default {
   methods: {
     GroupChange() {
       this.selectRows = [];
-      this.$emit("groupsSelectedOnChange", this.selectGroups);
+      this.$emit("groupsSelectedOnChange", this.selectedGroup);
     },
     RowChange() {
       this.$emit("rowSelectedOnchange", this.selectRows);
@@ -91,7 +90,7 @@ export default {
       this.$emit("sensorTypeSelectedOnchange", this.selectedSensorTypes);
     },
     StatusChange() {
-      this.$emit("statusSelectedOnchange", this.selectedStatusList);
+      //this.$emit("statusSelectedOnchange", this.selectedStatusList);
     },
     SettingSelectedOption(eqid, field) {
       this.selectRows = [eqid];
@@ -124,45 +123,31 @@ export default {
         NewGroupItem.value = "";
         NewGroupItem.text = "--Select Group--";
         groupItems.push(NewGroupItem);
-        Object.keys(this.$dataInfo.Dict_GroupSetting).forEach((element) => {
+        Object.keys(this.GroupModel).forEach((element) => {
           var NewGroupItem = {};
           NewGroupItem.value = element;
           NewGroupItem.text = element;
           groupItems.push(NewGroupItem);
         });
-
         return groupItems;
       },
     },
     rowNames: {
       get() {
-        if (this.selectGroups == "") return null;
+        if (this.selectedGroup == "") return null;
         return Object.keys(
-          this.$dataInfo.Dict_GroupSetting[this.selectGroups].Dict_RowListSensor
+          this.GroupModel[this.selectedGroup].Dict_RowListSensor
         );
       },
     },
     sensorTypes: {
       get() {
-        var Types = [];
-        if (this.selectGroups == "") return null;
-        this.$dataInfo.AllSensorInfo.forEach((element) => {
-          if (this.$dataInfo.Dict_GroupSetting[this.selectGroups].List_SensorName.includes(element.SensorName)) 
-          {
-            if (!Types.includes(element.SensorType)) 
-            {
-              Types.push(element.SensorType);
-            }
-          }
-        });
-        return Types;
+        if (this.selectedGroup == "")
+          return [];
+
+        return this.GroupModel[this.selectedGroup].List_AllColumnName;
       },
-    },
-    eqidls: {
-      get() {
-        return this.$dataInfo.eqidls;
-      },
-    },
+    }
   },
   mounted() {
     console.log("filter mounted");
@@ -181,6 +166,9 @@ export default {
 .my-class .dropdown-menu {
   max-height: 100%;
   overflow-y: auto;
+}
+
+.group-filter {
 }
 </style>
 
