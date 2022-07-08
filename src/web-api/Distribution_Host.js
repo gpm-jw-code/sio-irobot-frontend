@@ -197,17 +197,19 @@ export var Query = {
     startTime = Date(),
     endTime = Date(),
     groupName = 'SIOIROBOT',
-    eqid = 'eqid',
-    field = 'field',
+    sensorNames = 'String',
+    sensorTypes = 'String',
   ) {
-    var sensorName = `${eqid}_${field}`
     return await new Promise(function (resolve, reject) {
       var ws = new WebSocket(
-        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&groupName=${groupName}&sensorName=${sensorName}`,
+        `${control_center_ws_host}/GPM/QuerySensorRawData/?startTime=${startTime}&endTime=${endTime}&groupName=${groupName}&sensorNames=${sensorNames}&sensorTypes=${sensorTypes}`,
       )
       ws.onmessage = (e) => {
         ws.close()
         resolve(JSON.parse(e.data))
+      }
+      ws.onerror = (ex) => {
+        resolve({})
       }
     })
   },

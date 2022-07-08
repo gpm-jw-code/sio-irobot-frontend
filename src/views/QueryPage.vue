@@ -290,7 +290,7 @@ export default {
     },
     async QueryBtnClickHandle() {
       this.SaveQueryParmToLocalStorage();
-      var data = await QueryAll(this.quStartTime, this.quEndTime, this.filter.GroupName);
+      var data = await QueryAll(this.quStartTime, this.quEndTime, this.filter.GroupName, this.filter.robotLs, this.filter.typeLs);
       console.info('data', data);
 
 
