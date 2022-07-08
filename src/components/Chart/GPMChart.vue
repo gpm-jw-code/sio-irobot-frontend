@@ -112,6 +112,7 @@ export default {
       },
       xlabels: [],
       datasets: [],
+      colors: ['blue', 'green', 'red', 'orange', 'pink', 'grey', 'black', 'seagreen']
     }
   },
   methods: {
@@ -127,26 +128,29 @@ export default {
       });
       this.chartInstance.options.animation = false;
     },
-    Update(timeList, dataSetsInput) {
-      this.loading = true;
+    Update(timeList, dataSetsInput, showLoading = false) {
+      if (showLoading)
+        this.loading = true;
+
       this.xlabels = timeList;
       this.datasets = [];
+      var i = 0;
       dataSetsInput.forEach(dataObj => {
         this.datasets.push({
           label: dataObj.label,
           data: dataObj.data,
           backgroundColor: "",
-          borderColor: dataObj.borderColor ? dataObj.borderColor : 'blue',
+          borderColor: dataObj.borderColor ? dataObj.borderColor : this.colors[i],
           borderWidth: dataObj.borderWidth ? dataObj.borderWidth : 1,
           fill: false,
           pointStyle: 'none',
           pointRadius: 0, lineTension: 0,
-        })
+        });
+        i += 1;
       })
-      setTimeout(() => {
-        this.loading = false;
-        this.RenderData();
-      }, 200);
+
+      this.loading = false;
+      this.RenderData();
     },
 
     FeedData(time, dataSets) {

@@ -20,4 +20,5 @@ export async function QueryAll(
   )
   caches.queryResultCaches.lastTimeKey = timeKey
   caches.queryResultCaches.DataMap[timeKey] = ret
+  return ret
 }

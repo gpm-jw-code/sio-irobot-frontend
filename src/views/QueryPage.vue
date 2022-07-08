@@ -68,13 +68,18 @@
       </b-col>
     </b-row>
     <el-divider></el-divider>
-    <div id="charts-container">
+    <div
+      id="charts-container"
+      v-loading="Querying"
+      element-loading-text="數據查詢中"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
+    >
       <h3 class="text-left ml-1" @click="filterSideBarShow=true">
         GROUP:
         <u class="font-weight-bold;">{{filter.GroupName}}</u>
       </h3>
 
-      <div v-show="filter.robotLs.length==0" class="not-selected-div text-center">
+      <div v-show="filter.selectedRows.length==0" class="not-selected-div text-center">
         <p class="pt-3">
           <u class="pt-3" style="color:gold;cursor:pointer" @click="filterSideBarShow=true">未選擇感測器</u>
         </p>
@@ -82,15 +87,15 @@
 
       <div
         class="text-left mb-2"
-        v-for="eqid in AllEqidList"
+        v-for="eqid in AllRowsList"
         :key="eqid"
-        v-show="filter.robotLs.includes(eqid)"
+        v-show="filter.selectedRows.includes(eqid)"
       >
         <b-button pill block size="lg" class="text-left" variant="dark">
           感測器:
           <span style="color:#0069d9">{{eqid}}</span>
         </b-button>
-        <div v-show="filter.typeLs.length==0" class="not-selected-div text-center">
+        <div v-show="filter.selectedTypes.length==0" class="not-selected-div text-center">
           <p class="pt-3">
             <u
               class="pt-3"
@@ -102,16 +107,16 @@
         <div>
           <b-row :ref="eqid+'chart-row'" :cols-lg="IsOnlyOneChartDisplay?1:2">
             <b-col
-              v-for="field in AllFieldList"
+              v-for="field in AllTypesList"
               :key="field"
               class="ma-0 pa-1 text-center"
-              :md="filter.typeLs.length==1? 12: 3"
-              v-show="filter.typeLs.includes(field)"
+              :md="filter.selectedTypes.length==1? 12: 3"
+              v-show="filter.selectedTypes.includes(field)"
             >
               <GPMChartVue
                 :ref="`chart-${eqid}-${field}`"
                 class="ma-0"
-                style="height:250px;"
+                v-bind:style="{height: filter.selectedTypes.length==1 && filter.selectedRows.length==1? '550px': '350px'}"
                 :id="eqid+field"
                 :title="field"
               ></GPMChartVue>
@@ -129,10 +134,10 @@
         </div>
       </div>
       <!-- 
-        <div class="text-left" v-for="eqid in filter.robotLs" :key="eqid">
+        <div class="text-left" v-for="eqid in filter.selectedRows" :key="eqid">
           <b-button squared class="ml-1">{{eqid}}</b-button>
           <b-row :cols-lg="IsOnlyOneChartDisplay?1:2">
-            <b-col v-for="field in filter.typeLs" :key="field" class="mb-1 text-center" lg>
+            <b-col v-for="field in filter.selectedTypes" :key="field" class="mb-1 text-center" lg>
               <sio-chart-vue
                 :ref="`sio-chart-${eqid}${field}`"
                 :id="`scv-${eqid}${field}`"
@@ -149,6 +154,7 @@
     </div>
     <b-sidebar
       id="filter-sidebar"
+      z-index="2022"
       right
       backdrop
       width="500px"
@@ -158,6 +164,7 @@
       <filter-vue
         ref="filter"
         :GroupModel="GroupModel"
+        :SensorInfosModel="SensorInfosModel"
         @groupsSelectedOnChange="ChangeSelectedGroupName"
         @rowSelectedOnchange="RobotLsOnchange"
         @sensorTypeSelectedOnchange="TypeLsOnchange"
@@ -170,9 +177,8 @@
 <script>
 import filterVue from '../components/Trend/filter.vue';
 import SioChartVue from '../components/Chart/SioChart.vue';
-import { Query, GetSensorInfo } from '../web-api/Distribution_Host';
 import { QueryAll } from '../web-api/Query';
-import { GetGroupList, GetGroupModel } from '../web-api/Distribution_Host'
+import { GetSensorInfo, GetGroupModel, } from '../web-api/Distribution_Host'
 import moment from 'moment';
 import GPMChartVue from '../components/Chart/GPMChart.vue';
 export default {
@@ -206,14 +212,15 @@ export default {
       },
       filter: {
         GroupName: "",
-        robotLs: [],
-        typeLs: [],
+        selectedRows: [],
+        selectedTypes: [],
         statusLs: []
       },
-      GroupModel: {
-
-      },
-      keywordsInput: ""
+      GroupModel: {},
+      SensorInfosModel: [],
+      keywordsInput: "",
+      QueryResult: [],
+      Querying: false
     }
   },
   async mounted() {
@@ -222,6 +229,7 @@ export default {
     this.ReloadQueryParamFromLocalStorage();
     this.$dataInfo.AllSensorInfo = await GetSensorInfo();
     this.GroupModel = await GetGroupModel();
+    this.SensorInfosModel = await GetSensorInfo();
 
   },
   beforeDestroy() {
@@ -235,8 +243,8 @@ export default {
       if (this.$route.query.eqid) {
         this.currentQuery = this.$route.query;
         console.log(this.currentQuery);
-        this.filter.robotLs = [this.currentQuery.eqid];
-        this.filter.typeLs = [this.currentQuery.field];
+        this.filter.selectedRow = [this.currentQuery.eqid];
+        this.filter.selectedTypes = [this.currentQuery.field];
         this.$refs.filter.SettingSelectedOption(this.currentQuery.eqid, this.currentQuery.field);
       } else {
         // this.$router.push({ path: this.$route.path, query: this.currentQuery });
@@ -247,19 +255,19 @@ export default {
     },
     RobotLsOnchange(list) {
       list.sort();
-      this.filter.robotLs = list;
+      this.filter.selectedRows = list;
       this.RenderQueryData();
     },
     TypeLsOnchange(list) {
-      this.filter.typeLs = list;
+      this.filter.selectedTypes = list;
       this.RenderQueryData();
     },
 
     async RenderQueryData() {
-      for (let index = 0; index < this.filter.robotLs.length; index++) {
-        var eqid = this.filter.robotLs[index];
-        for (let index = 0; index < this.filter.typeLs.length; index++) {
-          var field = this.filter.typeLs[index];
+      for (let index = 0; index < this.filter.selectedRows.length; index++) {
+        var eqid = this.filter.selectedRows[index];
+        for (let index = 0; index < this.filter.selectedTypes.length; index++) {
+          var field = this.filter.selectedTypes[index];
           var sioChart = this.$refs[`sio-chart-${eqid}${field}`][0];
           var ret = this.$caches.queryResultCaches.TryGetLastQueryDataFromCache(eqid, field);
           var timekey = this.$caches.queryResultCaches.lastTimeKey
@@ -290,29 +298,41 @@ export default {
     },
     async QueryBtnClickHandle() {
       this.SaveQueryParmToLocalStorage();
-      var data = await QueryAll(this.quStartTime, this.quEndTime, this.filter.GroupName, this.filter.robotLs, this.filter.typeLs);
-      console.info('data', data);
 
+      if (this.filter.GroupName == '' | this.filter.selectedRows.length == 0 | this.filter.selectedTypes.length == 0)
+        return;
 
-      // this.filter.robotLs.forEach(robotId => {
-      //   this.filter.typeLs.forEach(field => {
-      //     var sioChart = this.$refs[`sio-chart-${robotId}${field}`][0];
-      //     var isShowRealTimeData = this.isShowRealTimeData;
-      //     setTimeout(() => {
-      //       new Promise(
-      //         function () {
-      //           if (isShowRealTimeData)
-      //             sioChart.ChangeToDisplayRealTimeDataMode();
-      //           else {
-      //             sioChart.ChangeToDisplayQueryDataMode();
-      //           }
-      //         }
-      //       )
-      //     }, 100);
-      //   });
-      // })
-      // if (!this.isShowRealTimeData)
-      //   this.RenderQueryData();
+      this.Querying = true;
+      this.QueryResult = await QueryAll(this.quStartTime, this.quEndTime, this.filter.GroupName, this.filter.selectedRows, this.filter.selectedTypes);
+      this.QueryResult.forEach(sensorData => {
+
+        var chartKey = `chart-${sensorData.RowName}-${sensorData.SensorType}`;
+        var gpmChart = this.$refs[chartKey][0];
+        var dataSets = [];
+        var dictData = sensorData.QueryData.Dict_DataList;
+
+        var colors = ['blue', 'green', 'red', 'orange', 'pink', 'grey', 'black', 'seagreen']
+
+        var i = 0;
+
+        Object.keys(dictData).forEach(key => {
+          if (key !== 'timelog') {
+            var dataList = dictData[key];
+            dataSets.push({
+              label: key,
+              data: dataList,
+              borderWidth: 2,
+              borderColor: colors[i]
+            });
+            i += 1
+          }
+        });
+
+        gpmChart.Update(sensorData.QueryData.List_TimeLog, dataSets, true);
+      }
+
+      )
+      this.Querying = false;
     },
     ShowRealTimeHandle() {
       this.isShowRealTimeData = true;
@@ -344,15 +364,15 @@ export default {
       }
 
       if (eqidShow.length != 0 && fieldShow.length != 0)
-        this.filter.typeLs = fieldShow.concat();
+        this.filter.selectedTypes = fieldShow.concat();
       else
-        this.filter.typeLs = this.AllFieldList;
+        this.filter.selectedTypes = this.AllTypesList;
 
       if (fieldShow.length != 0 && eqidShow == 0) {
-        this.filter.typeLs = fieldShow.concat();
-        this.filter.robotLs = this.AllEqidList;
+        this.filter.selectedTypes = fieldShow.concat();
+        this.filter.selectedRows = this.AllRowsList;
       } else
-        this.filter.robotLs = eqidShow.concat();
+        this.filter.selectedRows = eqidShow.concat();
     },
 
     EqBtnClick(eqid) {
@@ -384,21 +404,29 @@ export default {
       return this.condition.QuEnd + " " + this.condition.QuEnd_Time;
     },
     IsOnlyOneChartDisplay() {
-      return this.filter.typeLs.length == 1;
+      return this.filter.selectedTypes.length == 1;
     },
     keywordsInputSplit() {
       return this.keywordsInput.split(',')
     },
-    AllFieldList() {
+    AllTypesList() {
       if (this.filter.GroupName == '')
         return [];
-      return this.GroupModel[this.filter.GroupName].List_AllColumnName;
+      var Types = [];
+      this.SensorInfosModel.forEach((element) => {
+        if (this.GroupModel[this.filter.GroupName].List_SensorName.includes(element.SensorName)) {
+          if (!Types.includes(element.SensorType)) {
+            Types.push(element.SensorType);
+          }
+        }
+      });
+      return Types;
     },
-    AllEqidList() {
+    AllRowsList() {
       if (this.filter.GroupName == '')
         return [];
 
-      return this.GroupModel[this.filter.GroupName].List_SensorName;
+      return Object.keys(this.GroupModel[this.filter.GroupName].Dict_RowListSensor);
     }
   },
 }
@@ -420,6 +448,9 @@ export default {
   border: 1px dashed white;
   border-radius: 10px;
   font-size: 23px;
+}
+
+#charts-container {
 }
 
 #charts-container h3 {

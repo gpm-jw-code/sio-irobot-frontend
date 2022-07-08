@@ -17,7 +17,7 @@
           @close="()=>{selectRows=[] ,$emit('rowSelectedOnchange', selectRows)}"
         >{{selectRows.length}}</el-tag>
       </div>
-      <b-dropdown text="選擇感測器" block variant="light">
+      <b-dropdown text="選擇查詢項目(ROW)" block variant="light">
         <b-dropdown-form form-class="dropdown-form">
           <b-form-checkbox-group
             size="md"
@@ -94,7 +94,11 @@ export default {
 
         }
       }
-    }
+    },
+    SensorInfosModel: {
+      type: Array,
+      default() { return [] }
+    },
   },
   data() {
     return {
@@ -173,16 +177,24 @@ export default {
     },
     rowNames: {
       get() {
-        if (this.selectedGroup == "") return null;
-        return this.GroupModel[this.selectedGroup].List_SensorName;
+        if (this.selectedGroup == "")
+          return [];
+        return Object.keys(this.GroupModel[this.selectedGroup].Dict_RowListSensor);
       },
     },
     sensorTypes: {
       get() {
         if (this.selectedGroup == "")
           return [];
-
-        return this.GroupModel[this.selectedGroup].List_AllColumnName;
+        var Types = [];
+        this.SensorInfosModel.forEach((element) => {
+          if (this.GroupModel[this.selectedGroup].List_SensorName.includes(element.SensorName)) {
+            if (!Types.includes(element.SensorType)) {
+              Types.push(element.SensorType);
+            }
+          }
+        });
+        return Types;
       },
     }
   },
@@ -206,6 +218,7 @@ export default {
 }
 
 .group-filter {
+  z-index: 2001;
 }
 
 .selected-description {
